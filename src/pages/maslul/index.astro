@@ -1,0 +1,112 @@
+---
+import Base from '../../layouts/Base.astro';
+import SignupBand from '../../components/SignupBand.astro';
+import { getCollection } from 'astro:content';
+import { STAGES, TOTAL_LESSONS } from '../../data/track';
+
+const live = await getCollection('maslul', (e) => e.data.published);
+const liveSlugs = new Set(live.map((e) => e.id));
+const liveCount = live.length;
+---
+<Base
+  title="המסלול · קפיצת מדרגה"
+  description={`${TOTAL_LESSONS} שיעורים על AI בארגונים, מהאפס עד הטמעה. פתוח לכולם, בחינם, שיעור חדש בכל שבוע.`}
+>
+  <section class="wrap head">
+    <h1 class="head__title">המסלול</h1>
+    <p class="head__sub">
+      {TOTAL_LESSONS} שיעורים בחמישה שלבים, מ"מה זה בכלל" עד תוכנית הטמעה שאפשר להביא להנהלה.
+      הכל פתוח, בלי תשלום ובלי הרשמה.
+    </p>
+    <p class="head__count">
+      <strong>{liveCount}</strong> שיעורים באוויר · שיעור חדש בכל שבוע · השאר כבר כתובים בתוכנית ומופיעים למטה
+    </p>
+  </section>
+
+  {STAGES.map((s) => (
+    <section class="wrap stage" aria-labelledby={`stage-${s.n}`}>
+      <div class="stage__head">
+        <div class="stage__n" aria-hidden="true">{s.n}</div>
+        <div>
+          <h2 id={`stage-${s.n}`} class="stage__title">{s.title}</h2>
+          <p class="stage__q">{s.question}</p>
+          <p class="stage__out"><span>בסוף השלב</span> {s.outcome}</p>
+        </div>
+      </div>
+      <ol class="stage__list">
+        {s.items.map((it) => {
+          const isLive = liveSlugs.has(it.slug);
+          return (
+            <li class:list={['it', { 'it--live': isLive, 'it--soon': !isLive }]}>
+              {isLive ? (
+                <a href={`/maslul/${it.slug}`} class="it__inner">
+                  <span class="it__n">{it.n}</span>
+                  <span class="it__body">
+                    <span class="it__t">{it.title}</span>
+                    <span class="it__note">{it.note}</span>
+                  </span>
+                  <span class="it__state">{it.interactive ? 'אינטראקטיבי' : 'קראו'}</span>
+                </a>
+              ) : (
+                <div class="it__inner">
+                  <span class="it__n">{it.n}</span>
+                  <span class="it__body">
+                    <span class="it__t">{it.title}</span>
+                    <span class="it__note">{it.note}</span>
+                  </span>
+                  <span class="it__state it__state--soon">בקרוב</span>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  ))}
+
+  <SignupBand />
+</Base>
+
+<style>
+  .head { padding-block: 3rem 2rem; }
+  .head__title { font-size: clamp(2.4rem, 5vw, 3.4rem); margin-block-end: 0.9rem; }
+  .head__sub { font-size: var(--t-xl); color: var(--ink-muted); font-weight: 300; max-inline-size: 56ch; margin-block-end: 1.2rem; }
+  .head__count { font-size: var(--t-sm); color: var(--ink-muted); margin: 0; }
+  .head__count strong { color: var(--ink-strong); font-family: var(--font-display); font-size: var(--t-lg); }
+
+  .stage { padding-block: 2.25rem; border-block-start: 1px solid var(--rule); }
+  .stage__head { display: grid; grid-template-columns: auto 1fr; gap: 1.4rem; margin-block-end: 1.5rem; align-items: start; }
+  .stage__n {
+    font-family: var(--font-display); font-size: 1.5rem; color: var(--accent-ink);
+    background: var(--accent); inline-size: 2.9rem; block-size: 2.9rem;
+    border-radius: var(--r-control); display: grid; place-items: center; margin-block-start: 0.2rem;
+  }
+  .stage__title { font-size: var(--t-2xl); margin-block-end: 0.35rem; }
+  .stage__q { color: var(--ink-faint); font-style: italic; margin-block-end: 0.5rem; font-size: var(--t-sm); }
+  .stage__out { font-size: var(--t-sm); color: var(--ink-muted); margin: 0; }
+  .stage__out span { color: var(--accent-deep); font-weight: 500; }
+
+  .stage__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  .it__inner {
+    display: grid; grid-template-columns: 3rem 1fr auto; gap: 1rem;
+    align-items: center; padding: 0.95rem 1.25rem;
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); text-decoration: none; color: inherit;
+  }
+  a.it__inner { transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+  a.it__inner:hover { border-color: var(--rule-strong); box-shadow: var(--shadow-1); color: inherit; }
+  .it--soon .it__inner { background: transparent; border-style: dashed; }
+  .it__n { font-family: var(--font-display); font-size: var(--t-base); color: var(--ink-faint); }
+  .it--live .it__n { color: var(--accent-deep); }
+  .it__body { display: flex; flex-direction: column; gap: 0.1rem; min-inline-size: 0; }
+  .it__t { font-weight: 500; color: var(--ink-strong); }
+  .it--soon .it__t { color: var(--ink-muted); font-weight: 400; }
+  .it__note { font-size: var(--t-sm); color: var(--ink-faint); font-weight: 300; line-height: 1.55; }
+  .it__state { font-size: var(--t-xs); color: var(--accent-deep); font-weight: 500; white-space: nowrap; }
+  .it__state--soon { color: var(--ink-faint); font-weight: 400; }
+
+  @media (max-width: 640px) {
+    .it__inner { grid-template-columns: 2.2rem 1fr; row-gap: 0.3rem; }
+    .it__state { grid-column: 2; }
+  }
+</style>
