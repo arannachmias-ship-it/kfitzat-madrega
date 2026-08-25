@@ -1,0 +1,230 @@
+---
+import Base from '../layouts/Base.astro';
+import SignupBand from '../components/SignupBand.astro';
+import { getCollection } from 'astro:content';
+import { STAGES, TOTAL_LESSONS } from '../data/track';
+
+const live = (await getCollection('maslul', (e) => e.data.published))
+  .sort((a, b) => a.data.stage - b.data.stage || a.data.order - b.data.order);
+const featured = live.slice(0, 4);
+---
+<Base
+  title="קפיצת מדרגה · הכשרות והטמעת AI בארגונים"
+  description="מסלול לימוד AI פתוח וחינמי לארגונים, וסדנאות שבהן הצוות עובד בידיים במקום להקשיב. ארן נחמיאס ומתי מצוינים."
+>
+  <!-- hero -->
+  <section class="wrap hero">
+    <div class="hero__copy">
+      <h1 class="hero__title">לא באנו להתלהב מ־ AI.</h1>
+      <p class="hero__sub">באנו לוודא שהצוות שלכם עושה איתו משהו ביום שלישי בבוקר. מסלול הלימוד פתוח לכולם, בחינם.</p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href={live[0] ? `/maslul/${live[0].id}` : '/maslul'}>התחילו בשיעור הראשון</a>
+        <a class="btn btn--ghost" href="/irgunim">תוכניות לארגונים</a>
+      </div>
+    </div>
+    <img
+      class="hero__img"
+      src="/hero.jpg" width="900" height="672" fetchpriority="high" decoding="async"
+      alt="סדנה בפעולה: משתתפים יושבים סביב שולחן עם מחשבים ניידים, אחת מהם רוכנת ומצביעה על מסך של עמית, ומנחה עומד בצד ומדבר"
+    />
+  </section>
+
+  <!-- the track: the anchor of the page -->
+  <section class="track band-deep" aria-labelledby="track-title">
+    <div class="wrap">
+      <div class="track__head">
+        <div>
+          <h2 id="track-title" class="track__title">המסלול</h2>
+          <p class="track__sub">
+            {TOTAL_LESSONS} שיעורים בחמישה שלבים, מהאפס עד הטמעה בארגון. פתוח לכולם, בלי תשלום ובלי הרשמה.
+            {live.length} כבר באוויר, שיעור חדש בכל שבוע.
+          </p>
+        </div>
+        <a class="track__all" href="/maslul">כל המסלול ←</a>
+      </div>
+
+      <ol class="track__grid">
+        {featured.map((l) => (
+          <li class:list={['lesson', { 'lesson--flag': l.data.interactive }]}>
+            <a href={`/maslul/${l.id}`} class="lesson__link">
+              <span class="lesson__n">{String(l.data.stage)}.{String(l.data.order)}</span>
+              <span class="lesson__body">
+                <span class="lesson__title">{l.data.title}</span>
+                <span class="lesson__note">{l.data.kicker}</span>
+                <span class="lesson__meta">
+                  {l.data.interactive ? 'אינטראקטיבי · ' : ''}{l.data.readingTime} דקות קריאה
+                </span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+
+      <div class="track__stages">
+        {STAGES.map((s) => (
+          <div class="stagechip">
+            <span class="stagechip__n">שלב {s.n}</span>
+            <span class="stagechip__t">{s.title}</span>
+            <span class="stagechip__c">{s.items.length} שיעורים</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- proof -->
+  <section class="proof" aria-label="נתונים">
+    <div class="wrap proof__grid">
+      <div class="proof__cell">
+        <p class="proof__n">88%</p>
+        <p class="proof__t">מ־3,000 מתנדבים שכל העבודה שלהם הייתה פנים אל פנים עברו לזום תוך 30 יום, ושביעות רצון הלקוחות עלתה מ־90% ל־94%</p>
+      </div>
+      <div class="proof__cell">
+        <p class="proof__n">20 שנה</p>
+        <p class="proof__t">הוראה לכל אחד משנינו. פסיכומטרי, קצינים, תיכון, מכללה.</p>
+      </div>
+      <div class="proof__cell">
+        <p class="proof__n">70%</p>
+        <p class="proof__t">מזמן הסדנה הוא עבודה בידיים על החומרים שלכם.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- the staircase -->
+  <section class="wrap stairs" aria-labelledby="stairs-title">
+    <h2 id="stairs-title" class="stairs__title">שלוש מדרגות. רוב הארגונים עומדים על הראשונה.</h2>
+    <p class="stairs__sub">אחד משלושת המשפטים האלה כנראה נאמר אצלכם בחודש האחרון.</p>
+    <div class="stairs__grid">
+      <article class="step">
+        <h3 class="step__q">"צריכים לעשות משהו בנושא AI"</h3>
+        <p class="step__d">לחץ מההנהלה, בלי יעד מוגדר.</p>
+        <p class="step__tag">הרצאת פתיחה</p>
+      </article>
+      <article class="step step--mid">
+        <h3 class="step__q">"עשינו הרצאה, לא קרה כלום"</h3>
+        <p class="step__d">יש מודעות, אין מיומנות.</p>
+        <p class="step__tag">סדנת ידיים</p>
+      </article>
+      <article class="step step--top">
+        <h3 class="step__q">"קנינו רישיונות ואף אחד לא נוגע"</h3>
+        <p class="step__d">אין תהליך, אין בעלות, אין מדידה.</p>
+        <p class="step__tag step__tag--accent">ליווי הטמעה</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- programs -->
+  <section class="wrap programs" aria-labelledby="programs-title">
+    <div class="programs__intro">
+      <h2 id="programs-title" class="programs__title">כשאתם רוצים אותנו בחדר</h2>
+      <p>שני מנחים, לא מרצה אחד. בקבוצה גדולה זה אומר שאפשר לפצל לשתי קבוצות עבודה במקביל ולסיים במפגש משותף.</p>
+      <p>לכל תוכנית יש אג'נדה מלאה עם חלוקת זמנים, פתוחה לקריאה לפני שמדברים.</p>
+      <p><a href="/irgunim" class="programs__link">לעמוד התוכניות ←</a></p>
+    </div>
+    <div class="programs__table" role="table" aria-label="תוכניות לארגונים">
+      <div class="prow prow--head" role="row">
+        <span role="columnheader">תוכנית</span><span role="columnheader">אורך</span><span role="columnheader">קבוצה</span><span role="columnheader">ידיים</span>
+      </div>
+      <div class="prow" role="row"><span role="cell">הרצאת פתיחה</span><span role="cell">60 עד 90 דקות</span><span role="cell">עד 200</span><span role="cell">20%</span></div>
+      <div class="prow" role="row"><span role="cell">סדנת ידיים</span><span role="cell">4 שעות</span><span role="cell">10 עד 25</span><span role="cell" class="prow__hi">70%</span></div>
+      <div class="prow" role="row"><span role="cell">יום מרוכז לצוות גדול</span><span role="cell">יום</span><span role="cell">25 עד 50</span><span role="cell" class="prow__hi">70%</span></div>
+      <div class="prow" role="row"><span role="cell">סדרת הכשרה</span><span role="cell">3 עד 4 מפגשים</span><span role="cell">10 עד 20</span><span role="cell" class="prow__hi">65%</span></div>
+      <div class="prow" role="row"><span role="cell">ליווי הטמעה</span><span role="cell">3 עד 6 חודשים</span><span role="cell">הנהלה וצוותים</span><span role="cell">רובו</span></div>
+    </div>
+  </section>
+
+  <SignupBand />
+</Base>
+
+<style>
+  /* hero */
+  .hero { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 2.75rem; align-items: center; padding-block: 3rem 4rem; }
+  .hero__title { font-size: clamp(2.5rem, 5.4vw, 3.75rem); margin-block-end: 1.1rem; }
+  .hero__sub { font-size: var(--t-xl); line-height: 1.6; color: #3D5A64; font-weight: 300; max-inline-size: 40ch; margin-block-end: 1.9rem; }
+  .hero__actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .hero__img { inline-size: 100%; block-size: 320px; object-fit: cover; border-radius: var(--r-card); box-shadow: var(--shadow-3); }
+  @media (max-width: 880px) {
+    .hero { grid-template-columns: 1fr; gap: 2rem; padding-block: 2rem 2.5rem; }
+    .hero__img { block-size: 240px; }
+  }
+
+  /* track */
+  .track { background-image: radial-gradient(900px 420px at 88% -12%, rgba(198,214,63,0.17), transparent 62%), radial-gradient(700px 500px at 4% 112%, rgba(74,102,112,0.4), transparent 58%); padding-block: 3.5rem 3.75rem; }
+  .track__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 2.5rem; margin-block-end: 2rem; }
+  .track__title { font-size: var(--t-3xl); margin-block-end: 0.6rem; }
+  .track__sub { color: var(--ink-on-deep-mute); font-weight: 300; max-inline-size: 52ch; margin: 0; }
+  .track__all { color: var(--accent); font-weight: 500; white-space: nowrap; text-decoration: none; }
+  .track__all:hover { color: var(--accent); text-decoration: underline; }
+
+  .track__grid { list-style: none; margin: 0 0 1.75rem; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; }
+  .lesson { display: flex; }
+  .lesson__link { display: flex; gap: 1.1rem; align-items: flex-start; inline-size: 100%; background: rgba(255,255,255,0.055); border: 1px solid var(--rule-on-deep); border-radius: var(--r-card); padding: 1.35rem 1.5rem; text-decoration: none; color: inherit; transition: background 0.15s ease, border-color 0.15s ease; }
+  .lesson__link:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.22); color: inherit; }
+  .lesson--flag .lesson__link { background: var(--accent-soft); border-color: var(--accent); }
+  .lesson--flag .lesson__link:hover { background: rgba(198,214,63,0.18); }
+  .lesson__n { font-family: var(--font-display); font-size: 1.6rem; color: #7E9AA2; line-height: 1.2; min-inline-size: 2.2rem; }
+  .lesson--flag .lesson__n { color: var(--accent); }
+  .lesson__body { display: flex; flex-direction: column; gap: 0.3rem; }
+  .lesson__title { font-weight: 700; font-size: var(--t-lg); color: var(--ink-on-deep); }
+  .lesson__note { color: var(--ink-on-deep-mute); font-size: var(--t-sm); font-weight: 300; line-height: 1.6; }
+  .lesson__meta { color: #7E9AA2; font-size: var(--t-xs); }
+
+  .track__stages { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 0.75rem; padding-block-start: 1.5rem; border-block-start: 1px solid var(--rule-on-deep); }
+  .stagechip { display: flex; flex-direction: column; gap: 0.15rem; }
+  .stagechip__n { font-size: var(--t-xs); color: var(--accent); }
+  .stagechip__t { font-size: var(--t-sm); color: var(--ink-on-deep); font-weight: 500; line-height: 1.45; }
+  .stagechip__c { font-size: var(--t-xs); color: #7E9AA2; }
+  @media (max-width: 860px) {
+    .track__grid { grid-template-columns: 1fr; }
+    .track__head { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .track__stages { grid-template-columns: 1fr 1fr; gap: 1rem; }
+  }
+
+  /* proof */
+  .proof { background: var(--surface); }
+  .proof__grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; padding-inline: 0; }
+  .proof__cell { padding: 2.1rem var(--gutter); border-inline-end: 1px solid var(--rule); }
+  .proof__cell:last-child { border-inline-end: none; }
+  .proof__n { font-family: var(--font-display); font-size: var(--t-4xl); color: var(--ink-strong); line-height: 1; margin: 0 0 0.5rem; }
+  .proof__t { color: var(--ink-muted); font-size: var(--t-sm); font-weight: 300; margin: 0; }
+  @media (max-width: 820px) {
+    .proof__grid { grid-template-columns: 1fr; }
+    .proof__cell { border-inline-end: none; border-block-end: 1px solid var(--rule); }
+  }
+
+  /* staircase */
+  .stairs { padding-block: 3.75rem 4rem; }
+  .stairs__title { font-size: var(--t-3xl); margin-block-end: 0.7rem; }
+  .stairs__sub { color: var(--ink-muted); font-weight: 300; font-size: var(--t-lg); max-inline-size: 54ch; margin-block-end: 2.4rem; }
+  .stairs__grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1.1rem; align-items: end; }
+  .step { background: var(--surface); border-radius: var(--r-card); padding: 1.6rem; box-shadow: var(--shadow-1); }
+  .step--mid { padding-block-end: 3.4rem; box-shadow: var(--shadow-2); }
+  .step--top { padding-block-end: 5.2rem; background: var(--deep); color: var(--ink-on-deep); box-shadow: 0 12px 34px -12px rgba(12,40,49,0.5); }
+  .step--top .step__q { color: var(--ink-on-deep); }
+  .step--top .step__d { color: var(--ink-on-deep-mute); }
+  .step__q { font-family: var(--font-body); font-weight: 700; font-size: var(--t-lg); line-height: 1.45; margin-block-end: 0.6rem; }
+  .step__d { color: var(--ink-muted); font-size: var(--t-sm); font-weight: 300; margin-block-end: 1.1rem; }
+  .step__tag { display: inline-block; background: var(--surface-sunk); color: var(--ink-strong); font-size: var(--t-sm); font-weight: 500; padding: 0.4rem 0.9rem; border-radius: var(--r-control); margin: 0; }
+  .step__tag--accent { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+  @media (max-width: 820px) {
+    .stairs__grid { grid-template-columns: 1fr; }
+    .step--mid, .step--top { padding-block-end: 1.6rem; }
+  }
+
+  /* programs */
+  .programs { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 3.25rem; padding-block-end: 4rem; align-items: start; }
+  .programs__title { font-size: var(--t-2xl); margin-block-end: 0.9rem; }
+  .programs__intro p { color: var(--ink-muted); font-weight: 300; }
+  .programs__link { font-weight: 500; color: var(--ink-strong); }
+  .programs__table { display: flex; flex-direction: column; }
+  .prow { display: grid; grid-template-columns: 1.5fr 0.9fr 0.85fr 0.6fr; gap: 1rem; padding-block: 0.95rem; border-block-end: 1px solid var(--rule); align-items: center; font-size: var(--t-sm); color: var(--ink-muted); }
+  .prow span:first-child { font-weight: 500; color: var(--ink); }
+  .prow--head { padding-block: 0 0.75rem; border-block-end: 1px solid var(--rule-strong); font-size: var(--t-xs); color: var(--ink-faint); }
+  .prow--head span:first-child { font-weight: 400; color: var(--ink-faint); }
+  .prow:last-child { border-block-end: none; }
+  .prow__hi { color: var(--ink-strong) !important; font-weight: 700; }
+  @media (max-width: 820px) {
+    .programs { grid-template-columns: 1fr; gap: 2rem; }
+    .prow { grid-template-columns: 1.4fr 1fr; row-gap: 0.35rem; }
+  }
+</style>
