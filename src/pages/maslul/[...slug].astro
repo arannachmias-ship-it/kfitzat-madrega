@@ -1,0 +1,30 @@
+---
+import { getCollection, render } from 'astro:content';
+import Lesson from '../../layouts/Lesson.astro';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('maslul', (e) => e.data.published))
+    .sort((a, b) => a.data.stage - b.data.stage || a.data.order - b.data.order);
+
+  return all.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: {
+      entry,
+      prev: i > 0 ? { id: all[i - 1].id, title: all[i - 1].data.title } : null,
+      next: i < all.length - 1 ? { id: all[i + 1].id, title: all[i + 1].data.title } : null,
+    },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+<Lesson
+  title={d.title} kicker={d.kicker} goal={d.goal}
+  stage={d.stage} order={d.order} readingTime={d.readingTime}
+  author={d.author} interactive={d.interactive}
+  prev={prev} next={next}
+>
+  <Content />
+</Lesson>
