@@ -1,0 +1,105 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 1.1.
+ * אין כאן קריאה למודל — כל הפלטים כתובים מראש, כי המטרה היא ללמד
+ * מה כל רכיב בפרומפט עושה, לא להדגים את המודל.
+ * ואי אפשר לזייף חוויה: הפלטים אמיתיים, נוצרו מראש מאותה ישיבה.
+ */
+---
+<div class="lab" data-lab>
+  <p class="lab__label">הרכיבו את הפרומפט וראו איך הפלט משתנה</p>
+
+  <fieldset class="lab__opts">
+    <legend class="lab__legend">מה נכלל בבקשה</legend>
+    <label class="opt"><input type="checkbox" data-k="role" /> <span><strong>תפקיד והקשר</strong> מי קורא את הסיכום ולמה</span></label>
+    <label class="opt"><input type="checkbox" data-k="struct" /> <span><strong>מבנה מבוקש</strong> החלטות, משימות, פתוחים</span></label>
+    <label class="opt"><input type="checkbox" data-k="source" /> <span><strong>הגבלה למקור</strong> רק מה שנאמר בישיבה</span></label>
+    <label class="opt"><input type="checkbox" data-k="len" /> <span><strong>אורך ואיסורים</strong> קצר, בלי מילים ריקות</span></label>
+  </fieldset>
+
+  <div class="lab__panes">
+    <div class="pane">
+      <p class="pane__h">הפרומפט</p>
+      <pre dir="rtl" data-prompt></pre>
+    </div>
+    <div class="pane">
+      <p class="pane__h">מה חוזר <span data-score class="pane__score"></span></p>
+      <div class="pane__out" data-out></div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+(() => {
+  const root = document.querySelector('[data-lab]');
+  if (!root) return;
+  const boxes = [...root.querySelectorAll('input[type=checkbox]')];
+  const promptEl = root.querySelector('[data-prompt]');
+  const outEl = root.querySelector('[data-out]');
+  const scoreEl = root.querySelector('[data-score]');
+
+  const BASE = 'סכם לי את הישיבה המצורפת.';
+  const LINES = {
+    role: 'הסיכום נשלח למנהלי צוותים שלא היו בישיבה וצריכים לדעת מה נדרש מהם.',
+    struct: 'החזר בשלושה חלקים: החלטות שהתקבלו, משימות עם אחראי, ונושאים שנשארו פתוחים.',
+    source: 'הסתמך רק על מה שנאמר בתמלול. אם משהו לא הוכרע, כתוב "לא הוכרע" ואל תשלים.',
+    len: 'עד 150 מילים. בלי מבוא, בלי סיכום בסוף, בלי המילים "חשוב לציין".',
+  };
+  const OUT = {
+    '': '<p class="o-bad">בישיבה נדונו מספר נושאים חשובים הנוגעים לפעילות הצוות. המשתתפים העלו נקודות מגוונות והביעו את עמדותיהם. חשוב לציין כי הוחלט להמשיך ולבחון את הסוגיות שעלו, ולחזור לדון בהן במועד מאוחר יותר. הישיבה התקיימה באווירה עניינית ופורייה.</p><p class="o-note">גנרי לחלוטין. אפשר להדביק את זה על כל ישיבה בעולם.</p>',
+    'role': '<p>הישיבה עסקה בהיערכות לרבעון הקרוב. מנהלי צוותים נדרשים להכיר את סדרי העדיפויות שנקבעו ולעדכן את הצוותים שלהם בהתאם. עלו גם שאלות תקציב שטרם הוכרעו.</p><p class="o-note">כבר מדבר אל מישהו מסוים. עדיין אי אפשר לפעול לפיו.</p>',
+    'struct': '<p><strong>החלטות:</strong> קידום פרויקט המדידה לרבעון הקרוב.<br><strong>משימות:</strong> הכנת תוכנית מדידה, בדיקת עלויות.<br><strong>פתוח:</strong> תקציב, לוח זמנים.</p><p class="o-note">מבנה נכון, אבל אין אחראים ואין תאריכים — ולפחות אחד מהפריטים לא באמת נאמר.</p>',
+    'role,struct': '<p><strong>החלטות:</strong> תוכנית המדידה עולה לרבעון הבא.<br><strong>משימות:</strong> טיוטת תוכנית מדידה, איסוף עלויות משלושה ספקים.<br><strong>פתוח:</strong> מסגרת התקציב.</p><p class="o-note">שימושי למנהל צוות. עדיין אין שמות, ועדיין יש סיכון להשלמות.</p>',
+    'role,struct,source': '<p><strong>החלטות:</strong> תוכנית המדידה עולה לרבעון הבא.<br><strong>משימות:</strong> דנה מכינה טיוטה עד ה־12; יואב אוסף הצעות מחיר.<br><strong>פתוח:</strong> מסגרת התקציב <em>לא הוכרע</em>. מועד ההשקה <em>לא הוכרע</em>.</p><p class="o-note">עכשיו אפשר לשלוח את זה. "לא הוכרע" הוא מה שהופך את זה לאמין.</p>',
+    'role,struct,source,len': '<p><strong>החלטות:</strong> תוכנית המדידה עולה לרבעון הבא.<br><strong>משימות:</strong> דנה, טיוטת תוכנית, עד ה־12. יואב, שלוש הצעות מחיר, עד ה־15.<br><strong>פתוח:</strong> מסגרת תקציב, לא הוכרע. מועד השקה, לא הוכרע.</p><p class="o-good">זה סיכום שאפשר להעביר הלאה בלי לגעת בו.</p>',
+  };
+  const ORDER = ['role', 'struct', 'source', 'len'];
+
+  function render() {
+    const on = ORDER.filter((k) => root.querySelector(`[data-k="${k}"]`).checked);
+    promptEl.textContent = [BASE, ...on.map((k) => LINES[k])].join('\n');
+    const key = on.join(',');
+    outEl.innerHTML = OUT[key] || OUT[ORDER.filter((k) => on.includes(k)).slice(0, 1).join(',')] || OUT[''];
+    scoreEl.textContent = `${on.length} מתוך 4`;
+  }
+  boxes.forEach((b) => b.addEventListener('change', render));
+  render();
+})();
+</script>
+
+<style>
+  .lab {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem; max-inline-size: 100%;
+  }
+  .lab__label { font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 1rem; }
+  .lab__opts { border: 0; margin: 0 0 1.25rem; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .lab__legend { padding: 0; font-size: var(--t-sm); color: var(--ink-muted); margin-block-end: 0.6rem; }
+  .opt {
+    display: flex; gap: 0.65rem; align-items: flex-start;
+    background: var(--surface-sunk); border-radius: var(--r-control);
+    padding: 0.8rem 0.95rem; cursor: pointer; font-size: var(--t-sm);
+    line-height: 1.5; min-block-size: 44px;
+  }
+  .opt input { margin-block-start: 0.25rem; inline-size: 1.05rem; block-size: 1.05rem; accent-color: var(--accent-deep); flex-shrink: 0; }
+  .opt strong { display: block; font-weight: 700; color: var(--ink-strong); }
+  .opt span { color: var(--ink-muted); }
+  .lab__panes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .pane__h { font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 0.45rem; display: flex; justify-content: space-between; }
+  .pane__score { color: var(--accent-deep); font-weight: 500; }
+  .pane pre { margin: 0; font-size: var(--t-xs) !important; white-space: pre-wrap; min-block-size: 190px; }
+  .pane__out {
+    background: var(--surface-sunk); border-radius: var(--r-card);
+    padding: 1rem 1.1rem; font-size: var(--t-sm); line-height: 1.65; min-block-size: 190px;
+  }
+  .pane__out p { margin-block-end: 0.7rem; }
+  .pane__out p:last-child { margin-block-end: 0; }
+  .pane__out :global(.o-note) { font-size: var(--t-xs); color: var(--ink-faint); border-block-start: 1px solid var(--rule); padding-block-start: 0.6rem; }
+  .pane__out :global(.o-good) { font-size: var(--t-xs); color: var(--accent-deep); font-weight: 500; border-block-start: 1px solid var(--rule); padding-block-start: 0.6rem; }
+  .pane__out :global(.o-bad) { color: var(--ink-faint); }
+  @media (max-width: 760px) {
+    .lab__opts, .lab__panes { grid-template-columns: 1fr; }
+    .pane pre, .pane__out { min-block-size: 0; }
+  }
+</style>
