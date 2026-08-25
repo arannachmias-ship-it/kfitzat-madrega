@@ -1,0 +1,110 @@
+---
+import Base from '../layouts/Base.astro';
+import SignupBand from '../components/SignupBand.astro';
+---
+<Base
+  title="מי אנחנו · קפיצת מדרגה"
+  description="ארן נחמיאס ומתי מצוינים. שני מורים ותיקים שגם ניהלו תפעול והטמיעו טכנולוגיה בארגונים, ועכשיו עושים את זה עם AI."
+>
+  <section class="wrap head">
+    <h1 class="head__title">אנחנו לא אנשי AI שלמדו ארגונים.</h1>
+    <p class="head__sub">
+      אנחנו שני מורים ותיקים שגם ניהלו תפעול וגם הטמיעו טכנולוגיה בשטח, ושכבר עשו את המעבר הזה
+      פעם אחת עם טכנולוגיות אחרות. רק הטכנולוגיה השתנתה.
+    </p>
+  </section>
+
+  <section class="wrap story band-story" aria-labelledby="story-t">
+    <h2 id="story-t" class="story__q">
+      במרץ 2020 היה צריך להעביר 3,000 מתנדבים, שכל העבודה שלהם עד אז הייתה פנים אל פנים,
+      לעבודה מרחוק בזום. תוך 30 יום.
+    </h2>
+    <p class="story__a">
+      88% מהם עברו. ושביעות רצון הלקוחות עלתה, מ־90% ל־94%.
+    </p>
+    <p class="story__note">
+      זה בדיוק אותו תפקיד שיש לארגונים היום מול AI. אנשים שלא ביקשו את השינוי, שיטת עבודה שמשתנה
+      בבת אחת, ולוח זמנים שלא מחכה לאף אחד.
+    </p>
+  </section>
+
+  <section class="wrap people">
+    <article class="p">
+      <h2 class="p__name">ארן נחמיאס</h2>
+      <p class="p__role">VP Product &amp; COO · מנהל למידה ופיתוח לשעבר</p>
+      <p class="p__line">
+        "אני מלמד מ־2003. פסיכומטרי במשך שלוש עשרה שנה, אחר כך שיעורי העשרה לכיתות ו׳ ו־ז׳,
+        וחמישה מחזורים בקק״ץ. במקביל ניהלתי תפעול, מוצר ולמידה בארגונים. אני יודע איך נראה ארגון
+        מבפנים, ואיפה הזמן באמת הולך לאיבוד."
+      </p>
+      <ul class="p__facts">
+        <li>ניהל תקציב הדרכה שנתי והכשרה של 3,000+ עובדים ומתנדבים</li>
+        <li>גייס 1.5 מיליון דולר להקמת מערכת למידה ארגונית, ובנה אותה</li>
+        <li>ניהל פדגוגית 30 מרכזים וכ־9,000 תלמידים בתוכנית למחוננים</li>
+        <li>בנה מחדש גיוס מורים: גידול של 120% במאגר, נשירה מ־32% ל־12%</li>
+        <li>סמג״ד במילואים</li>
+      </ul>
+    </article>
+
+    <article class="p">
+      <h2 class="p__name">מתי מצוינים</h2>
+      <p class="p__role">טכנולוג ראשי בתעשייה לשעבר · M.Sc. ביוטכנולוגיה</p>
+      <p class="p__line">
+        "שמונה שנים הכנסתי טכנולוגיות חדשות לתעשייה, ועשרים שנה אני מלמד, מסטודנטים במעבדה ועד
+        ילדים בני ארבע. אני יודע למה אנשים לא מאמצים דברים חדשים, ומה כן עוזר."
+      </p>
+      <ul class="p__facts">
+        <li>שמונה שנים טכנולוג ראשי: הטמעת טכנולוגיות ייצור, אישורי חומרים, פורום עיצוב ברמת הנהלה</li>
+        <li>מתרגל במכללה במעבדות מיקרוביולוגיה וגנטיקה מולקולרית</li>
+        <li>חונך סטודנטים, עולים חדשים ולקויי למידה</li>
+        <li>מורה למדעים בתיכון ומנחה עבודות גמר</li>
+        <li>זכיין <span dir="ltr">e² Young Engineers</span> · חוקר מו״פ לשעבר · רס״ן במילואים</li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="wrap why">
+    <h2 class="why__t">למה זה משנה למי שמזמין</h2>
+    <p>
+      רוב מרצי ה־AI בישראל הם טכנולוגים שלמדו להרצות. אצלנו זה בכיוון ההפוך, ובחדר זה מרגיש אחרת:
+      בכל קבוצה יש שניים־שלושה שנשארים מאחור ולא אומרים את זה בקול. עשרים שנות הוראה זה בעיקר
+      היכולת לזהות אותם ולא לאבד אותם.
+    </p>
+    <p>
+      וזו גם הסיבה שאנחנו מגיעים שניים. בקבוצה של ארבעים איש, מנחה אחד נותן הרצאה גם כשקוראים לזה סדנה.
+    </p>
+  </section>
+
+  <SignupBand />
+</Base>
+
+<style>
+  .head { padding-block: 3rem 1.5rem; }
+  .head__title { font-size: clamp(2.1rem, 4.6vw, 3rem); max-inline-size: 20ch; margin-block-end: 1rem; }
+  .head__sub { font-size: var(--t-xl); color: var(--ink-muted); font-weight: 300; max-inline-size: 58ch; }
+
+  .band-story {
+    background: var(--deep); color: var(--ink-on-deep);
+    border-radius: var(--r-card);
+    padding: 2.25rem 2.4rem;
+    background-image: radial-gradient(600px 300px at 90% -20%, rgba(198,214,63,0.15), transparent 62%);
+    margin-block-end: 3rem;
+    max-inline-size: none;
+  }
+  .story__q { font-size: var(--t-xl); line-height: 1.55; color: var(--ink-on-deep); font-family: var(--font-body); font-weight: 400; max-inline-size: 62ch; margin-block-end: 1rem; }
+  .story__a { font-family: var(--font-display); font-size: var(--t-2xl); color: var(--accent); margin-block-end: 1rem; }
+  .story__note { color: var(--ink-on-deep-mute); font-weight: 300; max-inline-size: 62ch; margin: 0; font-size: var(--t-sm); }
+
+  .people { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; padding-block-end: 3rem; }
+  .p__name { font-size: var(--t-2xl); margin-block-end: 0.25rem; }
+  .p__role { font-size: var(--t-sm); color: var(--ink-faint); margin-block-end: 1.1rem; }
+  .p__line { color: var(--ink); font-size: var(--t-lg); line-height: 1.75; border-inline-start: 3px solid var(--accent); padding-inline-start: 1.1rem; margin-block-end: 1.3rem; }
+  .p__facts { margin: 0; padding-inline-start: 1.2rem; font-size: var(--t-sm); color: var(--ink-muted); font-weight: 300; }
+  .p__facts li { margin-block-end: 0.5rem; }
+  .p__facts li::marker { color: var(--accent-deep); }
+  @media (max-width: 860px) { .people { grid-template-columns: 1fr; gap: 2rem; } }
+
+  .why { padding-block: 2.5rem 4rem; border-block-start: 1px solid var(--rule); }
+  .why__t { font-size: var(--t-2xl); margin-block-end: 1rem; }
+  .why p { color: var(--ink-muted); font-weight: 300; max-inline-size: 62ch; font-size: var(--t-lg); }
+</style>
