@@ -1,0 +1,60 @@
+---
+const links = [
+  { href: '/maslul', label: 'המסלול' },
+  { href: '/irgunim', label: 'לארגונים' },
+  { href: '/anachnu', label: 'מי אנחנו' },
+];
+const path = Astro.url.pathname;
+---
+<header class="nav">
+  <div class="wrap nav__inner">
+    <a href="/" class="nav__brand">קפיצת מדרגה</a>
+    <nav aria-label="ניווט ראשי" class="nav__links">
+      {links.map((l) => (
+        <a href={l.href} aria-current={path.startsWith(l.href) ? 'page' : undefined}>{l.label}</a>
+      ))}
+      <a href="/#hearshmu" class="nav__cta">קבלו שיעור בשבוע</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav { border-block-end: 1px solid transparent; }
+  .nav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-block-size: 68px;
+    padding-block: 0.75rem;
+  }
+  .nav__brand {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--ink-strong);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav__links {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    font-size: var(--t-sm);
+  }
+  .nav__links a { color: var(--ink-muted); text-decoration: none; white-space: nowrap; }
+  .nav__links a:hover { color: var(--ink-strong); }
+  .nav__links a[aria-current='page'] { color: var(--ink-strong); font-weight: 500; }
+  .nav__cta {
+    background: var(--deep);
+    color: var(--ink-on-deep) !important;
+    padding: 0.55rem 1.25rem;
+    border-radius: var(--r-control);
+    font-weight: 500;
+  }
+  .nav__cta:hover { background: var(--deep-2); color: var(--ink-on-deep) !important; }
+
+  @media (max-width: 780px) {
+    .nav__inner { flex-wrap: wrap; min-block-size: 0; }
+    .nav__links { gap: 1rem; font-size: var(--t-xs); flex-wrap: wrap; }
+  }
+</style>

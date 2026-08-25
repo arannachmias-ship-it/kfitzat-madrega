@@ -1,0 +1,42 @@
+---
+const year = 2026;
+---
+<footer class="ft">
+  <div class="wrap ft__inner">
+    <div>
+      <div class="ft__brand">קפיצת מדרגה</div>
+      <p class="ft__line">ארן נחמיאס · מתי מצוינים</p>
+      <p class="ft__line">הכשרות והטמעת AI בארגונים</p>
+    </div>
+    <nav class="ft__nav" aria-label="ניווט תחתון">
+      <a href="/maslul">המסלול</a>
+      <a href="/irgunim">תוכניות לארגונים</a>
+      <a href="/anachnu">מי אנחנו</a>
+      <a href="/negishut">הצהרת נגישות</a>
+    </nav>
+    <p class="ft__copy">© {year} כל הזכויות שמורות</p>
+  </div>
+</footer>
+
+<style>
+  .ft {
+    background: var(--surface);
+    border-block-start: 1px solid var(--rule);
+    padding-block: 2.5rem 3rem;
+    font-size: var(--t-sm);
+    color: var(--ink-muted);
+  }
+  .ft__inner {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 1.75rem 3rem;
+    align-items: start;
+  }
+  .ft__brand { font-family: var(--font-display); font-size: 1.15rem; color: var(--ink-strong); margin-block-end: 0.35rem; }
+  .ft__line { margin: 0; }
+  .ft__nav { display: flex; flex-direction: column; gap: 0.45rem; }
+  .ft__nav a { color: var(--ink-muted); text-decoration: none; }
+  .ft__nav a:hover { color: var(--ink-strong); }
+  .ft__copy { grid-column: 1 / -1; margin: 0; padding-block-start: 1.25rem; border-block-start: 1px solid var(--rule); font-size: var(--t-xs); color: var(--ink-faint); }
+  @media (max-width: 700px) { .ft__inner { grid-template-columns: 1fr; } }
+</style>
