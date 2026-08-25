@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="הצהרת נגישות · קפיצת מדרגה" description="הצהרת הנגישות של אתר קפיצת מדרגה, לפי תקנות שוויון זכויות לאנשים עם מוגבלות ותוי 5568.">
+  <section class="wrap doc">
+    <h1>הצהרת נגישות</h1>
+    <p class="doc__lead">
+      אנחנו רואים בנגישות האתר חלק מהעבודה ולא תוספת לה. האתר נבנה מתוך כוונה לעמוד בתקן הישראלי
+      תוי 5568 ברמה AA, בהתאם לתקנות שוויון זכויות לאנשים עם מוגבלות.
+    </p>
+
+    <h2>מה נעשה באתר</h2>
+    <ul>
+      <li>ניווט מלא באמצעות מקלדת, עם סימון ברור של האלמנט שבפוקוס</li>
+      <li>קישור דילוג לתוכן הראשי בתחילת כל עמוד</li>
+      <li>מבנה כותרות היררכי ותקין, ותגיות נחיתה לקוראי מסך</li>
+      <li>טקסט חלופי לכל תמונה שנושאת מידע</li>
+      <li>יחסי ניגודיות שנבדקו מול הרקע שעליו הטקסט מופיע</li>
+      <li>טפסים עם תוויות מקושרות וטקסט עזר, ולא תווית שמוסתרת בתוך השדה</li>
+      <li>כיבוד העדפת המערכת להפחתת אנימציה</li>
+      <li>גודל טקסט גוף שלא יורד מ־16 פיקסלים, וריווח שורות מותאם לעברית</li>
+    </ul>
+
+    <h2>מה עדיין לא הושלם</h2>
+    <p>
+      האתר בתחילת דרכו ואנחנו ממשיכים לבדוק אותו. אם נתקלתם בעמוד או ברכיב שלא עובד עבורכם,
+      נשמח לשמוע ולתקן. פנייה בנושא נגישות מטופלת אצלנו לפני כל דבר אחר.
+    </p>
+
+    <h2>יצירת קשר בנושא נגישות</h2>
+    <p>
+      רכז הנגישות: ארן נחמיאס.<br />
+      דוא״ל: <a href="mailto:arannachmias@gmail.com" dir="ltr">arannachmias@gmail.com</a><br />
+      טלפון: <a href="tel:+972548099878" dir="ltr">054-809-9878</a>
+    </p>
+
+    <p class="doc__date">עודכן לאחרונה: אוגוסט 2026</p>
+  </section>
+</Base>
+
+<style>
+  .doc { padding-block: 3rem 4.5rem; max-inline-size: 74ch; }
+  .doc h1 { font-size: clamp(2rem, 4.4vw, 2.75rem); margin-block-end: 1rem; }
+  .doc h2 { font-size: var(--t-xl); margin-block: 2.2rem 0.75rem; }
+  .doc__lead { font-size: var(--t-lg); color: var(--ink-muted); font-weight: 300; }
+  .doc ul { padding-inline-start: 1.3rem; }
+  .doc li { margin-block-end: 0.5rem; color: var(--ink-muted); }
+  .doc li::marker { color: var(--accent-deep); }
+  .doc p { color: var(--ink-muted); }
+  .doc__date { font-size: var(--t-sm); color: var(--ink-faint); margin-block-start: 2.5rem; padding-block-start: 1.25rem; border-block-start: 1px solid var(--rule); }
+</style>

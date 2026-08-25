@@ -1,0 +1,146 @@
+---
+import Base from './Base.astro';
+import SignupBand from '../components/SignupBand.astro';
+import { STAGES } from '../data/track';
+
+interface Props {
+  title: string; kicker: string; goal: string;
+  stage: number; order: number; readingTime: number;
+  author: string; interactive: boolean;
+  prev?: { id: string; title: string } | null;
+  next?: { id: string; title: string } | null;
+}
+const { title, kicker, goal, stage, order, readingTime, author, interactive, prev, next } = Astro.props;
+const stageInfo = STAGES.find((s) => s.n === stage);
+---
+<Base title={`${title} · קפיצת מדרגה`} description={kicker}>
+  <article class="lsn">
+    <header class="wrap lsn__head">
+      <nav class="lsn__crumb" aria-label="מיקום במסלול">
+        <a href="/maslul">המסלול</a>
+        <span aria-hidden="true">/</span>
+        <span>שלב {stage} · {stageInfo?.title}</span>
+      </nav>
+      <h1 class="lsn__title">{title}</h1>
+      <p class="lsn__kicker">{kicker}</p>
+      <div class="lsn__meta">
+        <span>שיעור {stage}.{order}</span>
+        <span>{readingTime} דקות קריאה</span>
+        <span>{author}</span>
+        {interactive && <span class="lsn__flag">אינטראקטיבי</span>}
+      </div>
+    </header>
+
+    <div class="wrap lsn__goal">
+      <p class="lsn__goalLabel">מה תדעו בסוף</p>
+      <p class="lsn__goalText">{goal}</p>
+    </div>
+
+    <div class="wrap lsn__body">
+      <slot />
+    </div>
+
+    <nav class="wrap lsn__nav" aria-label="ניווט בין שיעורים">
+      {prev ? <a class="lsn__navItem" href={`/maslul/${prev.id}`}><span>הקודם</span><strong>{prev.title}</strong></a> : <span></span>}
+      {next ? <a class="lsn__navItem lsn__navItem--next" href={`/maslul/${next.id}`}><span>הבא</span><strong>{next.title}</strong></a> : <span></span>}
+    </nav>
+  </article>
+
+  <SignupBand />
+</Base>
+
+<style is:global>
+  /* ---- lesson body typography: MDX content lands here ---- */
+  .lsn__body { font-size: var(--t-lg); line-height: 1.85; }
+  .lsn__body > * { max-inline-size: 68ch; }
+  /* the interactive block and the boundary use the full reading column */
+  .lsn__body > .lab, .lsn__body > div { max-inline-size: 100%; }
+  .lsn__body h2 { font-size: var(--t-2xl); margin-block: 2.6rem 0.9rem; }
+  .lsn__body h3 { font-size: var(--t-xl); font-family: var(--font-body); font-weight: 700; margin-block: 1.9rem 0.6rem; }
+  .lsn__body p { margin-block-end: 1.15rem; color: var(--ink); }
+  .lsn__body ul, .lsn__body ol { padding-inline-start: 1.4rem; margin-block-end: 1.3rem; }
+  .lsn__body li { margin-block-end: 0.55rem; }
+  .lsn__body li::marker { color: var(--accent-deep); }
+  .lsn__body strong { font-weight: 700; }
+  .lsn__body img { max-inline-size: 100%; block-size: auto; border-radius: var(--r-card); box-shadow: var(--shadow-1); }
+
+  /* the demo block: the only part that ages, so it is visually separate */
+  .lsn__body .demo {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-inline-start: 3px solid var(--accent);
+    border-radius: var(--r-card);
+    padding: 1.4rem 1.6rem;
+    margin-block: 1.75rem;
+    max-inline-size: 68ch;
+  }
+  .lsn__body .demo__label {
+    font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 0.5rem;
+  }
+  /* prompts in the lessons are Hebrew, so code blocks are RTL by default.
+     wrap real code in <div dir="ltr"> when it is actually code. */
+  .lsn__body pre {
+    background: var(--deep); color: var(--ink-on-deep);
+    padding: 1.15rem 1.3rem; border-radius: var(--r-card);
+    overflow-x: auto; direction: rtl; text-align: start;
+    font-size: var(--t-sm); line-height: 1.7; max-inline-size: 68ch;
+    white-space: pre-wrap; word-spacing: normal;
+  }
+  .lsn__body [dir="ltr"] pre { direction: ltr; text-align: left; white-space: pre; }
+  .lsn__body code { font-size: 0.92em; }
+  .lsn__body :not(pre) > code {
+    background: var(--surface-sunk); padding: 0.1rem 0.35rem; border-radius: 4px;
+  }
+
+  /* the honest boundary at the end of every lesson */
+  .lsn__body .boundary {
+    background: var(--deep);
+    color: var(--ink-on-deep);
+    border-radius: var(--r-card);
+    padding: 1.75rem 1.9rem;
+    margin-block-start: 2.75rem;
+    max-inline-size: 68ch;
+  }
+  .lsn__body .boundary h3 { color: var(--ink-on-deep); margin-block: 0 0.6rem; font-size: var(--t-lg); }
+  .lsn__body .boundary p { color: var(--ink-on-deep-mute); font-weight: 300; }
+  .lsn__body .boundary p:last-child { margin-block-end: 0; }
+  .lsn__body .boundary a { color: var(--accent); font-weight: 500; }
+
+  .lsn__body .task {
+    background: var(--surface-sunk);
+    border-radius: var(--r-card);
+    padding: 1.4rem 1.6rem;
+    margin-block: 1.75rem;
+    max-inline-size: 68ch;
+  }
+  .lsn__body .task h3 { margin-block-start: 0; }
+</style>
+
+<style>
+  .lsn :global(.wrap) { max-inline-size: 940px; }
+  .lsn__head { padding-block: 2.5rem 1.5rem; }
+  .lsn__crumb { display: flex; gap: 0.6rem; font-size: var(--t-sm); color: var(--ink-faint); margin-block-end: 1.1rem; flex-wrap: wrap; }
+  .lsn__crumb a { color: var(--ink-muted); text-decoration: none; }
+  .lsn__crumb a:hover { color: var(--ink-strong); }
+  .lsn__title { font-size: clamp(2rem, 4.4vw, 3rem); margin-block-end: 0.8rem; max-inline-size: 22ch; }
+  .lsn__kicker { font-size: var(--t-xl); color: var(--ink-muted); font-weight: 300; max-inline-size: 52ch; margin-block-end: 1.3rem; }
+  .lsn__meta { display: flex; gap: 1.4rem; font-size: var(--t-sm); color: var(--ink-faint); flex-wrap: wrap; }
+  .lsn__flag { color: var(--accent-deep); font-weight: 500; }
+
+  .lsn__goal { padding-block: 0 2rem; }
+  .lsn__goalLabel { font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 0.35rem; }
+  .lsn__goalText {
+    font-size: var(--t-lg); font-weight: 500; color: var(--ink-strong);
+    border-inline-start: 3px solid var(--accent); padding-inline-start: 1.1rem;
+    max-inline-size: 60ch; margin: 0;
+  }
+
+  .lsn__body { padding-block-end: 2.5rem; }
+
+  .lsn__nav { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding-block: 2rem 3.5rem; border-block-start: 1px solid var(--rule); }
+  .lsn__navItem { display: flex; flex-direction: column; gap: 0.2rem; background: var(--surface); border-radius: var(--r-card); padding: 1.1rem 1.35rem; text-decoration: none; box-shadow: var(--shadow-1); }
+  .lsn__navItem span { font-size: var(--t-xs); color: var(--ink-faint); }
+  .lsn__navItem strong { color: var(--ink-strong); font-weight: 500; font-size: var(--t-sm); }
+  .lsn__navItem--next { text-align: start; }
+  @media (max-width: 640px) { .lsn__nav { grid-template-columns: 1fr; } }
+</style>
