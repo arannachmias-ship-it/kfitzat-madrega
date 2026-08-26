@@ -54,7 +54,9 @@ const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: '
     {hasScreen && (
       <figure class="wrap tl__screen">
         <img src={`/kelim-screens/${slug}.webp`} width="1200" height="720" alt={`הפלט של ${p.name} להדגמה משיעור 2.2: תמלול ישיבה שהופך לשלוש רשימות, החלטות, משימות ונושאים פתוחים`} loading="lazy" decoding="async" />
-        <figcaption>ככה זה נראה בפועל: ההדגמה משיעור 2.2 (תמלול ישיבה לרשימת משימות) בתוך {p.name}, צולם ב־{checked}. אותו פרומפט בדיוק רץ בכל הכלים במדור.</figcaption>
+        <figcaption>{slug === 'gamma'
+          ? `ככה זה נראה בפועל: אותו סיכום ישיבה משיעור 2.2, הפעם כמצגת של ארבעה שקפים שנוצרה ב־${p.name} מפסקה אחת של טקסט, צולם ב־${checked}.`
+          : `ככה זה נראה בפועל: ההדגמה משיעור 2.2 (תמלול ישיבה לרשימת משימות) בתוך ${p.name}, צולם ב־${checked}. אותו פרומפט בדיוק רץ בכל הכלים במדור.`}</figcaption>
       </figure>
     )}
 
