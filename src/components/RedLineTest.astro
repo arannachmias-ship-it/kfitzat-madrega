@@ -1,0 +1,188 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 4.1.
+ * שמונה מקרים אמיתיים מהעבודה של משאבי אנוש. המשתמש מסווג כל אחד,
+ * ומקבל את הנימוק — לא רק את התשובה.
+ * אין כאן קריאה למודל: הסיווגים והנימוקים כתובים מראש.
+ */
+---
+<div class="rlt" data-rlt>
+  <div class="rlt__top">
+    <p class="rlt__label">שמונה מקרים. איפה אתם מותחים את הקו?</p>
+    <p class="rlt__score" data-score>0 מתוך 8</p>
+  </div>
+
+  <ol class="rlt__list" data-list></ol>
+
+  <p class="rlt__end" data-end hidden></p>
+</div>
+
+<script is:inline>
+(() => {
+  const root = document.querySelector('[data-rlt]');
+  if (!root) return;
+
+  const OPTS = [
+    { k: 'ok',   t: 'בלי בעיה' },
+    { k: 'org',  t: 'רק בכלי ארגוני' },
+    { k: 'no',   t: 'לא נכנס בכלל' },
+  ];
+
+  const CASES = [
+    {
+      q: 'נוסח של מודעת דרושים למשרת רכז הדרכה, לפני שהיא מתפרסמת.',
+      a: 'ok',
+      why: 'אין כאן אף אדם מזוהה, והמסמך ממילא נועד להתפרסם בעוד יומיים. זה בדיוק סוג המשימה שכדאי לעשות עם המכונה. החריג היחיד: אם המודעה חושפת שינוי מבני שטרם הוכרז — למשל תפקיד חדש שמעיד על פיצול מחלקה — היא חוזרת לקטגוריה השלישית.',
+    },
+    {
+      q: 'טבלת השכר של המחלקה, עם שמות, כדי לבקש ניתוח פערים בין גברים לנשים.',
+      a: 'no',
+      why: 'שם ועוד שכר הם צמד המידע הרגיש ביותר שיש במשאבי אנוש, ואת הניתוח הזה אפשר לקבל בלי אף שם: מחליפים את השמות ב־"עובד 1", "עובד 2", ומשאירים תפקיד, ותק ומגדר. הפלט זהה, החשיפה נעלמה. כשקיים ניסוח שנותן את אותה תשובה בלי המידע המזהה — הוא לא "יותר בטוח", הוא פשוט הניסוח הנכון.',
+    },
+    {
+      q: 'קורות חיים של מועמדת, כדי להפיק מהם סיכום קצר לוועדת הקבלה.',
+      a: 'org',
+      why: 'זה המקרה שהכי הרבה ארגונים טועים בו, כי הוא מרגיש תמים. המועמדת שלחה את קורות החיים כדי שתקראו אותם — לא כדי שיעברו דרך ספק חיצוני. בכלי ארגוני עם הסכם עיבוד מידע זה אפשרי, ובכל זאת לא אוטומטי: צריך שההודעה למועמדים תגיד את זה. רוב נוסחי "פרטיות מועמדים" נכתבו לפני 2023 ולא אומרים כלום על זה.',
+    },
+    {
+      q: 'תמלול ישיבת הנהלה שבה נדון שינוי מבני שטרם הוכרז.',
+      a: 'no',
+      why: 'כאן הסיכון הוא לא רגולטורי אלא ארגוני, והוא גדול בהרבה. הדבר ההרסני ביותר שיכול לדלוף מארגון הוא תוכנית שהעובדים עוד לא שמעו עליה. וזו גם הישיבה שהכי מתחשק לסכם, כי היא ארוכה ומורכבת — לכן שווה להסכים על זה מראש ולא ברגע.',
+    },
+    {
+      q: 'נוהל החופשות הפנימי, כדי לנסח אותו מחדש בשפה שעובדים מבינים.',
+      a: 'org',
+      why: 'אם הנוהל הזה ידלוף מחר, לא ייגרם שום נזק — הוא מחולק ממילא לכל העובדים. ובכל זאת התשובה היא כלי ארגוני, ולא בגלל המסמך: בגלל ההרגל. זה בדיוק המסמך הלא־מזיק שמלמד ארבעים אנשים שמדביקים מסמכים פנימיים לאן שנוח, ואז מגיע המסמך שכן מזיק. הכלל צריך להיות פשוט מספיק כדי שאפשר יהיה לזכור אותו בלחץ.',
+    },
+    {
+      q: 'רשימת שאלות לראיון עבודה למשרת אנליסט, ובקשה לחדד אותן.',
+      a: 'ok',
+      why: 'אין מידע על אף אדם, אין סוד עסקי, והשאלות ייאמרו בקול לזרים גמורים בשבוע הבא. שווה לשים לב שרוב העבודה השימושית של משאבי אנוש נמצאת דווקא כאן — בניסוח, חידוד וארגון של חומר שאינו מזהה איש.',
+    },
+    {
+      q: 'ארבעים טפסי משוב אנונימיים מסקר שביעות רצון, לזיהוי נושאים חוזרים.',
+      a: 'org',
+      why: '"אנונימי" בארגון של ארבעים איש הוא כמעט תמיד לא אנונימי. משפט אחד בשדה החופשי — "מאז שחזרתי מחופשת הלידה" — מזהה אדם אחד ויחיד, ואף אחד לא התכוון לכך. לפני שמעלים סקר לכל כלי, כדאי לקרוא את שדות הטקסט החופשי ולשאול על כל אחד: כמה אנשים בארגון יכלו לכתוב את המשפט הזה.',
+    },
+    {
+      q: 'מכתב סיום העסקה לעובד ספציפי, על שמו ועם הנימוקים.',
+      a: 'no',
+      why: 'המסמך הרגיש ביותר שמשאבי אנוש מייצרים, על אדם שנמצא ברגע הפגיע ביותר שלו מול הארגון. גם אם הכלי מאובטח לחלוטין — התשובה לשאלה "האם היית מוכנה שהעובד יידע שהדבקת את המכתב הזה למקום שלישי?" מסבירה את הכל.',
+    },
+  ];
+
+  const list = root.querySelector('[data-list]');
+  const scoreEl = root.querySelector('[data-score]');
+  const endEl = root.querySelector('[data-end]');
+  let answered = 0, right = 0;
+
+  CASES.forEach((c, i) => {
+    const li = document.createElement('li');
+    li.className = 'rc';
+    li.innerHTML =
+      '<p class="rc__q">' + c.q + '</p>' +
+      '<div class="rc__opts">' +
+        OPTS.map((o) =>
+          '<button type="button" class="rc__b" data-k="' + o.k + '">' + o.t + '</button>'
+        ).join('') +
+      '</div>' +
+      '<div class="rc__why" hidden></div>';
+
+    const why = li.querySelector('.rc__why');
+    const btns = [...li.querySelectorAll('.rc__b')];
+
+    btns.forEach((b) => {
+      b.addEventListener('click', () => {
+        if (li.dataset.done) return;
+        li.dataset.done = '1';
+        const picked = b.dataset.k;
+        const correct = picked === c.a;
+
+        btns.forEach((x) => {
+          x.disabled = true;
+          if (x.dataset.k === c.a) x.classList.add('is-answer');
+          else if (x === b) x.classList.add('is-wrong');
+        });
+
+        li.classList.add('a-' + c.a);
+        why.hidden = false;
+        why.innerHTML =
+          '<p class="rc__verdict">' +
+            (correct ? 'בדיוק. ' : 'התשובה היא ' + OPTS.find((o) => o.k === c.a).t + '. ') +
+          '</p><p class="rc__text">' + c.why + '</p>';
+
+        answered++;
+        if (correct) right++;
+        scoreEl.textContent = right + ' מתוך ' + answered;
+
+        if (answered === CASES.length) {
+          endEl.hidden = false;
+          endEl.textContent = right >= 7
+            ? 'אתם יודעים איפה הקו. השאלה היחידה שנשארה היא אם ארבעים האנשים בארגון יודעים אותו גם — וזה כבר לא שאלה של ידע.'
+            : right >= 4
+              ? 'זו בדיוק התוצאה הצפויה, וגם הסיבה שמדיניות בעל־פה לא עובדת: כשמישהו צריך להכריע בזמן אמת, הוא מנחש. עמוד אחד כתוב פותר את זה.'
+              : 'אם המקרים האלה לא היו ברורים — זה לא כישלון, זה המצב ברוב הארגונים היום. אף אחד לא כתב לאנשים האלה את הכללים.';
+        }
+      });
+    });
+
+    list.appendChild(li);
+  });
+})();
+</script>
+
+<style>
+  .rlt {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .rlt__top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 1rem; margin-block-end: 1.25rem;
+  }
+  .rlt__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0; }
+  .rlt__score { font-size: var(--t-xs); color: var(--accent-deep); font-weight: 500; margin: 0; white-space: nowrap; }
+
+  .rlt__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+
+  .rlt :global(.rc) {
+    background: var(--surface-sunk); border-radius: var(--r-card);
+    border-inline-start: 3px solid transparent;
+    padding: 1.1rem 1.2rem;
+  }
+  .rlt :global(.rc__q) { margin: 0 0 0.85rem; font-size: var(--t-sm); color: var(--ink-strong); line-height: 1.6; }
+  .rlt :global(.rc__opts) { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+  .rlt :global(.rc__b) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.55rem 0.9rem;
+    cursor: pointer; min-block-size: 38px;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .rlt :global(.rc__b:hover:not(:disabled)) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .rlt :global(.rc__b:disabled) { cursor: default; opacity: 0.55; }
+  .rlt :global(.rc__b.is-answer) { opacity: 1; border-color: var(--ink-strong); background: var(--ink-strong); color: var(--ink-on-deep); font-weight: 500; }
+  .rlt :global(.rc__b.is-wrong) { opacity: 1; border-color: var(--rule-strong); text-decoration: line-through; }
+
+  .rlt :global(.rc__why) { margin-block-start: 0.9rem; padding-block-start: 0.8rem; border-block-start: 1px solid var(--rule); }
+  .rlt :global(.rc__verdict) { margin: 0; display: inline; font-weight: 700; font-size: var(--t-sm); color: var(--ink-strong); }
+  .rlt :global(.rc__text) { margin: 0; display: inline; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
+
+  /* צבע מופיע רק אחרי תשובה, ורק כדי לסמן את שלוש הקטגוריות */
+  .rlt :global(.rc.a-ok)  { border-inline-start-color: #7E8B1F; }
+  .rlt :global(.rc.a-org) { border-inline-start-color: #8A5A16; }
+  .rlt :global(.rc.a-no)  { border-inline-start-color: #A0282F; }
+
+  .rlt__end {
+    margin: 1.25rem 0 0; padding-block-start: 1rem;
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--t-sm); color: var(--ink-strong); line-height: 1.65;
+  }
+
+  @media (max-width: 620px) {
+    .rlt { padding: 1.2rem 1.1rem; }
+    .rlt :global(.rc__opts) { flex-direction: column; align-items: stretch; }
+    .rlt :global(.rc__b) { inline-size: 100%; }
+  }
+</style>

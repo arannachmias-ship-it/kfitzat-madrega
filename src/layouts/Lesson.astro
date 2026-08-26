@@ -114,6 +114,32 @@ const stageInfo = STAGES.find((s) => s.n === stage);
     max-inline-size: 68ch;
   }
   .lsn__body .task h3 { margin-block-start: 0; }
+
+  /* ציטוט־מפתח: המשפט שהקוראת אמורה לזכור אחרי שסגרה את העמוד */
+  .lsn__body blockquote {
+    margin: 1.75rem 0;
+    padding-inline-start: 1.3rem;
+    border-inline-start: 3px solid var(--ink-strong);
+    max-inline-size: 62ch;
+  }
+  .lsn__body blockquote p {
+    margin: 0;
+    font-size: var(--t-lg);
+    line-height: 1.7;
+    color: var(--ink-strong);
+  }
+  .lsn__body blockquote p + p { margin-block-start: 0.7rem; }
+
+  /* הערת שוליים: הסתייגות, מצב רגולטורי, כל מה שנכון לומר ולא נכון להבליט */
+  .lsn__body .note {
+    margin-block: 1.5rem;
+    padding: 0.95rem 1.15rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    max-inline-size: 68ch;
+  }
+  .lsn__body .note p { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
+  .lsn__body .note p + p { margin-block-start: 0.55rem; }
 </style>
 
 <style>
