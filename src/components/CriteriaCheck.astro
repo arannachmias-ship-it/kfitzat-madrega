@@ -1,0 +1,216 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 2.6.
+ * מנתח טקסט: הקוראת מקלידה את קריטריוני המיון שלה, שורה לשורה,
+ * והרכיב מסמן עילה מוגנת, פרוקסי מוכר, או קריטריון תקין — ומסביר למה.
+ * זה היוריסטיקה על מילות מפתח, לא ייעוץ משפטי. הכול מקומי.
+ */
+---
+<div class="cc" data-cc>
+  <p class="cc__label">הקלידו את קריטריוני המיון שלכם, שורה לכל קריטריון</p>
+
+  <textarea class="cc__in" data-in dir="rtl" rows="6"
+    placeholder="שלוש שנות ניסיון ב־SQL&#10;זמינות גבוהה לשעות ערב&#10;בלי פערים בקורות החיים&#10;מגורים באזור המרכז&#10;אנגלית ברמה גבוהה"></textarea>
+
+  <div class="cc__out" data-out hidden>
+    <div class="cc__head">
+      <div class="cc__stat">
+        <p class="cc__num" data-red>0</p>
+        <p class="cc__numLabel" data-redlabel>עילות מוגנות</p>
+      </div>
+      <p class="cc__verdict" data-verdict></p>
+    </div>
+    <ul class="cc__list" data-rows></ul>
+  </div>
+
+  <p class="cc__note">
+    זו בדיקה על מילות מפתח, לא ייעוץ משפטי. היא תופסת את הנפוץ ומפספסת ניסוחים יצירתיים —
+    המבחן האמיתי נשאר שלכם: <strong>אפשר להסביר את הקריטריון במונחי התפקיד, בלי להזכיר אף תכונה של המועמד?</strong>
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-cc]');
+  if (!root) return;
+
+  // עילות מוגנות לפי חוק שוויון הזדמנויות בעבודה
+  const RED = [
+    { re: /גיל|בן\s*\d|בת\s*\d|צעיר|מבוגר|שנת לידה|עד גיל|מגיל/, t: 'גיל',
+      why: 'גיל הוא עילה מוגנת מפורשת. גם "צעיר" ו"אנרגטי" בהקשר של גיל נכנסים לכאן, וגם סינון לפי שנת סיום לימודים שמסיק גיל.' },
+    { re: /הריון|הרה|לידה|פוריות|הפריה/, t: 'הריון ופוריות',
+      why: 'הריון, טיפולי פוריות והפריה חוץ־גופית הם עילות מוגנות נפרדות, ולא רק בזמן ההיריון עצמו.' },
+    { re: /ילד|הור(ה|ות|ים)|משפח|נשוי|רווק|גרוש|מצב אישי|מצב משפחתי/, t: 'הורות ומצב אישי',
+      why: 'הורות ומצב אישי הם עילות מוגנות. זה החלק שהכי הרבה נכנס בטעות, דרך שאלות על "גמישות" ו"זמינות".' },
+    { re: /מילואים|שירות צבאי|צה"ל|צה״ל|יחידה|קרבי|פרופיל/, t: 'שירות במילואים',
+      why: 'שירות במילואים הוא עילה מוגנת מפורשת בחוק — וזו אחת ההפתעות הגדולות למנהלי גיוס ישראלים. "מי שלא נעדר למילואים" הוא לא שיקול תפעולי, הוא בתוך הרשימה.' },
+    { re: /מגור|מתגורר|אזור המרכז|תושב|כתובת|קרוב למשרד|רחוק/, t: 'מקום מגורים',
+      why: 'מקום מגורים הוא עילה מוגנת בחוק הישראלי — בניגוד לרוב המדינות. "רק מהמרכז" הוא קריטריון בעייתי גם כשהמניע הוא באמת זמן נסיעה. אם הנסיעה היא העניין, נסחו את הדרישה כנוכחות במשרד בימים מסוימים.' },
+    { re: /דת|דתי|חילוני|חרדי|כשר|שבת|מוצא|עדה|לאום|ערבי|יהודי|עולה/, t: 'דת, לאום וארץ מוצא',
+      why: 'דת, לאום, גזע וארץ מוצא הם עילות מוגנות. דרישות שקשורות לימי עבודה מנוסחות כדרישות של התפקיד, לא של המועמד.' },
+    { re: /גבר|אישה|נשים|גברים|זכר|נקבה|נטייה מינית/, t: 'מין ונטייה מינית',
+      why: 'מין ונטייה מינית הם עילות מוגנות. גם ניסוח מודעה בלשון זכר בלבד נבדק בפסיקה.' },
+    { re: /מפלג|פוליטי|השקפה|דעות/, t: 'השקפה והשתייכות מפלגתית',
+      why: 'השקפה והשתייכות מפלגתית הן עילות מוגנות.' },
+  ];
+
+  // פרוקסי מוכרים: לא מזכירים עילה, מסננים לפיה
+  const AMBER = [
+    { re: /פער|רצף|הפסק/, t: 'פערים בקורות החיים',
+      why: 'הפרוקסי הקלאסי להורות, הריון ומחלה. אם מה שמעניין אתכם הוא ניסיון עדכני — בקשו ניסיון בשלוש השנים האחרונות, וזה מודד את מה שרציתם בלי לסנן לפי הסיבה לפער.' },
+    { re: /זמינ|גמיש|שעות ערב|סופ"ש|סופי שבוע|שעות נוספות/, t: 'זמינות וגמישות',
+      why: '"זמינות גבוהה" מתאר אדם, לא עבודה, ומסנן בפועל לפי הורות. אם התפקיד באמת דורש שתי משמרות ערב — כתבו את זה: "נדרשת נוכחות בשתי משמרות ערב בשבוע". זה עומד במבחן, וזה גם מדויק יותר.' },
+    { re: /התאמה תרבותית|מתאים לצוות|רוח הצוות|כימיה|אנרגטי|צעיר ברוחו|דינמי/, t: 'התאמה תרבותית',
+      why: 'הניסוח הזה הוא לא קריטריון — הוא מקום ריק שכל אחד ממלא אחרת, ומודל ימלא אותו מהממוצע של מי שהתקבל אצלכם בעבר. אם בעבר התקבלו בעיקר אנשים דומים זה לזה, זה בדיוק מה שיחזור.' },
+    { re: /שפת אם|ילידי|בלי מבטא|עברית רהוטה/, t: 'עברית שפת אם',
+      why: 'פרוקסי לארץ מוצא ולאום. אם התפקיד דורש כתיבה שיווקית בעברית — כתבו "כתיבה שיווקית בעברית ברמה גבוהה", ובדקו את זה במטלה. זה גם מודד טוב יותר.' },
+    { re: /מראה|ייצגות|רושם|תמונה/, t: 'מראה וייצגות',
+      why: 'קריטריון שכמעט תמיד לא ניתן להצדקה במונחי התפקיד, ופותח פתח לאפליה על כמה עילות בבת אחת.' },
+  ];
+
+  // קריטריונים שקשורים לתפקיד עצמו
+  const GREEN = [
+    { re: /שנ(ה|ות|ים) ניסיון|ניסיון של|ותק מקצועי/, t: 'ניסיון מקצועי' },
+    { re: /תואר|בוגר|לימודי|הסמכ|תעודה|רישיון|רישוי/, t: 'השכלה והסמכה' },
+    { re: /SQL|Excel|אקסל|Python|שליטה ב|ידע ב|היכרות עם|כלי|מערכת|תוכנ/i, t: 'כלים וידע מקצועי' },
+    { re: /אנגלית|צרפתית|רוסית|ערבית|שפ(ה|ות)/, t: 'שפה נדרשת לתפקיד' },
+    { re: /ניהול|הובלת|אחריות על|ניסיון בניהול/, t: 'ניסיון ניהולי' },
+  ];
+
+  const inEl = root.querySelector('[data-in]');
+  const outEl = root.querySelector('[data-out]');
+  const rowsEl = root.querySelector('[data-rows]');
+  const redEl = root.querySelector('[data-red]');
+  const redLabelEl = root.querySelector('[data-redlabel]');
+  const verdEl = root.querySelector('[data-verdict]');
+
+  inEl.addEventListener('input', render);
+
+  function classify(line) {
+    for (const r of RED)   if (r.re.test(line)) return { lvl: 'red',   t: r.t, why: r.why };
+    for (const a of AMBER) if (a.re.test(line)) return { lvl: 'amber', t: a.t, why: a.why };
+    for (const g of GREEN) if (g.re.test(line)) return { lvl: 'green', t: g.t,
+      why: 'קריטריון שמתאר את העבודה ולא את המועמד. זה בדיוק הסוג שאפשר להריץ, ואפשר גם להסביר בדיעבד.' };
+    return { lvl: 'gray', t: 'לא זוהה',
+      why: 'לא זיהינו כאן מילה מוכרת, וזה לא אומר שהקריטריון תקין. הריצו עליו את המבחן בעצמכם: אפשר להסביר אותו במונחי התפקיד, בלי להזכיר אף תכונה של המועמד?' };
+  }
+
+  const LBL = { red: 'עילה מוגנת', amber: 'פרוקסי מוכר', green: 'תקין', gray: 'לא זוהה' };
+
+  function render() {
+    const lines = inEl.value.split('\n').map((s) => s.trim()).filter(Boolean);
+    if (!lines.length) { outEl.hidden = true; return; }
+    outEl.hidden = false;
+
+    const res = lines.map((l) => ({ line: l, c: classify(l) }));
+    const red = res.filter((r) => r.c.lvl === 'red').length;
+    const amber = res.filter((r) => r.c.lvl === 'amber').length;
+    redEl.textContent = red;
+    // עברית: "עילה מוגנת אחת", לא "1 עילות מוגנות"
+    redLabelEl.textContent = red === 1 ? 'עילה מוגנת' : 'עילות מוגנות';
+
+    verdEl.className = 'cc__verdict';
+    if (red) {
+      verdEl.classList.add('is-red');
+      verdEl.textContent = 'יש כאן קריטריון שנוגע ישירות בעילה מוגנת. שווה לזכור שנטל ההוכחה מתהפך: ברגע שהמעסיק ביקש מידע על עילה מוגנת, עליו להוכיח שלא הפלה — ולא על המועמד להוכיח שכן. זו לא שאלה לכלי, זו שיחה של רבע שעה עם היועץ המשפטי, ולפניה כדאי לבוא עם הרשימה הזאת.';
+    } else if (amber) {
+      verdEl.classList.add('is-amber');
+      verdEl.textContent = amber === 1
+        ? 'אין כאן עילה מוגנת ישירה, אבל יש קריטריון אחד שמסנן לפי אחת מהן בלי להזכיר אותה. ברוב המקרים אפשר לנסח אותו מחדש כך שימדוד בדיוק את מה שהתכוונתם — ראו למטה.'
+        : 'אין כאן עילה מוגנת ישירה, אבל ' + amber + ' מהקריטריונים מסננים לפי אחת מהן בלי להזכיר אותה. זה המצב הנפוץ, והוא גם הקל לתיקון: כמעט כולם ניתנים לניסוח מחדש במונחי התפקיד.';
+    } else {
+      verdEl.classList.add('is-green');
+      verdEl.textContent = 'שום דבר ברשימה לא נדלק. זו רשימה שאפשר להריץ, ואפשר גם להגן עליה — וברגע שהיא כתובה ומופעלת אחיד על כל המועמדים, היא ההגנה הכי טובה שיכולה להיות לכם, לא הסיכון.';
+    }
+
+    rowsEl.innerHTML = res.map((r) =>
+      '<li class="ccr is-' + r.c.lvl + '">' +
+        '<p class="ccr__t">' + esc(r.line) + '<span class="ccr__k">' + LBL[r.c.lvl] +
+          (r.c.lvl === 'red' || r.c.lvl === 'amber' ? ' · ' + r.c.t : '') + '</span></p>' +
+        '<p class="ccr__w">' + r.c.why + '</p>' +
+      '</li>'
+    ).join('');
+  }
+
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  render();
+})();
+</script>
+
+<style>
+  .cc {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .cc__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 0.7rem; }
+
+  .cc__in {
+    inline-size: 100%; font-family: var(--font-body); font-size: var(--t-sm);
+    color: var(--ink-strong); background: var(--surface-sunk);
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control);
+    padding: 0.75rem 0.9rem; line-height: 1.8; resize: vertical;
+  }
+  .cc__in::placeholder { color: var(--ink-faint); }
+  .cc__in:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .cc__out {
+    margin-block-start: 1.5rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .cc__out[hidden] { display: none; }
+
+  .cc__head {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem clamp(1rem, 3vw, 2rem); align-items: center;
+    margin-block-end: 1.2rem;
+  }
+  .cc__stat { border-inline-start: 2px solid var(--accent); padding-inline-start: 0.9rem; }
+  .cc__num {
+    margin: 0; font-family: var(--font-display); line-height: 0.95;
+    font-size: clamp(2.2rem, 6vw, 3.2rem); color: var(--ink-strong);
+  }
+  .cc__numLabel { margin: 0.3rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+  .cc__verdict { margin: 0; font-size: var(--t-sm); line-height: 1.7; color: var(--ink-muted); }
+  .cc__verdict.is-green { border-inline-start: 2px solid #7E8B1F; padding-inline-start: 0.85rem; }
+  .cc__verdict.is-amber { border-inline-start: 2px solid #8A5A16; padding-inline-start: 0.85rem; }
+  .cc__verdict.is-red   { border-inline-start: 2px solid #A0282F; padding-inline-start: 0.85rem; }
+
+  .cc__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+  .cc :global(.ccr) {
+    background: var(--surface-sunk); border-radius: var(--r-card);
+    border-inline-start: 3px solid var(--rule-strong);
+    padding: 0.85rem 1rem;
+  }
+  .cc :global(.ccr.is-red)   { border-inline-start-color: #A0282F; }
+  .cc :global(.ccr.is-amber) { border-inline-start-color: #8A5A16; }
+  .cc :global(.ccr.is-green) { border-inline-start-color: #7E8B1F; }
+  .cc :global(.ccr__t) {
+    margin: 0 0 0.35rem; font-size: var(--t-sm); font-weight: 600; color: var(--ink-strong);
+    display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .cc :global(.ccr__k) {
+    font-size: 0.75em; font-weight: 400; color: var(--ink-faint); flex: none;
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control); padding: 0.05rem 0.45rem;
+  }
+  .cc :global(.ccr.is-red .ccr__k)   { color: #A0282F; border-color: #A0282F; }
+  .cc :global(.ccr.is-amber .ccr__k) { color: #8A5A16; border-color: #8A5A16; }
+  .cc :global(.ccr.is-green .ccr__k) { color: #7E8B1F; border-color: #7E8B1F; }
+  .cc :global(.ccr__w) { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
+
+  .cc__note {
+    margin: 1.35rem 0 0; padding-block-start: 1rem;
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.7;
+  }
+  .cc__note strong { color: var(--ink-muted); }
+
+  @media (max-width: 620px) {
+    .cc { padding: 1.2rem 1.1rem; }
+    .cc__head { grid-template-columns: 1fr; }
+    .cc__stat { border-inline-start: 0; border-block-start: 2px solid var(--accent); padding-inline-start: 0; padding-block-start: 0.85rem; }
+  }
+</style>
