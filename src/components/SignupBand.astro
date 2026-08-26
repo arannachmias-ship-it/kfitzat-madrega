@@ -8,7 +8,8 @@ const { compact = false } = Astro.props;
       <h2 id="signup-title" class="signup__title">שיעור אחד בשבוע, ישר למייל</h2>
       <p class="signup__sub">אנחנו קוראים את התשובות ועונים. אם נתקעתם על משהו בארגון שלכם, פשוט תענו לנו חזרה.</p>
     </div>
-    <form class="signup__form" method="post" action="#" novalidate>
+
+    <form class="signup__form" data-signup novalidate>
       <label class="signup__label" for="email">כתובת המייל שלכם</label>
       <div class="signup__row">
         <input
@@ -18,12 +19,82 @@ const { compact = false } = Astro.props;
           placeholder="name@company.co.il"
           aria-describedby="signup-help"
         />
-        <button class="btn btn--onDeep" type="submit">הרשמה</button>
+        <button class="btn btn--onDeep" type="submit" data-submit>הרשמה</button>
       </div>
-      <p id="signup-help" class="signup__help">מייל בלבד. אפשר להסיר את ההרשמה בלחיצה אחת.</p>
+
+      <label class="signup__consent">
+        <input type="checkbox" name="consent" value="true" data-consent />
+        <span>אני מאשר לקבל מיילים עם שיעורים ועדכונים מקפיצת מדרגה, כולל מידע על ההרצאות והסדנאות.</span>
+      </label>
+
+      <!-- מלכודת בוטים: מוסתרת מהעין ומקוראי מסך כאחד -->
+      <div class="signup__trap" aria-hidden="true">
+        <label for="website">אל תמלאו שדה זה</label>
+        <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <p id="signup-help" class="signup__help">
+        מייל בלבד, ואפשר להסיר את ההרשמה בלחיצה אחת. <a href="/pratiyut">מה אנחנו עושים עם הכתובת</a>.
+      </p>
+
+      <p class="signup__status" data-status role="status" aria-live="polite" hidden></p>
     </form>
   </div>
 </section>
+
+<script is:inline>
+(() => {
+  document.querySelectorAll('[data-signup]').forEach((form) => {
+    const btn = form.querySelector('[data-submit]');
+    const status = form.querySelector('[data-status]');
+    const label = btn.textContent;
+
+    const say = (text, kind) => {
+      status.hidden = false;
+      status.textContent = text;
+      status.dataset.kind = kind;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const email = String(data.get('email') || '').trim();
+      const consent = form.querySelector('[data-consent]').checked;
+
+      if (!email) return say('צריך כתובת מייל', 'bad');
+      if (!consent) return say('צריך לאשר את קבלת המיילים כדי שנוכל לשלוח', 'bad');
+
+      btn.disabled = true;
+      btn.textContent = 'רגע…';
+      status.hidden = true;
+
+      try {
+        const r = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, consent, website: data.get('website') || '' }),
+        });
+        const out = await r.json().catch(() => ({}));
+
+        if (r.ok && out.pending) {
+          form.reset();
+          say('נרשמתם. השיעור הראשון יגיע ברגע שנפתח את הדיוור, בקרוב מאוד.', 'ok');
+        } else if (r.ok) {
+          form.reset();
+          say('שלחנו לכם מייל אישור. לחיצה אחת עליו ואתם בפנים.', 'ok');
+        } else {
+          say(out.message || 'משהו נתקע. אפשר לנסות שוב בעוד רגע.', 'bad');
+        }
+      } catch {
+        say('אין חיבור כרגע. אפשר לנסות שוב בעוד רגע.', 'bad');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = label;
+      }
+    });
+  });
+})();
+</script>
 
 <style>
   .signup {
@@ -59,7 +130,48 @@ const { compact = false } = Astro.props;
   /* placeholder must clear WCAG AA against the deep band */
   .signup__input::placeholder { color: #9FB4BA; opacity: 1; }
   .signup__input:focus-visible { outline-color: var(--accent); }
+
+  .signup__consent {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    margin-block-start: 0.9rem;
+    font-size: var(--t-sm);
+    line-height: 1.55;
+    color: var(--ink-on-deep-mute);
+    cursor: pointer;
+  }
+  .signup__consent input {
+    margin-block-start: 0.3rem;
+    inline-size: 1.05rem;
+    block-size: 1.05rem;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .signup__trap {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   .signup__help { margin-block-start: 0.7rem; margin-block-end: 0; font-size: var(--t-xs); color: var(--ink-on-deep-mute); }
+  .signup__help a { color: var(--ink-on-deep-mute); }
+  .signup__help a:hover { color: var(--ink-on-deep); }
+
+  .signup__status {
+    margin-block: 0.85rem 0;
+    font-size: var(--t-sm);
+    line-height: 1.55;
+    padding-inline-start: 0.85rem;
+    border-inline-start: 3px solid var(--rule-on-deep);
+  }
+  .signup__status[data-kind='ok'] { color: var(--accent); border-inline-start-color: var(--accent); }
+  .signup__status[data-kind='bad'] { color: #F3C9C2; border-inline-start-color: #F3C9C2; }
+
   @media (max-width: 860px) {
     .signup__inner { grid-template-columns: 1fr; gap: 1.75rem; }
   }
