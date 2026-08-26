@@ -29,7 +29,7 @@
   </div>
 </div>
 
-<script is:inline>
+<script is:inline data-astro-rerun>
 (() => {
   const root = document.querySelector('[data-lab]');
   if (!root) return;
@@ -81,8 +81,19 @@
     background: var(--surface-sunk); border-radius: var(--r-control);
     padding: 0.8rem 0.95rem; cursor: pointer; font-size: var(--t-sm);
     line-height: 1.5; min-block-size: 44px;
+    border: 1.5px solid transparent;
   }
-  .opt input { margin-block-start: 0.25rem; inline-size: 1.05rem; block-size: 1.05rem; accent-color: var(--accent-deep); flex-shrink: 0; }
+  .opt { transition: border-color var(--dur-fast) ease, background var(--dur-fast) ease, transform var(--dur-base) var(--ease-out); }
+  .opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); transform: translateY(-1px); }
+  .opt input {
+    margin-block-start: 0.25rem; inline-size: 1.05rem; block-size: 1.05rem; flex-shrink: 0;
+    appearance: none; -webkit-appearance: none; margin-inline: 0;
+    border: 1.5px solid var(--ink-faint); border-radius: 4px; background: var(--surface);
+    display: grid; place-items: center; transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease;
+  }
+  .opt input::before { content: ""; inline-size: 0.5rem; block-size: 0.5rem; border-radius: 2px; background: var(--deep); transform: scale(0); transition: transform var(--dur-base) var(--ease-spring); }
+  .opt input:checked { background: var(--accent); border-color: var(--accent); }
+  .opt input:checked::before { transform: scale(1); }
   .opt strong { display: block; font-weight: 700; color: var(--ink-strong); }
   .opt span { color: var(--ink-muted); }
   .lab__panes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }

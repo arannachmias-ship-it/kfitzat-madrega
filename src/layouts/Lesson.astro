@@ -14,6 +14,7 @@ const { title, kicker, goal, stage, order, readingTime, author, interactive, pre
 const stageInfo = STAGES.find((s) => s.n === stage);
 ---
 <Base title={`${title} · קפיצת מדרגה`} description={kicker}>
+  <div class="lsn__progress" aria-hidden="true"><i></i></div>
   <article class="lsn">
     <header class="wrap lsn__head">
       <nav class="lsn__crumb" aria-label="מיקום במסלול">
@@ -24,7 +25,7 @@ const stageInfo = STAGES.find((s) => s.n === stage);
       <h1 class="lsn__title">{title}</h1>
       <p class="lsn__kicker">{kicker}</p>
       <div class="lsn__meta">
-        <span>שיעור {stage}.{order}</span>
+        <span class="lsn__num"><span transition:name={`lesson-n-${Astro.params.slug ?? ''}`}>{stage}.{order}</span></span>
         <span>{readingTime} דקות קריאה</span>
         <span>{author}</span>
         {interactive && <span class="lsn__flag">אינטראקטיבי</span>}
@@ -48,6 +49,35 @@ const stageInfo = STAGES.find((s) => s.n === stage);
 
   <SignupBand />
 </Base>
+
+<script>
+  import { initReveal } from '../scripts/reveal';
+  function initLesson() {
+    // split the key quote into words so it can reveal one word at a time
+    document.querySelectorAll<HTMLElement>('.lsn__body blockquote:not(.reveal)').forEach((q) => {
+      q.querySelectorAll('p').forEach((p) => {
+        p.innerHTML = p.textContent!.split(/\s+/).filter(Boolean).map((w, i) => `<span class="w" style="transition-delay:${i * 45}ms">${w}</span>`).join(' ');
+      });
+      q.classList.add('reveal');
+      q.style.opacity = '1'; q.style.transform = 'none';
+    });
+    initReveal();
+    // progress fallback for browsers without scroll-driven animations
+    if (CSS.supports('animation-timeline: scroll()')) return;
+    const bar = document.querySelector<HTMLElement>('.lsn__progress i');
+    if (!bar) return;
+    let ticking = false;
+    const update = () => {
+      const d = document.documentElement;
+      bar.style.setProperty('--p', String(Math.min(1, d.scrollTop / (d.scrollHeight - d.clientHeight))));
+      ticking = false;
+    };
+    update();
+    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  }
+  initLesson();
+  document.addEventListener('astro:page-load', initLesson);
+</script>
 
 <style is:global>
   /* ---- lesson body typography: MDX content lands here ---- */
@@ -100,6 +130,17 @@ const stageInfo = STAGES.find((s) => s.n === stage);
     padding: 1.75rem 1.9rem;
     margin-block-start: 2.75rem;
     max-inline-size: 68ch;
+    position: relative; overflow: hidden; isolation: isolate;
+    box-shadow: 0 24px 48px -28px rgba(12, 40, 49, 0.6);
+  }
+  /* depth: a citron light in the corner and a faint paper grain, both behind the text */
+  .lsn__body .boundary::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(60% 90% at 100% 0%, rgba(198, 214, 63, 0.26), transparent 70%);
+  }
+  .lsn__body .boundary::after {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0.07; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   .lsn__body .boundary h3 { color: var(--ink-on-deep); margin-block: 0 0.6rem; font-size: var(--t-lg); }
   .lsn__body .boundary p { color: var(--ink-on-deep-mute); font-weight: 300; }
@@ -127,6 +168,18 @@ const stageInfo = STAGES.find((s) => s.n === stage);
     font-size: var(--t-lg);
     line-height: 1.7;
     color: var(--ink-strong);
+  }
+  /* the key quote reveals word by word, once */
+  .lsn__body blockquote .w { opacity: 0.18; transition: opacity 0.5s ease; }
+  .lsn__body blockquote.is-in .w { opacity: 1; }
+  .lsn__body blockquote { border-inline-start-color: var(--accent); }
+
+  /* reading progress: a citron hairline under the sticky nav */
+  .lsn__progress { position: sticky; top: 0; z-index: 51; block-size: 3px; margin-block-end: -3px; pointer-events: none; }
+  .lsn__progress i { display: block; block-size: 100%; inline-size: 100%; background: var(--accent); transform: scaleX(var(--p, 0)); transform-origin: right; }
+  @supports (animation-timeline: scroll()) {
+    .lsn__progress i { animation: lsnGrow linear both; animation-timeline: scroll(root); }
+    @keyframes lsnGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
   }
   .lsn__body blockquote p + p { margin-block-start: 0.7rem; }
 
@@ -164,7 +217,8 @@ const stageInfo = STAGES.find((s) => s.n === stage);
   .lsn__body { padding-block-end: 2.5rem; }
 
   .lsn__nav { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding-block: 2rem 3.5rem; border-block-start: 1px solid var(--rule); }
-  .lsn__navItem { display: flex; flex-direction: column; gap: 0.2rem; background: var(--surface); border-radius: var(--r-card); padding: 1.1rem 1.35rem; text-decoration: none; box-shadow: var(--shadow-1); }
+  .lsn__navItem { display: flex; flex-direction: column; gap: 0.2rem; background: var(--surface); border-radius: var(--r-card); padding: 1.1rem 1.35rem; text-decoration: none; box-shadow: var(--shadow-1); transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+  .lsn__navItem:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
   .lsn__navItem span { font-size: var(--t-xs); color: var(--ink-faint); }
   .lsn__navItem strong { color: var(--ink-strong); font-weight: 500; font-size: var(--t-sm); }
   .lsn__navItem--next { text-align: start; }

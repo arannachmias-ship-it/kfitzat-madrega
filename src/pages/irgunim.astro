@@ -89,40 +89,38 @@ const programs = [
     </div>
   </section>
 
-  <section class="wrap compare" aria-labelledby="compare-title">
-    <h2 id="compare-title" class="sr">השוואה בין התוכניות</h2>
-    <div class="ctab">
-      <div class="crow crow--head"><span>תוכנית</span><span>אורך</span><span>קבוצה</span><span>מנחים</span><span>ידיים</span><span>מחיר</span></div>
-      {programs.map((p) => (
-        <a class="crow" href={`#${p.id}`}>
-          <span class="crow__name">{p.name}</span><span>{p.len}</span><span>{p.group}</span><span>{p.hosts}</span>
-          <span class="crow__hands">{p.hands}</span><span class="crow__price">{p.price}</span>
-        </a>
+  <section class="wrap list" aria-labelledby="list-title">
+    <h2 id="list-title" class="sr">התוכניות</h2>
+    <div class="plist" data-stagger="80">
+      {programs.map((p, i) => (
+        <details class="prog reveal" id={p.id} open={i === 0}>
+          <summary class="prog__row">
+            <span class="prog__name">{p.name}</span>
+            <span class="prog__cell"><span class="prog__k">אורך</span>{p.len}</span>
+            <span class="prog__cell"><span class="prog__k">קבוצה</span>{p.group}</span>
+            <span class="prog__cell prog__cell--hands"><span class="prog__k">עבודה בידיים</span><span class="prog__hands">{p.hands}</span>
+              <span class="meter" aria-hidden="true"><i style={`--w:${p.hands.endsWith('%') ? p.hands : '85%'}`}></i></span></span>
+            <span class="prog__chev" aria-hidden="true">⌄</span>
+          </summary>
+          <div class="prog__body">
+            <div class="prog__side">
+              <dl class="prog__facts">
+                <div><dt>מנחים</dt><dd>{p.hosts}</dd></div>
+                <div><dt>טווח מחיר</dt><dd>{p.price}</dd></div>
+              </dl>
+              <p class="prog__gets">{p.gets}</p>
+            </div>
+            <div class="prog__agenda">
+              <p class="prog__agendaLabel">האג'נדה</p>
+              {p.agenda.map(([t, what]) => (
+                <div class="ag"><span class="ag__t">{t}</span><span class="ag__w">{what}</span></div>
+              ))}
+            </div>
+          </div>
+        </details>
       ))}
     </div>
   </section>
-
-  {programs.map((p) => (
-    <section class="wrap prog" id={p.id} aria-labelledby={`${p.id}-t`}>
-      <div class="prog__side">
-        <h2 id={`${p.id}-t`} class="prog__name">{p.name}</h2>
-        <dl class="prog__facts">
-          <div><dt>אורך</dt><dd>{p.len}</dd></div>
-          <div><dt>גודל קבוצה</dt><dd>{p.group}</dd></div>
-          <div><dt>מנחים</dt><dd>{p.hosts}</dd></div>
-          <div><dt>עבודה בידיים</dt><dd class="hi">{p.hands}</dd></div>
-          <div><dt>טווח מחיר</dt><dd>{p.price}</dd></div>
-        </dl>
-        <p class="prog__gets">{p.gets}</p>
-      </div>
-      <div class="prog__agenda">
-        <p class="prog__agendaLabel">האג'נדה</p>
-        {p.agenda.map(([t, what]) => (
-          <div class="ag"><span class="ag__t">{t}</span><span class="ag__w">{what}</span></div>
-        ))}
-      </div>
-    </section>
-  ))}
 
   <section class="wrap ask">
     <h2 class="ask__title">איך מתחילים</h2>
@@ -130,7 +128,7 @@ const programs = [
       כותבים לנו מה גודל הצוות, מה כבר ניסיתם, ומה ההנהלה ביקשה. אנחנו חוזרים עם המלצה לתוכנית אחת,
       ואם אנחנו חושבים שאתם לא צריכים אותנו עדיין, נגיד גם את זה.
     </p>
-    <p><a class="btn btn--primary" href="mailto:arannachmias@gmail.com?subject=פנייה%20מהאתר">כתבו לנו</a></p>
+    <p><a class="btn btn--primary" href="mailto:arannachmias@gmail.com?subject=פנייה%20מהאתר">כתבו לנו <span class="btn__arrow" aria-hidden="true">←</span></a></p>
   </section>
 
   <SignupBand />
@@ -146,31 +144,53 @@ const programs = [
   .head__pair strong { color: var(--ink-strong); font-weight: 700; }
   @media (max-width: 780px) { .head__pair { grid-template-columns: 1fr; gap: 1rem; } }
 
-  .compare { padding-block-end: 2.5rem; }
-  .ctab { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); overflow: hidden; }
-  .crow { display: grid; grid-template-columns: 1.4fr 1fr 1fr 0.9fr 0.6fr 0.9fr; gap: 1rem; padding: 0.95rem 1.35rem; border-block-end: 1px solid var(--rule); font-size: var(--t-sm); color: var(--ink-muted); text-decoration: none; align-items: center; }
-  a.crow:hover { background: var(--surface-sunk); color: var(--ink-muted); }
-  .crow:last-child { border-block-end: none; }
-  .crow--head { background: var(--surface-sunk); font-size: var(--t-xs); color: var(--ink-faint); }
-  .crow__name { font-weight: 700; color: var(--ink-strong); }
-  .crow__hands { font-weight: 700; color: var(--ink-strong); }
-  .crow__price { color: var(--ink-faint); }
-  @media (max-width: 900px) { .crow { grid-template-columns: 1.3fr 1fr; row-gap: 0.3rem; } .crow--head { display: none; } }
-
-  .prog { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 3rem; padding-block: 2.25rem; border-block-start: 1px solid var(--rule); scroll-margin-block-start: 1.5rem; }
-  .prog__name { font-size: var(--t-2xl); margin-block-end: 1.1rem; }
+  .list { padding-block-end: 2.5rem; }
+  .plist { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); overflow: hidden; }
+  .prog { border-block-end: 1px solid var(--rule); scroll-margin-block-start: 5rem; }
+  .prog:last-child { border-block-end: none; }
+  .prog__row {
+    list-style: none; cursor: pointer;
+    display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.1fr auto; gap: 1.25rem; align-items: center;
+    padding: 1.1rem 1.35rem; font-size: var(--t-sm); color: var(--ink-muted);
+    transition: background var(--dur-fast) ease;
+  }
+  .prog__row::-webkit-details-marker { display: none; }
+  .prog__row:hover { background: var(--surface-sunk); }
+  .prog[open] .prog__row { background: var(--surface-sunk); }
+  .prog__name { font-family: var(--font-display); font-size: var(--t-lg); color: var(--ink-strong); }
+  .prog__k { display: none; }
+  .prog__hands { font-weight: 700; color: var(--ink-strong); }
+  .meter { display: block; block-size: 5px; border-radius: 3px; background: var(--rule); overflow: hidden; margin-block-start: 0.4rem; inline-size: 100%; }
+  .meter i { display: block; block-size: 100%; inline-size: var(--w); background: var(--accent); transform: scaleX(0); transform-origin: right; transition: transform 0.9s var(--ease-out) 0.15s; }
+  .prog[open] .meter i, .prog__row:hover .meter i { transform: scaleX(1); }
+  .prog__chev {
+    inline-size: 1.7rem; block-size: 1.7rem; border-radius: 50%; border: 1px solid var(--rule-strong);
+    display: grid; place-items: center; color: var(--ink-muted); line-height: 1; padding-block-end: 0.2rem;
+    transition: transform var(--dur-base) var(--ease-out), background var(--dur-fast) ease, border-color var(--dur-fast) ease;
+  }
+  .prog[open] .prog__chev { transform: rotate(180deg); background: var(--accent-soft); border-color: var(--accent); }
+  .prog__body { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 3rem; padding: 1.25rem 1.35rem 1.75rem; }
+  .prog[open] .prog__body { animation: progOpen var(--dur-base) var(--ease-out); }
+  @keyframes progOpen { from { opacity: 0; transform: translateY(-8px); } }
   .prog__facts { margin: 0 0 1.1rem; display: flex; flex-direction: column; gap: 0.4rem; }
-  .prog__facts > div { display: grid; grid-template-columns: 9rem 1fr; gap: 0.75rem; font-size: var(--t-sm); }
+  .prog__facts > div { display: grid; grid-template-columns: 7rem 1fr; gap: 0.75rem; font-size: var(--t-sm); }
   .prog__facts dt { color: var(--ink-faint); }
   .prog__facts dd { margin: 0; color: var(--ink); }
-  .prog__facts .hi { color: var(--ink-strong); font-weight: 700; }
   .prog__gets { color: var(--ink-muted); font-weight: 300; font-size: var(--t-sm); margin: 0; }
   .prog__agendaLabel { font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 0.6rem; }
   .ag { display: grid; grid-template-columns: 9.5rem 1fr; gap: 1rem; padding-block: 0.7rem; border-block-end: 1px solid var(--rule); font-size: var(--t-sm); }
   .ag:last-child { border-block-end: none; }
   .ag__t { color: var(--accent-deep); font-weight: 500; font-variant-numeric: tabular-nums; }
   .ag__w { color: var(--ink); }
-  @media (max-width: 820px) { .prog { grid-template-columns: 1fr; gap: 1.5rem; } .ag { grid-template-columns: 1fr; gap: 0.15rem; } }
+  @media (max-width: 820px) {
+    .prog__row { grid-template-columns: 1fr auto; row-gap: 0.5rem; }
+    .prog__name { grid-column: 1; }
+    .prog__chev { grid-column: 2; grid-row: 1; }
+    .prog__cell { grid-column: 1 / -1; }
+    .prog__k { display: inline; color: var(--ink-faint); margin-inline-end: 0.5rem; font-size: var(--t-xs); }
+    .prog__body { grid-template-columns: 1fr; gap: 1.5rem; }
+    .ag { grid-template-columns: 1fr; gap: 0.15rem; }
+  }
 
   .ask { padding-block: 3rem 4rem; border-block-start: 1px solid var(--rule); }
   .ask__title { font-size: var(--t-2xl); margin-block-end: 0.8rem; }

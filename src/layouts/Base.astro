@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -26,6 +27,7 @@ const url = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.ur
     <meta property="og:image" content={new URL(ogImage, Astro.site ?? 'https://example.com').href} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <ClientRouter />
   </head>
   <body>
     <a class="skip-link" href="#main">דלגו לתוכן הראשי</a>
@@ -34,5 +36,10 @@ const url = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.ur
       <slot />
     </main>
     <Footer />
+    <script>
+      import { initReveal } from '../scripts/reveal';
+      initReveal();
+      document.addEventListener('astro:page-load', initReveal);
+    </script>
   </body>
 </html>

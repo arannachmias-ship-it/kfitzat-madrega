@@ -7,6 +7,7 @@ import { STAGES, TOTAL_LESSONS } from '../../data/track';
 const live = await getCollection('maslul', (e) => e.data.published);
 const liveSlugs = new Set(live.map((e) => e.id));
 const liveCount = live.length;
+const lastLiveIndex = (items: { slug: string }[]) => items.reduce((m, it, i) => (liveSlugs.has(it.slug) ? i : m), -1);
 ---
 <Base
   title="המסלול · קפיצת מדרגה"
@@ -33,19 +34,20 @@ const liveCount = live.length;
           <p class="stage__out"><span>בסוף השלב</span> {s.outcome}</p>
         </div>
       </div>
-      <ol class="stage__list">
+      <ol class="stage__list tl" data-stagger="70" style={`--fill:${lastLiveIndex(s.items) < 0 ? 0 : ((lastLiveIndex(s.items) + 0.5) / s.items.length) * 100}%`}>
+        <span class="tl__line" aria-hidden="true"><i></i></span>
         {s.items.map((it) => {
           const isLive = liveSlugs.has(it.slug);
           return (
-            <li class:list={['it', { 'it--live': isLive, 'it--soon': !isLive }]}>
+            <li class:list={['it', 'reveal', 'reveal--x', { 'it--live': isLive, 'it--soon': !isLive }]}>
               {isLive ? (
                 <a href={`/maslul/${it.slug}`} class="it__inner">
-                  <span class="it__n">{it.n}</span>
+                  <span class="it__n" transition:name={`lesson-n-${it.slug}`}>{it.n}</span>
                   <span class="it__body">
                     <span class="it__t">{it.title}</span>
                     <span class="it__note">{it.note}</span>
                   </span>
-                  <span class="it__state">{it.interactive ? 'אינטראקטיבי' : 'קראו'}</span>
+                  <span class="it__state">{it.interactive ? 'אינטראקטיבי' : 'קראו'} <span class="it__arrow" aria-hidden="true">←</span></span>
                 </a>
               ) : (
                 <div class="it__inner">
@@ -86,15 +88,26 @@ const liveCount = live.length;
   .stage__out { font-size: var(--t-sm); color: var(--ink-muted); margin: 0; }
   .stage__out span { color: var(--accent-deep); font-weight: 500; }
 
-  .stage__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  .stage__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; position: relative; }
+  /* the timeline: a faint rail, and a citron line that fills to the last published lesson */
+  .tl { padding-inline-start: 2.6rem; }
+  .tl__line { position: absolute; inset-block: 1.4rem; inset-inline-start: 0.95rem; inline-size: 2px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+  .tl__line i { display: block; inline-size: 100%; block-size: var(--fill); background: var(--accent); transform: scaleY(0); transform-origin: top; transition: transform 1.6s var(--ease-out) 0.2s; }
+  .tl.is-in .tl__line i { transform: scaleY(1); }
+  .it { position: relative; }
+  .it::before { content: ""; position: absolute; inset-inline-start: -2.6rem; inset-block-start: 50%; translate: 0 -50%; inline-size: 1.9rem; block-size: 1.9rem; border-radius: 50%; background: var(--paper); border: 2px solid var(--rule); box-sizing: border-box; z-index: 1; transition: border-color var(--dur-base) ease, background var(--dur-base) ease; }
+  .it--live::before { background: var(--accent); border-color: var(--accent); }
+  .it.reveal { transition-duration: 0.6s; }
   .it__inner {
     display: grid; grid-template-columns: 3rem 1fr auto; gap: 1rem;
     align-items: center; padding: 0.95rem 1.25rem;
     background: var(--surface); border: 1px solid var(--rule);
     border-radius: var(--r-card); text-decoration: none; color: inherit;
   }
-  a.it__inner { transition: border-color 0.15s ease, box-shadow 0.15s ease; }
-  a.it__inner:hover { border-color: var(--rule-strong); box-shadow: var(--shadow-1); color: inherit; }
+  a.it__inner { transition: border-color var(--dur-fast) ease, box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
+  a.it__inner:hover { border-color: var(--accent); box-shadow: var(--shadow-2); color: inherit; transform: translateX(-4px); }
+  .it__arrow { display: inline-block; opacity: 0; transform: translateX(6px); transition: opacity var(--dur-base) ease, transform var(--dur-base) var(--ease-out); }
+  a.it__inner:hover .it__arrow { opacity: 1; transform: none; }
   .it--soon .it__inner { background: transparent; border-style: dashed; }
   .it__n { font-family: var(--font-display); font-size: var(--t-base); color: var(--ink-faint); }
   .it--live .it__n { color: var(--accent-deep); }
@@ -106,6 +119,9 @@ const liveCount = live.length;
   .it__state--soon { color: var(--ink-faint); font-weight: 400; }
 
   @media (max-width: 640px) {
+    .tl { padding-inline-start: 1.9rem; }
+    .tl__line { inset-inline-start: 0.6rem; }
+    .it::before { inset-inline-start: -1.9rem; inline-size: 1.4rem; block-size: 1.4rem; }
     .it__inner { grid-template-columns: 2.2rem 1fr; row-gap: 0.3rem; }
     .it__state { grid-column: 2; }
   }
