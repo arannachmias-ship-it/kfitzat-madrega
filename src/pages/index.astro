@@ -188,12 +188,12 @@ const liveCount = live.length;
     animation: heroUnderline 0.7s var(--ease-out) 1.1s forwards;
   }
   @keyframes heroUnderline { to { transform: scaleX(1); } }
-  .hero__media { position: relative; margin-block-end: 1.6rem; }
+  .hero__media { position: relative; margin-block-end: 5rem; }
   .hero__frame { border-radius: var(--r-card); overflow: hidden; box-shadow: var(--shadow-3); }
   .hero__card {
-    position: absolute; inset-block-end: -1.4rem; inset-inline-start: 1.2rem; inset-inline-end: 1.2rem;
-    display: flex; align-items: center; gap: 0.7rem; min-inline-size: 0;
-    padding: 0.6rem 0.9rem; border-radius: var(--r-card); text-decoration: none; color: var(--ink-strong);
+    position: absolute; inset-block-end: -4.6rem; inset-inline-start: 1.2rem; inset-inline-end: 1.2rem;
+    display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 0.9rem; row-gap: 0.2rem; align-items: center;
+    padding: 0.8rem 1.1rem; border-radius: var(--r-card); text-decoration: none; color: var(--ink-strong);
     background: var(--glass);
     -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
     border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-edge), var(--shadow-2);
@@ -202,11 +202,11 @@ const liveCount = live.length;
   }
   .hero__card:hover { background: var(--glass-strong); color: var(--ink-strong); }
   @media (prefers-reduced-transparency: reduce) { .hero__card { background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; } }
-  .hero__cardLabel { font-size: var(--t-xs); color: var(--ink-muted); display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; flex: none; }
+  .hero__cardLabel { grid-column: 1; grid-row: 1; font-size: var(--t-xs); color: var(--ink-muted); display: flex; align-items: center; gap: 0.4rem; }
   .hero__dot { inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50%; background: var(--accent); animation: heroPulse 2.2s ease-in-out infinite; }
   @keyframes heroPulse { 50% { box-shadow: 0 0 0 6px rgba(198, 214, 63, 0.28); } }
-  .hero__cardTitle { font-family: var(--font-display); font-size: var(--t-base); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-inline-size: 0; flex: 1; }
-  .hero__cardArrow { color: var(--accent-deep); flex: none; transition: transform var(--dur-base) var(--ease-out); }
+  .hero__cardTitle { grid-column: 1; grid-row: 2; font-family: var(--font-display); font-size: var(--t-lg); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .hero__cardArrow { grid-column: 2; grid-row: 1 / -1; color: var(--accent-deep); font-size: var(--t-xl); transition: transform var(--dur-base) var(--ease-out); }
   .hero__card:hover .hero__cardArrow { transform: translateX(-4px); }
   .hero__title { font-size: clamp(2.5rem, 5.4vw, 3.75rem); margin-block-end: 1.1rem; }
   .hero__sub { font-size: var(--t-xl); line-height: 1.6; color: var(--ink-muted); font-weight: 300; max-inline-size: 40ch; margin-block-end: 1.9rem; }
