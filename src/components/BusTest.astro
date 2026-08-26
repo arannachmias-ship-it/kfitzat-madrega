@@ -1,0 +1,224 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 3.6.
+ * מבחן האוטובוס: שבע שאלות, ציון עמידות, והפערים המדויקים לפי סדר חשיבות —
+ * כולל כמה זמן לוקח לסגור כל אחד. הכול מקומי.
+ */
+---
+<div class="bt" data-bt>
+  <p class="bt__label">שבע שאלות על האוטומציות שכבר יש לכם</p>
+
+  <div class="bt__qs" data-qs></div>
+
+  <div class="bt__out" data-out hidden>
+    <div class="bt__head">
+      <div class="bt__stat">
+        <p class="bt__num"><span data-score>0</span><span class="bt__of">/100</span></p>
+        <p class="bt__band" data-band></p>
+      </div>
+      <p class="bt__verdict" data-verdict></p>
+    </div>
+
+    <div class="bt__gaps" data-gapwrap hidden>
+      <div class="bt__gapTop">
+        <p class="bt__gapH">הפערים, לפי סדר</p>
+        <p class="bt__time" data-time></p>
+      </div>
+      <ol class="bt__gapList" data-gaps></ol>
+    </div>
+  </div>
+
+  <p class="bt__empty" data-empty>ענו על כל השבע.</p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-bt]');
+  if (!root) return;
+
+  const Q = [
+    { k: 'list', w: 20, mins: 30, q: 'יש מקום אחד שרשומות בו כל האוטומציות?',
+      gap: 'פתחו גיליון עם שש עמודות: שם, מה זה עושה, איפה זה יושב, בעלים, איך יודעים שחי, ומה עושים אם נפל. **זה הפער הכי יקר ברשימה** — בלעדיו אף אחד לא יודע כמה אוטומציות בכלל קיימות.' },
+    { k: 'acct', w: 20, mins: 45, q: 'הן יושבות בחשבון ארגוני ולא בחשבון אישי?',
+      gap: 'העבירו את החיבורים לחשבון ייעודי בבעלות הארגון. זו העבודה הכי לא נעימה ברשימה ואי אפשר לדלג עליה: **אוטומציה בחשבון אישי מתה ביום שאותו אדם עוזב**, ואין דרך לשחזר אותה בדיעבד.' },
+    { k: 'names', w: 10, mins: 5, q: 'אפשר להבין מהשם מה כל זרימה עושה, בלי לפתוח אותה?',
+      gap: 'שנו את שמות הזרימות מ־`Scenario 4` ל־`גיוס · תיוק קורות חיים מתיבת jobs@`. שלוש שניות לכל אחת, וזה התיעוד היחיד שאי אפשר לאבד.' },
+    { k: 'why', w: 10, mins: 20, q: 'כתוב איפשהו למה כל תנאי לא־מובן־מאליו נמצא שם?',
+      gap: 'הצמידו הערה לכל תנאי שנראה שרירותי, והסבירו **למה** ולא **מה**: "הפילטר על 20KB מסנן לוגו של חתימה". בלי זה, מי שיבוא אחריכם ימחק אותו בתוך שבוע.' },
+    { k: 'owner', w: 15, mins: 10, q: 'לכל אוטומציה יש שם של אדם אחראי, ומחליף?',
+      gap: 'שם של אדם, לא של מחלקה, ועוד שם למי שמחליף בחופשות. "משאבי אנוש אחראים" הוא אותו דבר בדיוק כמו "אף אחד לא אחראי".' },
+    { k: 'pulse', w: 15, mins: 15, q: 'יש דופק שבועי, או בדיקה קבועה ביומן?',
+      gap: 'בנו זרימה נפרדת ששולחת מייל אחד בשבוע עם מספר ההרצות, וקבעו חצי שעה בחודש ביומן. **בלי זה, כשל שקט לא מתגלה לעולם** — הוא מתגלה כשמישהו צריך את המידע.' },
+    { k: 'manual', w: 10, mins: 10, q: 'כתוב מה עושים ידנית עד שזה חוזר לעבוד?',
+      gap: 'שורה אחת לכל אוטומציה: "פותחים את התיבה ידנית ומעתיקים לגיליון, עשר דקות ביום". זו השורה שמונעת מתקלה בת שעה להפוך ליום של בלגן.' },
+  ];
+
+  const A = [
+    { k: 'yes',  t: 'כן', f: 1 },
+    { k: 'part', t: 'חלקית', f: 0.5 },
+    { k: 'no',   t: 'לא', f: 0 },
+  ];
+
+  const qsEl = root.querySelector('[data-qs]');
+  const outEl = root.querySelector('[data-out]');
+  const emptyEl = root.querySelector('[data-empty]');
+  const scoreEl = root.querySelector('[data-score]');
+  const bandEl = root.querySelector('[data-band]');
+  const verdEl = root.querySelector('[data-verdict]');
+  const gapsEl = root.querySelector('[data-gaps]');
+  const gapWrap = root.querySelector('[data-gapwrap]');
+  const timeEl = root.querySelector('[data-time]');
+  const pick = {};
+
+  Q.forEach((q) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'btq';
+    const h = document.createElement('p');
+    h.className = 'btq__q'; h.textContent = q.q;
+    wrap.appendChild(h);
+    const row = document.createElement('div');
+    row.className = 'btq__row';
+    A.forEach((o) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btq__b'; b.textContent = o.t;
+      b.addEventListener('click', () => {
+        pick[q.k] = o.k;
+        [...row.children].forEach((c) => c.classList.remove('is-on'));
+        b.classList.add('is-on');
+        render();
+      });
+      row.appendChild(b);
+    });
+    wrap.appendChild(row);
+    qsEl.appendChild(wrap);
+  });
+
+  // עברית, לא מתמטיקה: "כשעה", "כשעתיים וחצי", ולא "כ-1 שעות".
+  function humanTime(mins) {
+    if (mins < 60) return 'כ־' + mins + ' דקות';
+    const h = Math.round(mins / 30) / 2;
+    const whole = Math.floor(h);
+    const half = h - whole === 0.5;
+    const base = whole === 1 ? 'כשעה' : whole === 2 ? 'כשעתיים' : 'כ־' + whole + ' שעות';
+    return half ? base + ' וחצי' : base;
+  }
+
+  function render() {
+    if (Q.some((q) => !pick[q.k])) { outEl.hidden = true; emptyEl.hidden = false; return; }
+    outEl.hidden = false; emptyEl.hidden = true;
+
+    let score = 0;
+    Q.forEach((q) => { score += q.w * A.find((a) => a.k === pick[q.k]).f; });
+    score = Math.round(score);
+    scoreEl.textContent = score;
+
+    if (score >= 80) {
+      bandEl.textContent = 'תשרוד החלפת תפקיד';
+      bandEl.className = 'bt__band is-good';
+      verdEl.textContent = 'זו כבר תשתית ולא טריק אישי. אם מי שבנה את זה יעבור תפקיד מחר, מישהו אחר ימצא את הרשימה, יבין מה רץ, וידע למי לפנות. זה המצב שאליו כדאי להביא כל אוטומציה לפני שבונים את הבאה.';
+    } else if (score >= 50) {
+      bandEl.textContent = 'תשרוד תקלה, לא תשרוד עזיבה';
+      bandEl.className = 'bt__band is-mid';
+      verdEl.textContent = 'ביום־יום זה עובד, וזו בדיוק הסיבה שקל לא לטפל בזה. הפער נפתח ברגע אחד ספציפי: כשהאדם שבנה את זה כבר לא בחדר, והשאלה הראשונה היא "איפה זה בכלל יושב". הפערים למטה סוגרים את זה, והם קצרים ממה שנדמה.';
+    } else {
+      bandEl.textContent = 'זה טריק אישי, לא תשתית';
+      bandEl.className = 'bt__band is-low';
+      verdEl.textContent = 'זה לא אומר שהאוטומציה גרועה — היא כנראה עובדת מצוין. זה אומר שהיא קיימת בזכות אדם אחד, ושהיא תיעלם איתו. זה גם המצב שבו רוב הארגונים נמצאים אחרי האוטומציה הראשונה, וזה בסדר — כל עוד סוגרים את זה עכשיו ולא אחרי החמישית.';
+    }
+
+    const gaps = Q.filter((q) => pick[q.k] !== 'yes')
+                  .sort((a, b) => b.w - a.w);
+    gapWrap.hidden = !gaps.length;
+    if (gaps.length) {
+      const mins = gaps.reduce((n, q) => n + (pick[q.k] === 'part' ? Math.round(q.mins / 2) : q.mins), 0);
+      timeEl.textContent = 'לסגור הכול: ' + humanTime(mins);
+      gapsEl.innerHTML = gaps.map((q) => {
+        const m = pick[q.k] === 'part' ? Math.round(q.mins / 2) : q.mins;
+        return '<li class="btg"><p class="btg__t">' + q.q.replace(/\?$/, '') +
+          '<span class="btg__m">' + m + ' דק׳</span></p>' +
+          '<p class="btg__f">' + q.gap.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/`(.+?)`/g, '<code>$1</code>') + '</p></li>';
+      }).join('');
+    }
+  }
+})();
+</script>
+
+<style>
+  .bt {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .bt__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1.35rem; }
+
+  .bt__qs { display: flex; flex-direction: column; gap: 1.05rem; }
+  .bt :global(.btq__q) { margin: 0 0 0.5rem; font-size: var(--t-sm); color: var(--ink-strong); }
+  .bt :global(.btq__row) { display: flex; gap: 0.4rem; }
+  .bt :global(.btq__b) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.5rem 1.1rem;
+    cursor: pointer; min-block-size: 38px;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .bt :global(.btq__b:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .bt :global(.btq__b.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+
+  .bt__empty { margin: 1.35rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .bt__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .bt__out[hidden] { display: none; }
+
+  .bt__head {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem clamp(1rem, 3vw, 2rem); align-items: center;
+  }
+  .bt__stat { border-inline-start: 2px solid var(--accent); padding-inline-start: 0.9rem; }
+  .bt__num {
+    margin: 0; font-family: var(--font-display); line-height: 0.95;
+    font-size: clamp(2.4rem, 6.5vw, 3.4rem); color: var(--ink-strong); white-space: nowrap;
+  }
+  .bt__of { font-size: 0.45em; color: var(--ink-faint); }
+  .bt__band { margin: 0.4rem 0 0; font-size: var(--t-xs); max-inline-size: 18ch; }
+  .bt__band.is-good { color: #7E8B1F; }
+  .bt__band.is-mid  { color: #8A5A16; }
+  .bt__band.is-low  { color: #A0282F; }
+  .bt__verdict { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.7; }
+
+  .bt__gaps { margin-block-start: 1.35rem; padding-block-start: 1.1rem; border-block-start: 1px solid var(--rule); }
+  .bt__gaps[hidden] { display: none; }
+  .bt__gapTop { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-block-end: 0.8rem; flex-wrap: wrap; }
+  .bt__gapH { margin: 0; font-size: var(--t-xs); color: var(--ink-faint); }
+  .bt__time { margin: 0; font-size: var(--t-xs); color: var(--accent-deep); font-weight: 600; white-space: nowrap; }
+
+  .bt__gapList { margin: 0; padding-inline-start: 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+  .bt :global(.btg__t) {
+    margin: 0 0 0.3rem; font-size: var(--t-sm); font-weight: 600; color: var(--ink-strong);
+    display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .bt :global(.btg__m) {
+    font-size: 0.75em; font-weight: 400; color: var(--ink-faint); flex: none;
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control); padding: 0.05rem 0.4rem;
+  }
+  .bt :global(.btg__f) { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
+  .bt :global(.btg__f strong) { color: var(--ink-strong); }
+  .bt :global(.btg__f code) {
+    font-size: 0.9em; background: var(--surface-sunk);
+    border-radius: 4px; padding: 0.05rem 0.3rem;
+  }
+
+  @media (max-width: 620px) {
+    .bt { padding: 1.2rem 1.1rem; }
+    .bt :global(.btq__row) { flex-wrap: wrap; }
+    .bt :global(.btq__b) { flex: 1 1 auto; }
+    .bt__head { grid-template-columns: 1fr; }
+    .bt__stat { border-inline-start: 0; border-block-start: 2px solid var(--accent); padding-inline-start: 0; padding-block-start: 0.85rem; }
+  }
+</style>
