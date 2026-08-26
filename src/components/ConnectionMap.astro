@@ -1,0 +1,243 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 3.2.
+ * מחולל אישי: הקוראת מסמנת אילו מערכות באמת יש בארגון שלה,
+ * והרכיב מייצר רשימת אוטומציות שאפשריות אצלה — ורשימת חסימות אמיתיות.
+ * הכללים כתובים מראש. אין קריאה לשום שירות חיצוני.
+ */
+---
+<div class="cm" data-cm>
+  <p class="cm__label">סמנו מה באמת יש בארגון שלכם. נסמן לכם מה אפשר לבנות מזה.</p>
+
+  <div class="cm__groups" data-groups></div>
+
+  <div class="cm__out" data-out hidden>
+    <div class="cm__panel">
+      <p class="cm__h" data-count>אפשר לבנות אצלכם</p>
+      <ul class="cm__list" data-can></ul>
+    </div>
+    <div class="cm__panel cm__panel--flags" data-flagwrap hidden>
+      <p class="cm__h">מה צריך לדעת לפני שמתחילים</p>
+      <div data-flags></div>
+    </div>
+    <p class="cm__pick" data-pick hidden></p>
+  </div>
+
+  <p class="cm__empty" data-empty>בחרו לפחות מערכת אחת.</p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-cm]');
+  if (!root) return;
+
+  const GROUPS = [
+    { g: 'מייל ויומן', items: [
+      { k: 'gmail',  t: 'Gmail ויומן גוגל', caps: ['MAIL', 'CAL'] },
+      { k: 'outlook',t: 'Outlook ויומן', caps: ['MAIL', 'CAL'] },
+    ]},
+    { g: 'גיליונות', items: [
+      { k: 'sheets', t: 'Google Sheets', caps: ['SHEET'] },
+      { k: 'exlOn',  t: 'Excel אונליין / SharePoint', caps: ['SHEET'] },
+      { k: 'exlLoc', t: 'אקסל על המחשב או בשרת פנימי', caps: [] },
+    ]},
+    { g: 'טפסים', items: [
+      { k: 'gform', t: 'Google Forms', caps: ['FORM'] },
+      { k: 'mform', t: 'Microsoft Forms', caps: ['FORM'] },
+    ]},
+    { g: 'צ׳אט ארגוני', items: [
+      { k: 'slack', t: 'Slack', caps: ['CHAT'] },
+      { k: 'teams', t: 'Microsoft Teams', caps: ['CHAT'] },
+      { k: 'wa',    t: 'וואטסאפ בלבד', caps: [] },
+    ]},
+    { g: 'קבצים', items: [
+      { k: 'drive', t: 'Google Drive', caps: ['FILE'] },
+      { k: 'onedr', t: 'OneDrive / SharePoint', caps: ['FILE'] },
+    ]},
+    { g: 'מערכות ליבה', items: [
+      { k: 'hrIL',  t: 'חילן / מלם / מיכפל', caps: [] },
+      { k: 'hrGlb', t: 'Priority / SAP / Oracle', caps: [] },
+      { k: 'ats',   t: 'מערכת גיוס ייעודית', caps: [] },
+    ]},
+  ];
+
+  const RECIPES = [
+    { n: 'תיוק אוטומטי של קורות חיים', needs: ['MAIL', 'FILE'], ease: 'קל',
+      line: 'כשמגיע מייל לתיבת הגיוס עם קובץ מצורף, הקובץ נשמר בתיקייה של המשרה הנכונה — עם התאריך ושם השולח בשם הקובץ.' },
+    { n: 'גיליון מועמדים שמתמלא לבד', needs: ['MAIL', 'SHEET'], ease: 'קל',
+      line: 'כל פנייה לתיבת הגיוס הופכת לשורה: תאריך, שם, משרה, קישור לקובץ. בלי להקליד שדה אחד.' },
+    { n: 'התראה לצוות על מועמד חדש', needs: ['MAIL', 'CHAT'], ease: 'קל',
+      line: 'הודעה קצרה בערוץ הגיוס ברגע שמגיע מועמד למשרה פתוחה — במקום שמישהי תרענן תיבה.' },
+    { n: 'טופס מועמדות שמזין את הגיליון', needs: ['FORM', 'SHEET'], ease: 'קל',
+      line: 'הטופס מגדיר לכם את השדות מראש, ולכן זה גם הכי נקי: אף פעם לא מגיע משהו שלא ציפיתם לו.' },
+    { n: 'סיכום שבועי שמגיע אליכם לבד', needs: ['SHEET', 'MAIL'], ease: 'קל',
+      line: 'כל ראשון בשבע: כמה מועמדים נכנסו השבוע, לאילו משרות, ומי עוד לא נענה. שלושים הרצות בחודש.' },
+    { n: 'תזכורות ותק ויום הולדת למנהלים', needs: ['SHEET', 'MAIL'], ease: 'קל',
+      line: 'הכלי קורא את הגיליון כל בוקר ושולח למנהל הישיר תזכורת שבוע מראש. הדבר הקטן שהכי מורגש.' },
+    { n: 'תהליך קליטה: 30 / 60 / 90', needs: ['SHEET', 'CAL'], ease: 'דורש הגדרה חד־פעמית',
+      line: 'שורה חדשה בגיליון הקליטה פותחת שלוש פגישות ביומן של המנהל ושולחת לו את מה שצריך להכין לכל אחת.' },
+    { n: 'בקשת חופשה: טופס, אישור, גיליון', needs: ['FORM', 'SHEET', 'MAIL'], ease: 'דורש הגדרה חד־פעמית',
+      line: 'הבקשה נכנסת, המנהל מקבל מייל, האישור מעדכן את הגיליון. פותר את השרשור הכי נפוץ בוואטסאפ של כל ארגון.' },
+    { n: 'סקר יציאה שנשלח לבד', needs: ['SHEET', 'FORM', 'MAIL'], ease: 'דורש הגדרה חד־פעמית',
+      line: 'שבוע אחרי תאריך הסיום שרשום בגיליון, הטופס נשלח לכתובת הפרטית. זה שנשלח לכולם, בלי תלות במצב הרוח, הוא מה שהופך אותו לנתון.' },
+    { n: 'מסיכום ישיבה לרשימת משימות', needs: ['CAL', 'FILE', 'MAIL'], ease: 'דורש הגדרה חד־פעמית',
+      line: 'התמלול נוחת בתיקייה, המודל מחלץ החלטות ומשימות עם אחראי, והרשימה נשלחת למשתתפים תוך דקות. כאן יש שלב AI — הוא גם היקר וגם היחיד שיכול לטעות בשקט.' },
+  ];
+
+  const groupsEl = root.querySelector('[data-groups]');
+  const outEl = root.querySelector('[data-out]');
+  const canEl = root.querySelector('[data-can]');
+  const countEl = root.querySelector('[data-count]');
+  const flagsEl = root.querySelector('[data-flags]');
+  const flagWrap = root.querySelector('[data-flagwrap]');
+  const pickEl = root.querySelector('[data-pick]');
+  const emptyEl = root.querySelector('[data-empty]');
+
+  const on = new Set();
+
+  GROUPS.forEach((g) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'cmg';
+    const h = document.createElement('p');
+    h.className = 'cmg__h'; h.textContent = g.g;
+    wrap.appendChild(h);
+    const row = document.createElement('div');
+    row.className = 'cmg__row';
+    g.items.forEach((it) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'cmg__b'; b.textContent = it.t;
+      b.addEventListener('click', () => {
+        if (on.has(it.k)) { on.delete(it.k); b.classList.remove('is-on'); }
+        else { on.add(it.k); b.classList.add('is-on'); }
+        render();
+      });
+      row.appendChild(b);
+    });
+    wrap.appendChild(row);
+    groupsEl.appendChild(wrap);
+  });
+
+  function caps() {
+    const c = new Set();
+    GROUPS.forEach((g) => g.items.forEach((it) => {
+      if (on.has(it.k)) it.caps.forEach((x) => c.add(x));
+    }));
+    return c;
+  }
+
+  function render() {
+    if (!on.size) { outEl.hidden = true; emptyEl.hidden = false; return; }
+    outEl.hidden = false; emptyEl.hidden = true;
+
+    const c = caps();
+    const can = RECIPES.filter((r) => r.needs.every((n) => c.has(n)));
+
+    countEl.innerHTML = can.length
+      ? 'אפשר לבנות אצלכם <span class="cm__count">' +
+        (can.length === 1 ? 'אוטומציה אחת' : can.length + ' אוטומציות') + '</span>'
+      : 'אפשר לבנות אצלכם';
+    canEl.innerHTML = can.length
+      ? can.map((r) =>
+          '<li class="cmr"><p class="cmr__n">' + r.n +
+          '<span class="cmr__e' + (r.ease === 'קל' ? ' is-easy' : '') + '">' + r.ease + '</span></p>' +
+          '<p class="cmr__l">' + r.line + '</p></li>'
+        ).join('')
+      : '<li class="cmr cmr__none"><p class="cmr__l">עם מה שסימנתם עדיין אין צירוף שמייצר אוטומציה שלמה. כמעט תמיד חסר אחד משניים: מייל מחובר, או מקום מסודר שהנתונים נוחתים בו — גיליון או טופס. שניהם קיימים כבר בארגון שלכם ברוב המקרים, רק לא בגרסה שמדברת.</p></li>';
+
+    const f = [];
+    if (!c.has('MAIL')) f.push('**בלי מייל מחובר כמעט שום דבר לא זז.** המייל הוא גם הטריגר הכי נפוץ וגם הדלת האחורית של כל מערכת שאין לה חיבור. זו נקודת ההתחלה, לא אחת האפשרויות.');
+    if (on.has('exlLoc') && !c.has('SHEET')) f.push('**אקסל שיושב על המחשב או בשרת פנימי לא מחובר לשום דבר**, ואין דרך לעקוף את זה. אותו קובץ בדיוק, כשהוא ב־SharePoint או ב־Drive, מתחבר בלחיצה. זו לרוב העברה של חצי שעה, והיא פותחת את רוב הרשימה למעלה.');
+    if (on.has('hrIL')) f.push('**לחילן, מלם ומיכפל אין ברוב המקרים חיבור מוכן בכלי האוטומציה.** אל תבנו שום דבר שתלוי בהן לפני שבדקתם. השאלה לספק היא אחת: "אפשר לתזמן דוח שנשלח אוטומטית במייל?" — התשובה כמעט תמיד כן, ואז הדוח שנוחת בתיבה הוא הטריגר, ואתם בחזרה במשחק.');
+    if (on.has('hrGlb')) f.push('לפריוריטי ולמערכות הגלובליות יש כמעט תמיד API, אבל לא חיבור בלחיצה. זה אומר שעה של מישהו טכני, פעם אחת — לא פרויקט. שווה לבקש את זה בכתב מהמטמיע לפני שמחדשים חוזה.');
+    if (on.has('ats')) f.push('למערכות גיוס ייעודיות המצב מעורב מאוד: לחלקן יש חיבור מוכן ולחלקן אין כלום. חפשו בשם המדויק בספריית האפליקציות — ואם אין, שאלו על webhook לפני שמוותרים.');
+    if (on.has('wa') && !c.has('CHAT')) f.push('וואטסאפ עסקי כן מתחבר, אבל דרך WhatsApp Business API — זה תהליך אישור מול ספק, לא חמש דקות. לאוטומציה ראשונה, מייל יעשה את אותה עבודה היום.');
+
+    flagWrap.hidden = !f.length;
+    flagsEl.innerHTML = f.map((x) =>
+      '<p class="cm__flag">' + x.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') + '</p>'
+    ).join('');
+
+    const easy = can.find((r) => r.ease === 'קל');
+    pickEl.hidden = !easy;
+    if (easy) pickEl.innerHTML = 'אם צריך לבחור אחת: <strong>' + easy.n + '</strong>. כל המערכות שלה כבר מחוברות אצלכם, היא נבנית בערב אחד, ותפקיד הראשונה הוא להצליח — לא להרשים.';
+  }
+
+  render();
+})();
+</script>
+
+<style>
+  .cm {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .cm__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1.35rem; }
+
+  .cm__groups { display: flex; flex-direction: column; gap: 1.1rem; }
+  .cm :global(.cmg__h) {
+    margin: 0 0 0.5rem; font-size: var(--t-xs); font-weight: 500;
+    color: var(--ink-muted);
+  }
+  .cm :global(.cmg__row) { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .cm :global(.cmg__b) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.5rem 0.85rem;
+    cursor: pointer; min-block-size: 38px; text-align: start;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .cm :global(.cmg__b:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .cm :global(.cmg__b.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+
+  .cm__empty { margin: 1.35rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .cm__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+    display: flex; flex-direction: column; gap: 1.35rem;
+  }
+  .cm__out[hidden] { display: none; }
+  .cm__h { margin: 0 0 0.85rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .cm :global(.cm__count) { color: var(--accent-deep); font-weight: 600; }
+
+  .cm__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+  .cm :global(.cmr) {
+    background: var(--surface-sunk); border-radius: var(--r-card);
+    padding: 0.95rem 1.05rem;
+  }
+  .cm :global(.cmr__n) {
+    margin: 0 0 0.4rem; font-size: var(--t-sm); font-weight: 600; color: var(--ink-strong);
+    display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .cm :global(.cmr__e) {
+    font-size: 0.72em; font-weight: 400; color: var(--ink-faint);
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control);
+    padding: 0.1rem 0.45rem; flex: none;
+  }
+  .cm :global(.cmr__e.is-easy) { color: #7E8B1F; border-color: #7E8B1F; }
+  .cm :global(.cmr__l) { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
+
+  .cm__panel--flags { border-block-start: 1px solid var(--rule); padding-block-start: 1.2rem; }
+  .cm :global(.cm__flag) {
+    margin: 0 0 0.7rem; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65;
+    border-inline-start: 2px solid #8A5A16; padding-inline-start: 0.85rem;
+  }
+  .cm :global(.cm__flag:last-child) { margin-block-end: 0; }
+  .cm :global(.cm__flag strong) { color: var(--ink-strong); }
+
+  .cm__pick {
+    margin: 0; padding-block-start: 1.2rem; border-block-start: 1px solid var(--rule);
+    font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65;
+  }
+  .cm__pick :global(strong) { color: var(--ink-strong); }
+
+  @media (max-width: 620px) {
+    .cm { padding: 1.2rem 1.1rem; }
+    .cm :global(.cmg__row) { flex-direction: column; align-items: stretch; }
+    .cm :global(.cmg__b) { inline-size: 100%; }
+  }
+</style>
