@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base
+  title="תודה · קפיצת מדרגה"
+  description="אישור ההרשמה לרשימת התפוצה של קפיצת מדרגה."
+>
+  <section class="wrap doc">
+    <h1 data-title>מאשרים…</h1>
+    <p class="doc__lead" data-body>רגע אחד.</p>
+
+    <p class="doc__next" data-next hidden>
+      בינתיים אפשר להתחיל: <a href="/maslul">כל המסלול נמצא כאן</a>, פתוח וחינם.
+    </p>
+  </section>
+</Base>
+
+<script is:inline>
+(() => {
+  const status = new URLSearchParams(location.search).get('status');
+  const title = document.querySelector('[data-title]');
+  const body = document.querySelector('[data-body]');
+  const next = document.querySelector('[data-next]');
+
+  const states = {
+    ok: [
+      'אתם בפנים',
+      'ההרשמה אושרה. שיעור אחד בשבוע, ואפשר לענות על כל מייל — אנחנו קוראים.',
+      true,
+    ],
+    invalid: [
+      'הקישור לא תקף',
+      'ייתכן שהוא נחתך בהעתקה, או שכבר השתמשתם בו. אפשר פשוט להירשם שוב מהאתר ונשלח קישור חדש.',
+      true,
+    ],
+    error: [
+      'משהו נתקע אצלנו',
+      'ההרשמה לא הושלמה, וזו לא אשמתכם. נסו שוב בעוד כמה דקות, או כתבו לנו ונסדר את זה ידנית.',
+      true,
+    ],
+  };
+
+  const [t, b, showNext] = states[status] || [
+    'תודה',
+    'אין כאן מה לאשר כרגע. אם הגעתם לכאן מקישור במייל, נסו ללחוץ עליו שוב.',
+    true,
+  ];
+
+  title.textContent = t;
+  body.textContent = b;
+  if (showNext) next.hidden = false;
+})();
+</script>
+
+<style>
+  .doc { padding-block: 4rem 5.5rem; max-inline-size: 62ch; }
+  .doc h1 { font-size: clamp(2rem, 4.4vw, 2.75rem); margin-block-end: 1rem; }
+  .doc__lead { font-size: var(--t-lg); color: var(--ink-muted); font-weight: 300; }
+  .doc__next {
+    margin-block-start: 2rem;
+    padding-block-start: 1.25rem;
+    border-block-start: 1px solid var(--rule);
+    color: var(--ink-muted);
+    font-size: var(--t-sm);
+  }
+</style>
