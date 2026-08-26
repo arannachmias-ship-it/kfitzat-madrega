@@ -40,7 +40,7 @@
       why: 'שם ועוד שכר הם צמד המידע הרגיש ביותר שיש במשאבי אנוש, ואת הניתוח הזה אפשר לקבל בלי אף שם: מחליפים את השמות ב־"עובד 1", "עובד 2", ומשאירים תפקיד, ותק ומגדר. הפלט זהה, החשיפה נעלמה. כשקיים ניסוח שנותן את אותה תשובה בלי המידע המזהה — הוא לא "יותר בטוח", הוא פשוט הניסוח הנכון.',
     },
     {
-      q: 'קורות חיים של מועמדת, כדי להפיק מהם סיכום קצר לוועדת הקבלה.',
+      q: 'קורות חיים של מועמדת, כדי להפיק מהם סיכום קצר לועדת הקבלה.',
       a: 'org',
       why: 'זה המקרה שהכי הרבה ארגונים טועים בו, כי הוא מרגיש תמים. המועמדת שלחה את קורות החיים כדי שתקראו אותם — לא כדי שיעברו דרך ספק חיצוני. בכלי ארגוני עם הסכם עיבוד מידע זה אפשרי, ובכל זאת לא אוטומטי: צריך שההודעה למועמדים תגיד את זה. רוב נוסחי "פרטיות מועמדים" נכתבו לפני 2023 ולא אומרים כלום על זה.',
     },
@@ -162,7 +162,8 @@
   }
   .rlt :global(.rc__b:hover:not(:disabled)) { border-color: var(--ink-faint); color: var(--ink-strong); }
   .rlt :global(.rc__b:disabled) { cursor: default; opacity: 0.55; }
-  .rlt :global(.rc__b.is-answer) { opacity: 1; border-color: var(--ink-strong); background: var(--ink-strong); color: var(--ink-on-deep); font-weight: 500; }
+  /* ציטרון ולא --ink-strong: במצב כהה --ink-strong ו---ink-on-deep שניהם בהירים. */
+  .rlt :global(.rc__b.is-answer) { opacity: 1; border-color: var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 500; }
   .rlt :global(.rc__b.is-wrong) { opacity: 1; border-color: var(--rule-strong); text-decoration: line-through; }
 
   .rlt :global(.rc__why) { margin-block-start: 0.9rem; padding-block-start: 0.8rem; border-block-start: 1px solid var(--rule); }
