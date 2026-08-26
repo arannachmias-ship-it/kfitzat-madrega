@@ -1,0 +1,225 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 3.5.
+ * סימולטור: בוחרים אילו תרחישי שבירה באמת יכולים לקרות אצלכם,
+ * ומקבלים את זמן הגילוי הגרוע ביותר ורשימת חוסן מאוחדת להעתקה.
+ * הכול מקומי, בלי קריאה לשום שירות.
+ */
+---
+<div class="bs" data-bs>
+  <p class="bs__label">סמנו אילו מהתרחישים האלה יכולים לקרות לאוטומציה שלכם</p>
+
+  <ul class="bs__list" data-list></ul>
+
+  <div class="bs__out" data-out hidden>
+    <div class="bs__head">
+      <div class="bs__stat">
+        <p class="bs__num" data-worst>0</p>
+        <p class="bs__numLabel" data-worstlabel>עד שתגלו</p>
+      </div>
+      <p class="bs__headText" data-headtext></p>
+    </div>
+    <div class="bs__fix">
+      <div class="bs__fixTop">
+        <p class="bs__fixH">רשימת החוסן שלכם</p>
+        <button type="button" class="bs__copy" data-copy>העתקה</button>
+      </div>
+      <ul class="bs__fixList" data-fixes></ul>
+    </div>
+  </div>
+
+  <p class="bs__empty" data-empty>סמנו לפחות אחד.</p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-bs]');
+  if (!root) return;
+
+  // days = כמה זמן בפועל עובר עד שמישהו מגלה, בלי דופק שבועי
+  const S = [
+    { k: 'col', kind: 'silent', days: 21,
+      t: 'מישהו הוסיף עמודה באמצע הגיליון, או שינה כותרת',
+      what: 'הזרימה ממשיכה לרוץ בהצלחה ולכתוב לעמודה הלא נכונה. אפס שגיאות. מתגלה כשמישהו צריך את הנתון ומגלה שהוא במקום אחר.',
+      fix: ['התייחסו לעמודות **לפי שם ולא לפי מיקום**, בכל מקום שהכלי מאפשר.',
+            'פעם בחודש: פתחו חמש שורות אקראיות והשוו למקור. שלוש דקות.'] },
+    { k: 'auth', kind: 'loud', days: 1,
+      t: 'ההרשאה פגה, או שמישהו החליף סיסמה',
+      what: 'זה דווקא הסוג הטוב — הכלי נופל ושולח שגיאה. הבעיה היחידה היא אם החיבור נעשה דרך חשבון אישי, ואז הוא נופל בדיוק כשאותו אדם בחופשה או עזב.',
+      fix: ['החיבור עובר דרך **חשבון ייעודי בבעלות הארגון**, לא חשבון אישי.',
+            'ודאו שמייל השגיאה של הכלי מגיע לאדם שקורא אותו.'] },
+    { k: 'left', kind: 'silent', days: 60,
+      t: 'מי שבנה את זה עבר תפקיד או עזב',
+      what: 'שום דבר לא נשבר ביום שהוא עזב. הכול ממשיך לרוץ — עד התקלה הראשונה, ואז מתברר שאף אחד לא יודע איפה זה יושב, באיזה חשבון, ולמה זה בנוי ככה.',
+      fix: ['שלושה שמות של אנשים: **בעלים, מי מקבל את הדופק, ומי יודע לתקן**.',
+            'מפרט כתוב במקום שאפשר למצוא — לא במייל של מי שבנה.',
+            'הוסיפו שורה: מה עושים ידנית עד שזה חוזר.'] },
+    { k: 'quota', kind: 'silent', days: 9,
+      t: 'הקרדיטים נגמרו באמצע החודש',
+      what: 'הזרימה נעצרת בשקט ב־22 לחודש וחוזרת לעצמה בראשון. תשעה ימים חסרים, ואז זה קורה שוב בחודש הבא — ומכיוון שזה נעלם מעצמו, אף אחד לא מחפש את הסיבה.',
+      fix: ['הפעילו התראת מכסה ב־80 אחוז בהגדרות החשבון.',
+            'אם זה חוזר: בדקו אם יש טריגר מיידי במקום סקירה. זה בדרך כלל שם.'] },
+    { k: 'filter', kind: 'silent', days: 14,
+      t: 'הפילטר מסנן עכשיו מאה אחוז',
+      what: 'התנאי היה "רק אם הנושא מכיל את שם אחת המשרות הפתוחות". המשרות התחלפו, התנאי לא. הזרימה רצה בהצלחה מלאה ומסננת הכול.',
+      fix: ['כל תנאי שמכיל **רשימה שמשתנה** צריך תאריך בדיקה ביומן, לא רק בראש.',
+            'הפניות שנופלות בפילטר צריכות לנחות איפשהו, לא להיעלם.'] },
+    { k: 'vendor', kind: 'silent', days: 21,
+      t: 'הספק שינה את המבנה של הדוח שהוא שולח',
+      what: 'הדוח המתוזמן מגיע עכשיו עם שורת כותרת נוספת. הזרימה קוראת, לא מוצאת, ורושמת שורות ריקות — שנראות בדיוק כמו שורות אמיתיות עד שמסתכלים.',
+      fix: ['תנאי שעוצר את הזרימה אם שדה חובה חזר ריק, במקום לכתוב ריק.',
+            'פעם בחודש: פתחו חמש שורות אקראיות והשוו למקור.'] },
+    { k: 'dup', kind: 'semi', days: 4,
+      t: 'הזרימה רצה פעמיים על אותו פריט',
+      what: 'הכי קל לגלות מכל הרשימה, כי הכפילויות נראות. אבל אם מישהו כבר קיבל מייל פעמיים, הנזק כבר קרה — ובמייל למועמד זה נראה מאוד לא מקצועי.',
+      fix: ['סמנו כל פריט כ**"טופל"** בסוף הזרימה, ובדקו את הסימון בהתחלה.'] },
+  ];
+
+  const HEART = 'הוסיפו **דופק שבועי**: זרימה נפרדת ששולחת מייל אחד בשבוע עם מספר ההרצות, גם כשהכול תקין. זה מה שהופך אפס לנראה.';
+
+  const listEl = root.querySelector('[data-list]');
+  const outEl = root.querySelector('[data-out]');
+  const emptyEl = root.querySelector('[data-empty]');
+  const worstEl = root.querySelector('[data-worst]');
+  const worstLabelEl = root.querySelector('[data-worstlabel]');
+  const headEl = root.querySelector('[data-headtext]');
+  const fixesEl = root.querySelector('[data-fixes]');
+  const copyBtn = root.querySelector('[data-copy]');
+  const on = new Set();
+
+  S.forEach((s) => {
+    const li = document.createElement('li');
+    li.className = 'bsc';
+    li.innerHTML =
+      '<button type="button" class="bsc__b">' +
+        '<span class="bsc__t">' + s.t + '</span>' +
+        '<span class="bsc__k' + (s.kind === 'loud' ? ' is-loud' : '') + '">' +
+          (s.kind === 'loud' ? 'רועש' : s.kind === 'semi' ? 'חצי נראה' : 'שקט') +
+        '</span>' +
+      '</button>' +
+      '<p class="bsc__w" hidden>' + s.what + '</p>';
+    const b = li.querySelector('.bsc__b');
+    const w = li.querySelector('.bsc__w');
+    b.addEventListener('click', () => {
+      if (on.has(s.k)) { on.delete(s.k); b.classList.remove('is-on'); w.hidden = true; }
+      else { on.add(s.k); b.classList.add('is-on'); w.hidden = false; }
+      render();
+    });
+    listEl.appendChild(li);
+  });
+
+  function render() {
+    if (!on.size) { outEl.hidden = true; emptyEl.hidden = false; return; }
+    outEl.hidden = false; emptyEl.hidden = true;
+
+    const sel = S.filter((s) => on.has(s.k));
+    const worst = sel.reduce((a, s) => (s.days > a.days ? s : a), sel[0]);
+
+    worstEl.textContent = worst.days >= 60 ? 'לעולם' : worst.days;
+    worstLabelEl.textContent = worst.days >= 60 ? 'לא תגלו מזה, אלא מתקלה אחרת' : 'ימים עד שתגלו, במקרה הגרוע';
+
+    const silent = sel.filter((s) => s.kind === 'silent').length;
+    headEl.textContent = silent === 0
+      ? 'כל מה שסימנתם מודיע על עצמו. זה המצב הנוח, והוא נדיר — שווה לעבור שוב על הרשימה ולשאול אם באמת אף אחד לא ייגע במקור.'
+      : silent === 1
+        ? 'תרחיש אחד מתוך מה שסימנתם נשבר בשקט. אחד מספיק: כשל שקט לא מתגלה מעצמו לעולם, הוא מתגלה כשמישהו צריך את המידע.'
+        : silent + ' מהתרחישים שסימנתם נשברים בשקט — הזרימה תמשיך לרוץ ולדווח על עצמה כתקינה. זו הסיבה שהתראת שגיאות לא מספיקה, ושדופק שבועי כן.';
+
+    const fixes = [];
+    sel.forEach((s) => s.fix.forEach((f) => { if (fixes.indexOf(f) === -1) fixes.push(f); }));
+    if (silent) fixes.unshift(HEART);
+
+    fixesEl.innerHTML = fixes.map((f) =>
+      '<li>' + f.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') + '</li>'
+    ).join('');
+  }
+
+  copyBtn.addEventListener('click', async () => {
+    const txt = 'רשימת חוסן לאוטומציה\n\n' +
+      [...fixesEl.querySelectorAll('li')].map((li, i) => (i + 1) + '. ' + li.textContent).join('\n');
+    try {
+      await navigator.clipboard.writeText(txt);
+      copyBtn.textContent = 'הועתק';
+      setTimeout(() => { copyBtn.textContent = 'העתקה'; }, 1600);
+    } catch (e) {
+      copyBtn.textContent = 'סמנו והעתיקו ידנית';
+    }
+  });
+})();
+</script>
+
+<style>
+  .bs {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .bs__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1.25rem; }
+
+  .bs__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  .bs :global(.bsc__b) {
+    inline-size: 100%; font-family: var(--font-body); font-size: var(--t-sm);
+    color: var(--ink-muted); background: var(--surface-sunk);
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control);
+    padding: 0.7rem 0.9rem; cursor: pointer; text-align: start;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 0.85rem; min-block-size: 44px;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .bs :global(.bsc__b:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .bs :global(.bsc__b.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+  .bs :global(.bsc__k) {
+    font-size: var(--t-xs); flex: none; opacity: 0.75;
+    border: 1px solid currentColor; border-radius: var(--r-control);
+    padding: 0.1rem 0.45rem;
+  }
+  .bs :global(.bsc__b.is-on .bsc__k) { opacity: 1; }
+  .bs :global(.bsc__w) {
+    margin: 0.5rem 0 0.25rem; font-size: var(--t-sm); color: var(--ink-muted);
+    line-height: 1.65; border-inline-start: 2px solid var(--rule-strong);
+    padding-inline-start: 0.85rem;
+  }
+
+  .bs__empty { margin: 1.25rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .bs__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .bs__out[hidden] { display: none; }
+
+  .bs__head {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem clamp(1rem, 3vw, 2rem); align-items: center;
+  }
+  .bs__stat { border-inline-start: 2px solid var(--accent); padding-inline-start: 0.9rem; }
+  .bs__num {
+    margin: 0; font-family: var(--font-display); line-height: 0.95;
+    font-size: clamp(2.2rem, 6vw, 3.2rem); color: var(--ink-strong); white-space: nowrap;
+  }
+  .bs__numLabel { margin: 0.3rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); max-inline-size: 16ch; }
+  .bs__headText { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.7; }
+
+  .bs__fix { margin-block-start: 1.35rem; padding-block-start: 1.1rem; border-block-start: 1px solid var(--rule); }
+  .bs__fixTop { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-block-end: 0.7rem; }
+  .bs__fixH { margin: 0; font-size: var(--t-xs); color: var(--ink-faint); }
+  .bs__copy {
+    font-family: var(--font-body); font-size: var(--t-xs); font-weight: 500;
+    background: var(--accent); color: var(--accent-ink);
+    border: 0; border-radius: var(--r-control);
+    padding: 0.5rem 1rem; cursor: pointer; min-block-size: 36px; white-space: nowrap;
+  }
+  .bs__fixList { margin: 0; padding-inline-start: 1.1rem; display: flex; flex-direction: column; gap: 0.55rem; }
+  .bs :global(.bs__fixList li) { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
+  .bs :global(.bs__fixList strong) { color: var(--ink-strong); }
+
+  @media (max-width: 620px) {
+    .bs { padding: 1.2rem 1.1rem; }
+    .bs :global(.bsc__b) { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+    .bs__head { grid-template-columns: 1fr; }
+    .bs__stat { border-inline-start: 0; border-block-start: 2px solid var(--accent); padding-inline-start: 0; padding-block-start: 0.85rem; }
+  }
+</style>
