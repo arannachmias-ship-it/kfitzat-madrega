@@ -1,0 +1,208 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 3.4.
+ * כלי הכרעה: חמש שאלות שמובילות לאחת מארבע תשובות — ולא תמיד לזאת שרוצים.
+ * הכללים כתובים מראש ומוסברים בפלט, כדי שאפשר יהיה לחלוק על ההכרעה.
+ */
+---
+<div class="ac" data-ac>
+  <p class="ac__label">חמש שאלות על משימה אחת אמיתית שלכם</p>
+
+  <div class="ac__qs" data-qs></div>
+
+  <div class="ac__out" data-out hidden>
+    <p class="ac__verdictLabel">ההכרעה</p>
+    <p class="ac__verdict" data-verdict></p>
+    <p class="ac__why" data-why></p>
+    <div class="ac__next" data-next></div>
+  </div>
+
+  <p class="ac__empty" data-empty>ענו על כל החמש כדי לקבל הכרעה.</p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-ac]');
+  if (!root) return;
+
+  const Q = [
+    { k: 'steps', q: 'אתם יכולים לכתוב את הצעדים על דף מראש?',
+      a: [
+        { k: 'all',  t: 'כן, תמיד אותו דבר' },
+        { k: 'most', t: 'כן ברוב המקרים, יש חריגים' },
+        { k: 'none', t: 'לא, כל מקרה שונה' },
+      ]},
+    { k: 'read', q: 'יש שלב שדורש לקרוא טקסט חופשי ולהבין אותו?',
+      a: [
+        { k: 'no',    t: 'לא' },
+        { k: 'closed',t: 'כן, אבל התשובה תמיד מרשימה סגורה' },
+        { k: 'open',  t: 'כן, והתשובה פתוחה' },
+      ]},
+    { k: 'vol', q: 'כמה פעמים בחודש זה קורה?',
+      a: [
+        { k: 'few',  t: 'בודדים' },
+        { k: 'tens', t: 'עשרות' },
+        { k: 'many', t: 'מאות' },
+      ]},
+    { k: 'cost', q: 'מה קורה אם זה טועה פעם בעשרים?',
+      a: [
+        { k: 'inside', t: 'מישהו אצלנו שם לב ומתקן' },
+        { k: 'out',    t: 'זה מגיע ללקוח או לעובד' },
+        { k: 'person', t: 'זו החלטה על אדם' },
+      ]},
+    { k: 'explain', q: 'מישהו יצטרך להסביר את ההחלטה הזאת בדיעבד?',
+      a: [
+        { k: 'no',    t: 'לא' },
+        { k: 'maybe', t: 'אולי, פנימית' },
+        { k: 'yes',   t: 'כן — לעובד, למועמד או לרגולטור' },
+      ]},
+  ];
+
+  const V = {
+    hand: {
+      t: 'עדיין ביד — ותפכו משהו אחר',
+      why: 'זה קורה מעט מדי מכדי להצדיק בנייה ותחזוקה. בודדים בחודש הם בערך חצי שעה עבודה, וכל אוטומציה גובה זמן הקמה, זמן תיקון כשהיא נשברת, ומקום בראש של מישהו. זו לא עצלנות — זו ההחלטה הנכונה, והיא משחררת אתכם לתהליך שקורה כל יום.',
+      next: ['מצאו את המשימה המשעממת שקורית **כל בוקר** והפכו אותה במקום זו.'],
+    },
+    human: {
+      t: 'המכונה מכינה, אדם מחליט',
+      why: 'ברגע שההחלטה נוגעת באדם ומישהו יצטרך להסביר אותה, השאלה כבר לא כמה הכלי מדויק. גם כלי שצודק בתשעים ותשעה אחוזים מייצר מקרה אחד שאין לו נימוק שאפשר לחזור עליו — ואת המקרה הזה תצטרכו להסביר. הפתרון הוא לא לוותר על האוטומציה: היא אוספת, מסדרת, מציגה טבלה — והאדם מסמן.',
+      next: [
+        'בנו את הזרימה עד **רגע לפני** ההחלטה: איסוף, סידור, הצגה.',
+        'שדה ההחלטה נשאר ריק וממולא בידי אדם, עם שם ותאריך.',
+        'הכלל הזה מפורט ב<a href="/maslul/ma-asur-lehachnis">שיעור על מה אסור להכניס</a>.',
+      ],
+    },
+    flow: {
+      t: 'זרימה קבועה — רמה 1',
+      why: 'הצעדים ידועים ואין שלב שדורש הבנה של טקסט חופשי. זה הסוג שנבנה בערב אחד, עולה כמעט כלום, ואפשר לפתוח אותו ולראות בדיוק איזה צעד עשה מה. אל תתנו לאף אחד להגיד לכם שזה לא מספיק מתקדם — זה הסוג שרץ שנתיים ברצף.',
+      next: [
+        'זה בדיוק מה שבניתם ב<a href="/maslul/automatzia-rishona">שיעור הקודם</a>. תבנו את זה.',
+        'שימו פילטר **מיד אחרי הטריגר**, לא בסוף.',
+      ],
+    },
+    judge: {
+      t: 'זרימה קבועה עם שלב שיפוט אחד — רמה 2',
+      why: 'הצעדים ידועים, ואחד מהם דורש לקרוא ולהבין. זה לא סוכן: זה מודול אחד בזרימה, שמקבל קלט מוגדר ומחזיר פלט מוגדר. כאן נמצא כמעט כל הערך האמיתי — וזו גם הרמה שהכי הרבה ארגונים מדלגים עליה, כי היא לא נשמעת מרשימה מספיק.',
+      next: [
+        'הגדירו **רשימה סגורה** של חמש עד שבע אפשרויות, לא טקסט חופשי.',
+        'הוסיפו לרשימה תמיד את **"לא ברור"** — זה מה שמחזיר את המקרה לאדם.',
+        'הריצו על חמישים מקרים מהחודש שעבר לפני שמפעילים.',
+      ],
+    },
+    agent: {
+      t: 'כאן באמת יש הצדקה לסוכן',
+      why: 'מרחב המקרים פתוח, הצעדים לא ניתנים לכתיבה מראש, והנפח מצדיק את ההשקעה. זו התשובה הנדירה בקטגוריה הזאת, ואם הגעתם אליה בכנות — היא נכונה. שווה בכל זאת לזכור שסוכן אפשר רק לשחזר, לא לבדוק, ולכן הוא מתאים כאן דווקא מפני שהמחיר של טעות נשאר בפנים.',
+      next: [
+        'לפני שקונים: נסו בכל זאת לכתוב את הצעדים חצי שעה. ברוב הפעמים יוצאים ארבעה.',
+        'הגבילו לסוכן את הכלים שהוא יכול לגעת בהם — לא גישה לכל התיבה.',
+        'הריצו שבועיים במקביל לתהליך הקיים לפני שמחליפים.',
+      ],
+    },
+  };
+
+  const qsEl = root.querySelector('[data-qs]');
+  const outEl = root.querySelector('[data-out]');
+  const emptyEl = root.querySelector('[data-empty]');
+  const vEl = root.querySelector('[data-verdict]');
+  const wEl = root.querySelector('[data-why]');
+  const nEl = root.querySelector('[data-next]');
+  const pick = {};
+
+  Q.forEach((q) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'acq';
+    const h = document.createElement('p');
+    h.className = 'acq__q'; h.textContent = q.q;
+    wrap.appendChild(h);
+    const row = document.createElement('div');
+    row.className = 'acq__row';
+    q.a.forEach((o) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'acq__b'; b.textContent = o.t;
+      b.addEventListener('click', () => {
+        pick[q.k] = o.k;
+        [...row.children].forEach((c) => c.classList.remove('is-on'));
+        b.classList.add('is-on');
+        render();
+      });
+      row.appendChild(b);
+    });
+    wrap.appendChild(row);
+    qsEl.appendChild(wrap);
+  });
+
+  function decide(p) {
+    // הסדר קובע. החלטה על אדם גוברת על הכול, ונפח נמוך גובר על כל שאר השיקולים.
+    if (p.cost === 'person' || p.explain === 'yes') return 'human';
+    if (p.vol === 'few') return 'hand';
+    if (p.steps === 'none' && p.read === 'open' && p.vol === 'many') return 'agent';
+    if (p.read === 'no' && p.steps === 'all') return 'flow';
+    return 'judge';
+  }
+
+  function render() {
+    if (Q.some((q) => !pick[q.k])) { outEl.hidden = true; emptyEl.hidden = false; return; }
+    outEl.hidden = false; emptyEl.hidden = true;
+
+    const v = V[decide(pick)];
+    vEl.textContent = v.t;
+    wEl.textContent = v.why;
+    nEl.innerHTML = '<p class="ac__nextH">מה עושים ביום שני</p><ul class="ac__list">' +
+      v.next.map((x) => '<li>' + x.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') + '</li>').join('') +
+      '</ul>';
+  }
+})();
+</script>
+
+<style>
+  .ac {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .ac__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1.35rem; }
+
+  .ac__qs { display: flex; flex-direction: column; gap: 1.15rem; }
+  .ac :global(.acq__q) { margin: 0 0 0.55rem; font-size: var(--t-sm); color: var(--ink-strong); }
+  .ac :global(.acq__row) { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .ac :global(.acq__b) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.5rem 0.85rem;
+    cursor: pointer; min-block-size: 38px; text-align: start;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .ac :global(.acq__b:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .ac :global(.acq__b.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+
+  .ac__empty { margin: 1.35rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .ac__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .ac__out[hidden] { display: none; }
+  .ac__verdictLabel { margin: 0 0 0.35rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .ac__verdict {
+    margin: 0 0 0.85rem; font-family: var(--font-display); line-height: 1.15;
+    font-size: clamp(1.35rem, 3.5vw, 1.85rem); color: var(--ink-strong);
+    border-inline-start: 3px solid var(--accent); padding-inline-start: 0.85rem;
+  }
+  .ac__why { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.7; }
+
+  .ac__next { margin-block-start: 1.2rem; padding-block-start: 1rem; border-block-start: 1px solid var(--rule); }
+  .ac :global(.ac__nextH) { margin: 0 0 0.6rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .ac :global(.ac__list) { margin: 0; padding-inline-start: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .ac :global(.ac__list li) { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
+  .ac :global(.ac__list strong) { color: var(--ink-strong); }
+
+  @media (max-width: 620px) {
+    .ac { padding: 1.2rem 1.1rem; }
+    .ac :global(.acq__row) { flex-direction: column; align-items: stretch; }
+    .ac :global(.acq__b) { inline-size: 100%; }
+  }
+</style>
