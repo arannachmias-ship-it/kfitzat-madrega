@@ -130,7 +130,10 @@ const path = Astro.url.pathname;
   :root:not([data-theme="dark"]) .nav__themeIcon .moon { opacity: 1; transform: none; }
 
   @media (max-width: 780px) {
-    .nav__inner { flex-wrap: wrap; min-block-size: 0; }
+    .nav__inner { flex-wrap: wrap; min-block-size: 0; position: relative; }
     .nav__links { gap: 1rem; font-size: var(--t-xs); flex-wrap: wrap; }
+    /* the toggle sits on the brand row, at the far end, instead of wrapping to a third line */
+    .nav__theme { position: absolute; inset-block-start: 0.85rem; inset-inline-end: var(--gutter); }
+    .nav--compact .nav__theme { inset-block-start: 0.5rem; }
   }
 </style>
