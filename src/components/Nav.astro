@@ -14,6 +14,18 @@ const path = Astro.url.pathname;
         <a href={l.href} aria-current={path.startsWith(l.href) ? 'page' : undefined}>{l.label}</a>
       ))}
       <a href="/#hearshmu" class="nav__cta">קבלו שיעור בשבוע</a>
+      <button type="button" class="nav__theme" data-theme-toggle aria-label="החלפה בין מצב בהיר לכהה" title="מצב בהיר / כהה">
+        <svg class="nav__themeIcon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+          <circle class="sun" cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <g class="rays" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/>
+            <line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/>
+            <line x1="5.3" y1="5.3" x2="7" y2="7"/><line x1="17" y1="17" x2="18.7" y2="18.7"/>
+            <line x1="5.3" y1="18.7" x2="7" y2="17"/><line x1="17" y1="7" x2="18.7" y2="5.3"/>
+          </g>
+          <path class="moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/>
+        </svg>
+      </button>
     </nav>
   </div>
 </header>
@@ -28,8 +40,22 @@ const path = Astro.url.pathname;
     update();
     window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
   }
-  initNav();
-  document.addEventListener('astro:page-load', initNav);
+  function initTheme() {
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((btn) => {
+      if (btn.dataset.bound) return;
+      btn.dataset.bound = '1';
+      btn.addEventListener('click', () => {
+        const html = document.documentElement;
+        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        html.classList.add('theme-switching');
+        html.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch {}
+        setTimeout(() => html.classList.remove('theme-switching'), 400);
+      });
+    });
+  }
+  initNav(); initTheme();
+  document.addEventListener('astro:page-load', () => { initNav(); initTheme(); });
 </script>
 
 <style>
@@ -37,14 +63,14 @@ const path = Astro.url.pathname;
     position: sticky;
     top: 0;
     z-index: 50;
-    background: rgba(241, 244, 244, 0.72);
+    background: var(--glass);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
     backdrop-filter: blur(14px) saturate(160%);
     border-block-end: 1px solid transparent;
     transition: border-color var(--dur-base) ease, box-shadow var(--dur-base) ease;
   }
   .nav--compact { border-block-end-color: var(--rule); box-shadow: 0 8px 24px -18px rgba(12, 40, 49, 0.35); }
-  @supports not (backdrop-filter: blur(1px)) { .nav { background: rgba(241, 244, 244, 0.96); } }
+  @supports not (backdrop-filter: blur(1px)) { .nav { background: var(--glass-strong); } }
   @media (prefers-reduced-transparency: reduce) { .nav { background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; } }
   .nav__inner {
     display: flex;
@@ -84,6 +110,24 @@ const path = Astro.url.pathname;
   .nav__cta { transition: background var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out); }
   .nav__cta:hover { background: var(--deep-2); color: var(--ink-on-deep) !important; }
   .nav__cta:active { transform: scale(0.97); }
+  :root[data-theme="dark"] .nav__cta { background: var(--surface); border: 1px solid var(--rule-strong); }
+  :root[data-theme="dark"] .nav__cta:hover { background: var(--surface-sunk); }
+
+  .nav__theme {
+    inline-size: 2.25rem; block-size: 2.25rem; border-radius: 50%;
+    border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-muted);
+    display: grid; place-items: center; cursor: pointer; padding: 0;
+    transition: color var(--dur-fast) ease, border-color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
+  }
+  .nav__theme:hover { color: var(--ink-strong); border-color: var(--ink-muted); }
+  .nav__theme:active { transform: scale(0.92); }
+  .nav__themeIcon .sun, .nav__themeIcon .rays { transform-origin: 12px 12px; transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) ease; }
+  .nav__themeIcon .moon { transform-origin: 12px 12px; transition: transform var(--dur-base) var(--ease-spring), opacity var(--dur-base) ease; }
+  /* light: show the moon (what you switch TO); dark: show the sun */
+  :root[data-theme="dark"] .nav__themeIcon .moon { opacity: 0; transform: scale(0.4) rotate(-40deg); }
+  :root[data-theme="dark"] .nav__themeIcon .sun, :root[data-theme="dark"] .nav__themeIcon .rays { opacity: 1; transform: none; }
+  :root:not([data-theme="dark"]) .nav__themeIcon .sun, :root:not([data-theme="dark"]) .nav__themeIcon .rays { opacity: 0; transform: scale(0.4) rotate(40deg); }
+  :root:not([data-theme="dark"]) .nav__themeIcon .moon { opacity: 1; transform: none; }
 
   @media (max-width: 780px) {
     .nav__inner { flex-wrap: wrap; min-block-size: 0; }

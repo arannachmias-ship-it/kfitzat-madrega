@@ -28,6 +28,19 @@ const url = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.ur
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <ClientRouter />
+    <script is:inline>
+      // runs before first paint, and again after every view transition (html attributes are swapped)
+      (function () {
+        function apply() {
+          var saved = null;
+          try { saved = localStorage.getItem('theme'); } catch (e) {}
+          var t = saved === 'dark' || saved === 'light' ? saved : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', t);
+        }
+        apply();
+        document.addEventListener('astro:after-swap', apply);
+      })();
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">דלגו לתוכן הראשי</a>
