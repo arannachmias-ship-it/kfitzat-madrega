@@ -13,7 +13,8 @@ const lastLiveIndex = (items: { slug: string }[]) => items.reduce((m, it, i) => 
   title="המסלול · קפיצת מדרגה"
   description={`${TOTAL_LESSONS} שיעורים על AI בארגונים, מהאפס עד הטמעה. פתוח לכולם, בחינם, שיעור חדש בכל שבוע.`}
 >
-  <section class="wrap head">
+  <section class="wrap head head--photo">
+    <div class="head__text">
     <h1 class="head__title">המסלול</h1>
     <p class="head__sub">
       {TOTAL_LESSONS} שיעורים בחמישה שלבים, מ"מה זה בכלל" עד תוכנית הטמעה שאפשר להביא להנהלה.
@@ -22,6 +23,10 @@ const lastLiveIndex = (items: { slug: string }[]) => items.reduce((m, it, i) => 
     <p class="head__count">
       <strong>{liveCount}</strong> שיעורים באוויר · שיעור חדש בכל שבוע · השאר כבר כתובים בתוכנית ומופיעים למטה
     </p>
+    </div>
+    <div class="head__media rise">
+      <img src="/photos/maslul.webp" width="1200" height="800" alt="עובדת לומדת לבד מול מחשב נייד במשרד שקט, עם מחברת וכוס קפה" fetchpriority="high" decoding="async" />
+    </div>
   </section>
 
   {STAGES.map((s) => (

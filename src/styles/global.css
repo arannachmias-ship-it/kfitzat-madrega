@@ -264,6 +264,14 @@ a:hover { color: var(--accent-deep); }
 @view-transition { navigation: auto; }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.28s; }
 
+/* --- page head with a photo beside it --- */
+.head--photo { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: center; }
+.head__media img { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--r-card); box-shadow: var(--shadow-3); }
+@media (max-width: 880px) {
+  .head--photo { grid-template-columns: 1fr; gap: 1.5rem; }
+  .head__media { order: -1; }
+}
+
 /* --- sections --- */
 .band-deep {
   background: var(--deep);
