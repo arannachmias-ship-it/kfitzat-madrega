@@ -1,0 +1,322 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 4.8 — והתוצר הכי "לוקחים איתנו" באתר.
+ * מחולל אישי: ארבע בחירות על המצב האמיתי בארגון, ומתקבלת תוכנית 90 יום
+ * מחולקת לשלושה בלוקים, עם בעלים, שערי החלטה ומדידה — להעתקה ולהבאה להנהלה.
+ * הבחירות משנות אילו צעדים מופיעים, לא רק את הניסוח.
+ * כל ההיגיון מקומי.
+ */
+---
+<div class="p9" data-p9>
+  <p class="p9__label">ארבע שאלות על המצב אצלכם עכשיו</p>
+
+  <div class="p9__qs" data-qs></div>
+
+  <div class="p9__out" data-out hidden>
+    <div class="p9__warn" data-warn></div>
+
+    <p class="p9__docH">תוכנית 90 יום</p>
+    <pre class="p9__doc" data-doc></pre>
+    <button type="button" class="p9__copy" data-copy>העתקה</button>
+
+    <p class="p9__foot">התוכנית בנויה כך שכל בלוק נגמר בהחלטה, ולא בדוח. אם אין החלטה — הבלוק לא נגמר.</p>
+  </div>
+
+  <p class="p9__empty" data-empty>ענו על ארבע השאלות כדי לקבל תוכנית.</p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-p9]');
+  if (!root) return;
+
+  const Q = [
+    { k: 'size', q: 'כמה עובדים בארגון?',
+      a: [
+        { k: 's', t: 'עד 50' },
+        { k: 'm', t: '50 עד 250' },
+        { k: 'l', t: 'מעל 250' },
+      ]},
+    { k: 'now', q: 'איפה אתם היום?',
+      a: [
+        { k: 'zero',   t: 'לא התחלנו' },
+        { k: 'wild',   t: 'אנשים מנסים לבד, בלי כללים' },
+        { k: 'bought', t: 'קנינו כלי ואף אחד לא משתמש' },
+        { k: 'policy', t: 'יש מדיניות, אין שימוש מסודר' },
+      ]},
+    { k: 'owner', q: 'מי הבעלים של הנושא?',
+      a: [
+        { k: 'none', t: 'אף אחד עדיין' },
+        { k: 'hr',   t: 'משאבי אנוש לבד' },
+        { k: 'both', t: 'משאבי אנוש עם מערכות מידע' },
+        { k: 'team', t: 'יש צוות היגוי' },
+      ]},
+    { k: 'use', q: 'באיזה שימוש מתחילים?',
+      a: [
+        { k: 'meet',   t: 'סיכומי ישיבות' },
+        { k: 'report', t: 'דוחות ומצגות' },
+        { k: 'comms',  t: 'תקשורת פנימית' },
+        { k: 'hire',   t: 'גיוס ומיון' },
+        { k: 'know',   t: 'ידע פנימי ונהלים' },
+      ]},
+  ];
+
+  const USE = {
+    meet:   { t: 'סיכומי ישיבות', first: 'ישיבת הצוות הקבועה של שבוע הבא', why: 'קורה כל שבוע, התוצר נבדק מיד, ואף אחד לא מתגעגע לעבודה הזאת.' },
+    report: { t: 'דוחות ומצגות', first: 'הדוח החודשי הקרוב', why: 'החיסכון גדול, אבל צריך לשמור על ההחלטה מה הסיפור אצל האדם.' },
+    comms:  { t: 'תקשורת פנימית', first: 'ההודעה הארגונית הבאה שממילא תישלח', why: 'התוצאה נמדדת מיד בשיעור הפתיחה ובכמות התזכורות שלא נדרשו.' },
+    hire:   { t: 'גיוס ומיון', first: 'המשרה הבאה שנפתחת', why: 'הערך גבוה והחשיפה גבוהה — כאן חובה להתחיל בחילוץ בלבד, בלי דירוג.' },
+    know:   { t: 'ידע פנימי ונהלים', first: 'עשר השאלות שחוזרות אליכם כל שבוע', why: 'העבודה האמיתית היא ניקיון המסמכים, וכדאי לדעת את זה מראש.' },
+  };
+
+  const qsEl = root.querySelector('[data-qs]');
+  const outEl = root.querySelector('[data-out]');
+  const emptyEl = root.querySelector('[data-empty]');
+  const warnEl = root.querySelector('[data-warn]');
+  const docEl = root.querySelector('[data-doc]');
+  const copyBtn = root.querySelector('[data-copy]');
+  const pick = {};
+
+  Q.forEach((q) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'p9q';
+    const h = document.createElement('p');
+    h.className = 'p9q__q'; h.textContent = q.q;
+    wrap.appendChild(h);
+    const row = document.createElement('div');
+    row.className = 'p9q__row';
+    q.a.forEach((o) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'p9q__b'; b.textContent = o.t;
+      b.addEventListener('click', () => {
+        pick[q.k] = o.k;
+        [...row.children].forEach((c) => c.classList.remove('is-on'));
+        b.classList.add('is-on');
+        render();
+      });
+      row.appendChild(b);
+    });
+    wrap.appendChild(row);
+    qsEl.appendChild(wrap);
+  });
+
+  function render() {
+    if (Q.some((q) => !pick[q.k])) {
+      outEl.hidden = true; emptyEl.hidden = false; return;
+    }
+    outEl.hidden = false; emptyEl.hidden = true;
+
+    const u = USE[pick.use];
+    const big = pick.size === 'l';
+    const mid = pick.size === 'm';
+
+    // גודל קבוצת הפילוט נגזר מגודל הארגון — לא אחוז, מספר אנשים.
+    const pilot = pick.size === 's' ? 'צוות אחד, 5 עד 8 אנשים'
+                : mid ? 'צוות אחד, 8 עד 12 אנשים'
+                : 'צוות אחד, 10 עד 15 אנשים — ולא יותר, גם אם לוחצים';
+
+    // אזהרה ממוקדת למצב שנבחר.
+    let warn;
+    if (pick.owner === 'none') {
+      warn = { s: 'high', t: 'אין בעלים — וזו ההחלטה שקודמת לכל השאר',
+        b: 'תוכנית 90 יום בלי שם של אדם אחראי היא מסמך. בשבוע הראשון בתוכנית מופיע רק דבר אחד: מי זה. בלי זה, שאר 89 הימים לא יקרו — וזה הכשל הכי שכיח שראינו, הרבה לפני בחירת כלי.' };
+    } else if (pick.now === 'wild') {
+      warn = { s: 'high', t: 'אנשים כבר משתמשים — השעון כבר רץ',
+        b: 'המצב הזה נראה כמו "עוד לא התחלנו" והוא ההפך: יש שימוש, אין כללים, ומידע כבר יוצא החוצה מדי יום. לכן בתוכנית הזאת עמוד המדיניות עולה לשבוע הראשון ולא לחודש השני. אין צורך שיהיה מושלם.' };
+    } else if (pick.now === 'bought') {
+      warn = { s: 'mid', t: 'הכלי כבר קיים — אל תתחילו מהדרכה',
+        b: 'קניתם ואף אחד לא משתמש, כלומר הבעיה כבר הוכחה כלא־בעיה של גישה או של ידע. התוכנית מתחילה בשיחות עם אנשים שניסו ולא חזרו, כי שם נמצאת הסיבה. עוד הדרכה תעלה את הכיסוי ולא את החזרה.' };
+    } else if (pick.use === 'hire') {
+      warn = { s: 'mid', t: 'התחלתם בקטגוריה הכי חשופה',
+        b: 'גיוס הוא שימוש בעל ערך גבוה ובעל סיכון גבוה. התוכנית מגבילה את הפילוט לחילוץ נתונים בלבד, בלי דירוג ובלי סינון — וקובעת שיחה עם היועץ המשפטי כשער יציאה מהחודש הראשון.' };
+    } else {
+      warn = { s: 'ok', t: 'נקודת פתיחה טובה',
+        b: 'יש בעלים ויש כיוון, ולכן התוכנית יכולה להתמקד בעומק ולא בהקמה. שימו לב במיוחד לשער של יום 60: הוא נועד לעצור הרחבה שלא הרוויחה אותה.' };
+    }
+
+    warnEl.innerHTML = '<div class="p9w p9w--' + warn.s + '">' +
+      '<p class="p9w__t">' + warn.t + '</p><p class="p9w__b">' + warn.b + '</p></div>';
+
+    const L = [];
+    L.push('תוכנית 90 יום — הטמעת AI');
+    L.push('שימוש ראשון: ' + u.t);
+    L.push('למה דווקא הוא: ' + u.why);
+    L.push('בעלים: ______________________   תאריך התחלה: ____________');
+    L.push('');
+    L.push('════════════════════════════════════');
+    L.push('ימים 1–30 · לצמצם, לא להתחיל בגדול');
+    L.push('════════════════════════════════════');
+
+    if (pick.owner === 'none') {
+      L.push('שבוע 1  קובעים שם של אדם אחראי, בכתב, עם זמן מוקצה ביומן.');
+      L.push('        בלי זה אין טעם להמשיך לשבוע 2.');
+    } else {
+      L.push('שבוע 1  הבעלים מקצה שעתיים קבועות בשבוע ביומן. לא "כשיהיה זמן".');
+    }
+
+    if (pick.now === 'wild') {
+      L.push('שבוע 1  עמוד מדיניות אחד יוצא לכולם. סביר ולא מושלם.');
+      L.push('        אנשים כבר משתמשים — זה דחוף מכל השאר.');
+    }
+
+    if (pick.now === 'bought') {
+      L.push('שבוע 1  שיחות של 10 דקות עם 3 אנשים שניסו ולא חזרו.');
+      L.push('        שאלה אחת: מה ניסית לעשות, ומה קרה.');
+      L.push('שבוע 2  שיחות עם 3 שכן חזרו. מה המשימה השבועית שנפתרה להם.');
+    } else {
+      L.push('שבוע 2  בוחרים ' + pilot + '.');
+      L.push('        לא מתנדבים מכל הארגון — צוות אחד שעובד יחד.');
+    }
+
+    L.push('שבוע 2  מדידת בסיס: כמה זמן לוקח ' + u.t + ' היום, בפועל.');
+    L.push('        בלי זה אין למה להשוות בעוד חודשיים.');
+
+    if (pick.now !== 'wild' && pick.now !== 'policy') {
+      L.push('שבוע 3  עמוד מדיניות אחד: מה מותר, מה לא נכנס, למי פונים, מי אחראי.');
+    }
+    if (pick.use === 'hire') {
+      L.push('שבוע 3  שיחה של רבע שעה עם היועץ המשפטי. חילוץ בלבד, בלי דירוג.');
+    }
+    if (pick.use === 'know') {
+      L.push('שבוע 3  שעה של ניקיון תיקייה: מוחקים גרסאות ישנות, מתארכים קבצים.');
+      L.push('        זו העבודה האמיתית של השימוש הזה.');
+    }
+
+    L.push('שבוע 4  מריצים על ' + u.first + '.');
+    L.push('        במקביל לתהליך הקיים, לא במקומו.');
+    L.push('');
+    L.push('שער יום 30 ← החלטה: ממשיכים עם השימוש הזה או מחליפים אותו?');
+    L.push('              אם הצוות לא הרגיש הבדל — מחליפים. זה לא כישלון.');
+    L.push('');
+    L.push('════════════════════════════════════');
+    L.push('ימים 31–60 · לייצב, לא להרחיב');
+    L.push('════════════════════════════════════');
+    L.push('שבוע 5  הצוות עובד עם זה באמת. בלי מקביל.');
+    L.push('שבוע 5  מודדים שבועית: מתוך מי שהשתמש, כמה חזרו.');
+    L.push('        זה המספר. לא כמה נגעו.');
+    L.push('שבוע 6  אוספים חיכוכים ומתקנים את שלושת הגדולים.');
+    L.push('        ברוב הפעמים אלה דברים קטנים ומטופשים, וזה בסדר.');
+    L.push('שבוע 7  שני אנשים מהצוות מלמדים אדם שלישי.');
+    L.push('        אם הם לא מצליחים — זה עוד לא מוכן להרחבה.');
+
+    if (big) {
+      L.push('שבוע 7  מיישרים קו עם מערכות מידע על הרשאות ועל מה שנשמר.');
+    }
+
+    L.push('שבוע 8  כותבים דף אחד: מה עובד, מה לא, כמה זמן חזר.');
+    L.push('');
+    L.push('שער יום 60 ← החלטה: מרחיבים לצוות שני?');
+    L.push('              רק אם שיעור החזרה החזיק מעל 50% שלושה שבועות.');
+    L.push('              אם לא — נשארים בצוות אחד עוד חודש. זה מותר.');
+    L.push('');
+    L.push('════════════════════════════════════');
+    L.push('ימים 61–90 · להפוך את זה לדבר של הארגון');
+    L.push('════════════════════════════════════');
+    L.push('שבוע 9   צוות שני מתחיל, עם מלווה מהצוות הראשון.');
+    L.push('שבוע 10  כותבים את הפרומפט הקבוע שהצוות באמת מריץ,');
+    L.push('         ושומרים אותו במקום משותף עם שם של בעלים.');
+
+    if (pick.owner === 'hr' || pick.owner === 'none') {
+      L.push('שבוע 10  מגייסים שותף אחד מחוץ ל־HR. נושא שיושב על אדם אחד נעלם איתו.');
+    }
+
+    L.push('שבוע 11  קובעים תור חודשי קבוע: חצי שעה, על שם אדם,');
+    L.push('         לבדוק שהמדדים עדיין נמדדים ושהמדיניות עדיין נכונה.');
+    L.push('שבוע 12  מסמך אחד להנהלה: שני המספרים יחד — כיסוי וחזרה —');
+    L.push('         כמה זמן חזר לצוות, ומה הבקשה לרבעון הבא.');
+    L.push('');
+    L.push('שער יום 90 ← החלטה: מה נכנס לתקציב ולתוכנית העבודה?');
+    L.push('              תוכנית שנגמרת בלי בקשה תקציבית מסתיימת בשקט.');
+    L.push('');
+    L.push('────────────────────────────────────');
+    L.push('שלוש שורות שכדאי למלא לפני שמתחילים');
+    L.push('────────────────────────────────────');
+    L.push('מה נחשב הצלחה ביום 90:  ______________________');
+    L.push('מי מחליט אם נעצור:       ______________________');
+    L.push('מה נפסיק לעשות בשביל זה: ______________________');
+    L.push('');
+    L.push('השורה השלישית היא הקשה, והיא זו שמנבאת אם התוכנית תקרה.');
+
+    docEl.textContent = L.join('\n');
+  }
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(docEl.textContent);
+      copyBtn.textContent = 'הועתק';
+      setTimeout(() => { copyBtn.textContent = 'העתקה'; }, 1600);
+    } catch (e) {
+      copyBtn.textContent = 'סמנו והעתיקו ידנית';
+    }
+  });
+})();
+</script>
+
+<style>
+  .p9 {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .p9__label { font-size: var(--t-sm); color: var(--ink-strong); margin: 0 0 1.35rem; }
+
+  .p9__qs { display: flex; flex-direction: column; gap: 1.15rem; }
+  .p9 :global(.p9q__q) { margin: 0 0 0.55rem; font-size: var(--t-sm); color: var(--ink-strong); }
+  .p9 :global(.p9q__row) { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .p9 :global(.p9q__b) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.5rem 0.85rem;
+    cursor: pointer; min-block-size: 38px; text-align: start;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .p9 :global(.p9q__b:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .p9 :global(.p9q__b.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+
+  .p9__empty { margin: 1.35rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .p9__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .p9__out[hidden] { display: none; }
+
+  .p9 :global(.p9w) {
+    padding: 0.9rem 1.05rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+    margin-block-end: 1.5rem;
+  }
+  .p9 :global(.p9w--high) { border-inline-start-color: #C25A3E; }
+  .p9 :global(.p9w--mid) { border-inline-start-color: #C08A2E; }
+  .p9 :global(.p9w--ok) { border-inline-start-color: var(--accent); }
+  .p9 :global(.p9w__t) { margin: 0 0 0.3rem; font-size: var(--t-sm); color: var(--ink-strong); font-weight: 500; }
+  .p9 :global(.p9w__b) { margin: 0; font-size: var(--t-xs); color: var(--ink-muted); line-height: 1.7; }
+
+  .p9__docH { margin: 0 0 0.6rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .p9__doc {
+    margin: 0; padding: 1.1rem 1.2rem; overflow-x: auto;
+    background: var(--surface-sunk); border: 1px solid var(--rule);
+    border-radius: var(--r-control);
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: var(--t-xs); color: var(--ink); line-height: 1.9;
+    white-space: pre; direction: rtl; text-align: start;
+  }
+  .p9__copy {
+    margin-block-start: 0.7rem;
+    font-family: var(--font-body); font-size: var(--t-xs);
+    background: var(--accent); color: var(--accent-ink);
+    border: 1px solid var(--accent); border-radius: var(--r-control);
+    padding: 0.5rem 1rem; cursor: pointer; min-block-size: 38px; font-weight: 500;
+  }
+  .p9__foot { margin: 0.9rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.65; }
+
+  @media (max-width: 620px) {
+    .p9 { padding: 1.2rem 1.1rem; }
+    .p9 :global(.p9q__row) { flex-direction: column; align-items: stretch; }
+    .p9 :global(.p9q__b) { inline-size: 100%; }
+    .p9__doc { font-size: 0.75rem; line-height: 1.8; }
+  }
+</style>
