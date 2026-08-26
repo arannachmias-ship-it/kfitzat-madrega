@@ -1,0 +1,238 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 2.4.
+ * מחולל השוואה: אותה הודעה בשתי גרסאות — זו שכולם כותבים מול זו שנקראת.
+ * הכוח כאן הוא בניגוד, לא בייצור. הכול מקומי, בלי קריאה לשום מודל.
+ */
+---
+<div class="ol" data-ol>
+  <p class="ol__label">ארבעה שדות. בסוף יש לכם שורת נושא ופתיח להעתקה.</p>
+
+  <div class="ol__fields">
+    <div class="olf">
+      <p class="olf__l">על מה ההודעה</p>
+      <div class="olf__row" data-kinds></div>
+    </div>
+    <div class="olf">
+      <label class="olf__l" for="ol-do">מה בדיוק צריך לעשות — פועל, לא תיאור</label>
+      <input class="olf__i" id="ol-do" type="text" dir="rtl" data-do placeholder="למלא את טופס הדיווח בקישור" />
+    </div>
+    <div class="olf">
+      <label class="olf__l" for="ol-when">עד מתי — תאריך, לא "בהקדם"</label>
+      <input class="olf__i" id="ol-when" type="text" dir="rtl" data-when placeholder="יום חמישי, 4 בספטמבר" />
+    </div>
+    <div class="olf is-crit">
+      <label class="olf__l" for="ol-else">מה קורה אם לא</label>
+      <input class="olf__i" id="ol-else" type="text" dir="rtl" data-else placeholder="השעות לא ייספרו לאותו חודש" />
+    </div>
+  </div>
+
+  <div class="ol__out" data-out hidden>
+    <div class="ol__cols">
+      <div class="ol__col ol__col--bad">
+        <p class="ol__colH">הגרסה שכולם כותבים</p>
+        <p class="ol__subj" data-badsubj></p>
+        <p class="ol__body" data-badbody></p>
+      </div>
+      <div class="ol__col ol__col--good">
+        <div class="ol__colTop">
+          <p class="ol__colH">הגרסה שנקראת</p>
+          <button type="button" class="ol__copy" data-copy>העתקה</button>
+        </div>
+        <p class="ol__subj" data-goodsubj></p>
+        <p class="ol__body" data-goodbody></p>
+      </div>
+    </div>
+    <p class="ol__len" data-len></p>
+    <div class="ol__flags" data-flags></div>
+  </div>
+
+  <p class="ol__empty" data-empty>מלאו את שלושת השדות הראשונים.</p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-ol]');
+  if (!root) return;
+
+  const KINDS = [
+    { k: 'nohal', t: 'נוהל חדש',
+      badSubj: 'עדכון בנושא נוהל העבודה',
+      badBody: 'אנו שמחים לעדכן כי כחלק מתהליך ייעול מתמשך, ייכנס לתוקף נוהל חדש. הנוהל גובש לאחר בחינה מעמיקה ומטרתו לשפר את אופן העבודה. נשמח לשיתוף הפעולה שלכם.' },
+    { k: 'maarechet', t: 'שינוי במערכת',
+      badSubj: 'עדכון מערכת',
+      badBody: 'ברצוננו לעדכן כי בתקופה הקרובה תתבצע החלפה של המערכת הקיימת. אנו פועלים להבטיח מעבר חלק ככל הניתן, ונעדכן בהמשך בפרטים נוספים. תודה על ההבנה.' },
+    { k: 'tofes', t: 'בקשה למילוי טופס',
+      badSubj: 'בקשה לעדכון פרטים',
+      badBody: 'אנו פונים אליכם בבקשה להשלים את הפרטים הנדרשים בהקדם האפשרי. השלמת הפרטים חשובה לצורך המשך התהליך התקין. נשמח לשיתוף פעולה.' },
+    { k: 'irgun', t: 'שינוי ארגוני',
+      badSubj: 'עדכון ארגוני',
+      badBody: 'ברצוננו לשתף אתכם בשינוי מבני שנועד לחזק את הפעילות ולאפשר צמיחה. השינוי הוא חלק מתהליך רחב יותר, ואנו סמוכים ובטוחים שהוא ישרת את כולנו. פרטים נוספים יימסרו בהמשך.' },
+    { k: 'eeru', t: 'אירוע או מועד',
+      badSubj: 'הזמנה לאירוע',
+      badBody: 'אנו שמחים להזמין אתכם לאירוע שיתקיים בקרוב. האירוע נועד לחזק את הקשר בין הצוותים ולאפשר הכרות בלתי אמצעית. נשמח לראותכם.' },
+  ];
+
+  const kindsEl = root.querySelector('[data-kinds]');
+  const doEl = root.querySelector('[data-do]');
+  const whenEl = root.querySelector('[data-when]');
+  const elseEl = root.querySelector('[data-else]');
+  const outEl = root.querySelector('[data-out]');
+  const emptyEl = root.querySelector('[data-empty]');
+  const badSubjEl = root.querySelector('[data-badsubj]');
+  const badBodyEl = root.querySelector('[data-badbody]');
+  const goodSubjEl = root.querySelector('[data-goodsubj]');
+  const goodBodyEl = root.querySelector('[data-goodbody]');
+  const lenEl = root.querySelector('[data-len]');
+  const flagsEl = root.querySelector('[data-flags]');
+  const copyBtn = root.querySelector('[data-copy]');
+  let kind = KINDS[0];
+
+  KINDS.forEach((x, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'olf__b'; b.textContent = x.t;
+    if (i === 0) b.classList.add('is-on');
+    b.addEventListener('click', () => {
+      kind = x;
+      [...kindsEl.children].forEach((c) => c.classList.remove('is-on'));
+      b.classList.add('is-on');
+      render();
+    });
+    kindsEl.appendChild(b);
+  });
+
+  [doEl, whenEl, elseEl].forEach((el) => el.addEventListener('input', render));
+
+  function trimDot(s) { return s.replace(/[.\s]+$/, ''); }
+
+  function render() {
+    const d = doEl.value.trim(), w = whenEl.value.trim(), e = elseEl.value.trim();
+    if (!d || !w) { outEl.hidden = true; emptyEl.hidden = false; return; }
+    outEl.hidden = false; emptyEl.hidden = true;
+
+    badSubjEl.textContent = kind.badSubj;
+    badBodyEl.textContent = kind.badBody;
+
+    // הנושא נבנה מפעולה + תאריך. ה"אחרת" נכנס רק אם הוא עדיין נכנס בנייד —
+    // הרכיב עומד באותו כלל שהשיעור מלמד, במקום להטיף לו.
+    const base = trimDot(d) + ' עד ' + trimDot(w);
+    const full = base + ' — אחרת ' + trimDot(e);
+    const subj = (e && full.length <= 50) ? full : base;
+    goodSubjEl.textContent = subj;
+
+    const l1 = 'צריך ' + trimDot(d) + ' עד ' + trimDot(w) + '.';
+    const l2 = e ? 'מי שלא יספיק — ' + trimDot(e) + '.' : '';
+    goodBodyEl.textContent = l2 ? l1 + '\n' + l2 : l1;
+
+    const n = subj.length;
+    lenEl.className = 'ol__len' + (n > 50 ? ' is-warn' : '');
+    lenEl.textContent = n <= 50
+      ? 'שורת הנושא: ' + n + ' תווים. נכנסת גם בנייד.'
+      : 'שורת הנושא: ' + n + ' תווים — בנייד ייחתך אחרי כ־40. קצרו, או העבירו את הסוף לשורה הראשונה.';
+
+    const f = [];
+    if (!e) f.push('**לא כתבתם מה קורה אם לא.** זה השדה שהכי נוטים להשמיט, והוא היחיד שנותן סיבה לעשות את זה היום ולא בעוד שבועיים. אם באמת לא קורה כלום — שווה לשאול למה שלחתם הודעה.');
+    if (/בהקדם|בקרוב|בימים הקרובים|בהמשך/.test(w)) f.push('**"' + w + '" הוא לא תאריך.** כולם מתרגמים את זה ל"אין דדליין", וכולם צודקים. יום בשבוע ותאריך.');
+    if (/^ל?(היערך|להיערך|לשים לב|לקחת בחשבון|לעדכן את עצמכם)/.test(d)) f.push('**"' + d + '" הוא תיאור, לא פעולה.** הקורא לא יודע מה לפתוח ומה ללחוץ. פועל שאפשר לסמן כשעשו אותו.');
+    if (d.length > 60) f.push('**המשפט הראשון ארוך מדי.** אם מה שצריך לעשות לא נכנס בשורה, כנראה יש כאן שתי בקשות — ואז יש שתי הודעות. הודעה שמבקשת שניים משיגה בדרך כלל אחד.');
+
+    flagsEl.innerHTML = f.map((x) =>
+      '<p class="ol__flag">' + x.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') + '</p>'
+    ).join('');
+  }
+
+  copyBtn.addEventListener('click', async () => {
+    const txt = 'נושא: ' + goodSubjEl.textContent + '\n\n' + goodBodyEl.textContent;
+    try {
+      await navigator.clipboard.writeText(txt);
+      copyBtn.textContent = 'הועתק';
+      setTimeout(() => { copyBtn.textContent = 'העתקה'; }, 1600);
+    } catch (err) {
+      copyBtn.textContent = 'סמנו והעתיקו ידנית';
+    }
+  });
+
+  render();
+})();
+</script>
+
+<style>
+  .ol {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .ol__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1.35rem; }
+
+  .ol__fields { display: flex; flex-direction: column; gap: 1rem; }
+  .ol :global(.olf) { display: flex; flex-direction: column; gap: 0.4rem; }
+  .ol :global(.olf.is-crit) { border-inline-start: 2px solid var(--accent); padding-inline-start: 0.85rem; }
+  .ol :global(.olf__l) { font-size: var(--t-xs); color: var(--ink-muted); font-weight: 500; }
+  .ol :global(.olf__row) { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .ol :global(.olf__b) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.45rem 0.85rem;
+    cursor: pointer; min-block-size: 36px;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .ol :global(.olf__b:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .ol :global(.olf__b.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+  .ol :global(.olf__i) {
+    inline-size: 100%; font-family: var(--font-body); font-size: var(--t-sm);
+    color: var(--ink-strong); background: var(--surface-sunk);
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control);
+    padding: 0.6rem 0.8rem; min-block-size: 42px;
+  }
+  .ol :global(.olf__i::placeholder) { color: var(--ink-faint); }
+  .ol :global(.olf__i:focus-visible) { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .ol__empty { margin: 1.25rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .ol__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .ol__out[hidden] { display: none; }
+
+  .ol__cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+  .ol__col { background: var(--surface-sunk); border-radius: var(--r-card); padding: 1rem 1.05rem; }
+  .ol__col--good { border-inline-start: 3px solid var(--accent); }
+  .ol__colTop { display: flex; justify-content: space-between; align-items: center; gap: 0.7rem; margin-block-end: 0.55rem; flex-wrap: wrap; }
+  .ol__colH { margin: 0 0 0.55rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .ol__colTop .ol__colH { margin: 0; }
+  .ol__copy {
+    font-family: var(--font-body); font-size: var(--t-xs); font-weight: 500;
+    background: var(--accent); color: var(--accent-ink);
+    border: 0; border-radius: var(--r-control);
+    padding: 0.35rem 0.8rem; cursor: pointer; min-block-size: 30px; white-space: nowrap;
+  }
+  .ol__subj {
+    margin: 0 0 0.6rem; font-size: var(--t-sm); font-weight: 600;
+    color: var(--ink-strong); line-height: 1.5;
+  }
+  .ol__col--bad .ol__subj { color: var(--ink-faint); }
+  .ol__body {
+    margin: 0; font-size: var(--t-sm); color: var(--ink-muted);
+    line-height: 1.7; white-space: pre-wrap;
+  }
+  .ol__col--bad .ol__body { opacity: 0.7; }
+
+  .ol__len { margin: 0.9rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+  .ol__len.is-warn { color: #8A5A16; }
+
+  .ol__flags { margin-block-start: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .ol :global(.ol__flag) {
+    margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65;
+    border-inline-start: 2px solid #8A5A16; padding-inline-start: 0.85rem;
+  }
+  .ol :global(.ol__flag strong) { color: var(--ink-strong); }
+
+  @media (max-width: 720px) {
+    .ol { padding: 1.2rem 1.1rem; }
+    .ol__cols { grid-template-columns: 1fr; }
+  }
+</style>
