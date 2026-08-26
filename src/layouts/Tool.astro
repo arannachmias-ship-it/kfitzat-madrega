@@ -1,6 +1,8 @@
 ---
 import Base from './Base.astro';
 import SignupBand from '../components/SignupBand.astro';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 interface Props {
   name: string; vendor: string; category: string; tagline: string;
@@ -11,6 +13,8 @@ interface Props {
 }
 const p = Astro.props;
 const slug = Astro.params.slug ?? '';
+// a real screenshot of the lesson-2.2 demo (meeting transcript to task list) running inside this tool, if we have one
+const hasScreen = existsSync(join(process.cwd(), 'public', 'kelim-screens', `${slug}.webp`));
 const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
 <Base title={`${p.name} · מדריך הכלים · קפיצת מדרגה`} description={p.tagline}>
@@ -46,6 +50,13 @@ const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: '
       </dl>
       {p.startUrl && <a class="tl__start" href={p.startUrl} rel="noopener nofollow" target="_blank">לעמוד ההרשמה של {p.name}</a>}
     </div>
+
+    {hasScreen && (
+      <figure class="wrap tl__screen">
+        <img src={`/kelim-screens/${slug}.webp`} width="1200" height="720" alt={`הפלט של ${p.name} להדגמה משיעור 2.2: תמלול ישיבה שהופך לשלוש רשימות, החלטות, משימות ונושאים פתוחים`} loading="lazy" decoding="async" />
+        <figcaption>ככה זה נראה בפועל: ההדגמה משיעור 2.2 (תמלול ישיבה לרשימת משימות) בתוך {p.name}, צולם ב־{checked}. אותו פרומפט בדיוק רץ בכל הכלים במדור.</figcaption>
+      </figure>
+    )}
 
     <div class="wrap tl__body">
       <slot />
@@ -120,6 +131,9 @@ const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: '
   .tl__meta { display: flex; gap: 1.4rem; font-size: var(--t-sm); color: var(--ink-faint); flex-wrap: wrap; }
 
   .tl__facts { padding-block: 0 2.2rem; }
+  .tl__screen { margin: 0 auto 2.4rem; }
+  .tl__screen img { display: block; inline-size: 100%; block-size: auto; border-radius: var(--r-card); border: 1px solid var(--rule); box-shadow: var(--shadow-2); background: var(--surface); }
+  .tl__screen figcaption { font-size: var(--t-xs); color: var(--ink-faint); margin-block-start: 0.6rem; max-inline-size: 68ch; line-height: 1.6; }
   .tl__factsTitle { font-size: var(--t-lg); font-family: var(--font-body); font-weight: 700; margin-block: 0 0.9rem; }
   .tl__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: var(--r-card); overflow: hidden; margin: 0; }
   .tl__cell { background: var(--surface); padding: 0.95rem 1.15rem; }
