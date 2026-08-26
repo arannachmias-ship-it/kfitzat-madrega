@@ -1,0 +1,148 @@
+---
+import Base from '../../layouts/Base.astro';
+import SignupBand from '../../components/SignupBand.astro';
+import { getCollection } from 'astro:content';
+
+const all = (await getCollection('kelim', (e) => e.data.published))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const CATEGORIES = ["צ'אטים כלליים", 'כלים למשימה מסוימת', 'תמלול וסיכום ישיבות'] as const;
+const byCategory = CATEGORIES.map((c) => ({ name: c, items: all.filter((e) => e.data.category === c) }))
+  .filter((g) => g.items.length > 0);
+
+const newest = all.reduce((d, e) => (e.data.checked > d ? e.data.checked : d), new Date(0));
+const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<Base
+  title="מדריך הכלים · קפיצת מדרגה"
+  description="מה כל כלי AI באמת עושה, למי הוא מתאים, כמה הוא עולה, מה המצב עם עברית, ומה קורה למידע שאתם מדביקים בו. נבדק מול העמודים הרשמיים, עם תאריך."
+>
+  <section class="wrap head">
+    <h1 class="head__title">מדריך הכלים</h1>
+    <p class="head__sub">
+      המסלול מלמד עקרונות שלא מתיישנים. המדור הזה עושה את הדבר ההפוך:
+      הוא עונה על השאלה "אז באיזה כלי להשתמש בפועל" — וזו שאלה שהתשובה עליה משתנה כל רבעון.
+    </p>
+    <p class="head__note">
+      לכן לכל כלי כאן יש <strong>תאריך בדיקה גלוי</strong>. עודכן לאחרונה: {updated}.
+      אנחנו לא מקבלים עמלה מאף ספק, ואין לנו שותפות עם אף אחד מהם.
+      איפה שלא הצלחנו לאמת משהו מול המקור הרשמי — כתוב שלא אימתנו, ולא ניחשנו במקום.
+    </p>
+  </section>
+
+  <section class="wrap tbl-sec reveal" aria-labelledby="hashvaa">
+    <h2 id="hashvaa" class="sec__title">הכל בטבלה אחת</h2>
+    <p class="sec__sub">אם יש לכם שתי דקות ולא עשרים — זה מה שצריך לדעת.</p>
+    <div class="tbl-scroll" tabindex="0" role="region" aria-label="טבלת השוואת כלים, ניתנת לגלילה">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th scope="col">הכלי</th>
+            <th scope="col">הכי טוב ל־</th>
+            <th scope="col">עברית</th>
+            <th scope="col">חינם</th>
+            <th scope="col">ארגוני</th>
+            <th scope="col">מאמנים על התוכן שלכם?</th>
+          </tr>
+        </thead>
+        <tbody>
+          {all.map((e) => (
+            <tr>
+              <th scope="row"><a href={`/kelim/${e.id}`}>{e.data.name}</a></th>
+              <td>{e.data.bestFor}</td>
+              <td>{e.data.hebrew}</td>
+              <td>{e.data.priceFree}</td>
+              <td>{e.data.priceOrg}</td>
+              <td>
+                <span class="tbl__warn">אישי: {e.data.trainsPersonal}</span>
+                <span class="tbl__ok">ארגוני: {e.data.trainsOrg}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="tbl__after">
+      העמודה האחרונה היא הסיבה המרכזית שהמדור הזה קיים. כמעט בכל כלי ברשימה,
+      חשבון אישי וחשבון ארגוני הם שני מוצרים שונים מבחינת מה קורה למידע שהדבקתם —
+      ורוב הארגונים מגלים את זה אחרי שהעובדים כבר עובדים בחשבון האישי שלהם.
+      <a href="/maslul/ma-asur-lehachnis">העיקרון המלא נמצא כאן</a>.
+    </p>
+  </section>
+
+  {byCategory.map((g) => (
+    <section class="wrap cat reveal" aria-labelledby={`cat-${g.name}`}>
+      <h2 id={`cat-${g.name}`} class="sec__title">{g.name}</h2>
+      <ul class="cards" data-stagger="70">
+        {g.items.map((e) => (
+          <li class="card">
+            <a href={`/kelim/${e.id}`} class="card__inner">
+              <span class="card__name">{e.data.name}</span>
+              <span class="card__vendor">{e.data.vendor}</span>
+              <span class="card__tag">{e.data.tagline}</span>
+              <span class="card__row"><span>הכי טוב ל־</span>{e.data.bestFor}</span>
+              <span class="card__row"><span>פחות מתאים ל־</span>{e.data.notFor}</span>
+              <span class="card__cta">למדריך המלא</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+
+  <section class="wrap missing reveal">
+    <h2 class="sec__title">מה לא נמצא כאן, ולמה</h2>
+    <p>
+      אין כאן כל כלי שקיים, ובכוונה. כלי נכנס למדור רק אם בדקנו אותו מול העמודים
+      הרשמיים של הספק, ורק אם יש לו תשובה ברורה לשאלה מה קורה למידע שמדביקים בו.
+      כלי שהתשובה שלו לשאלה הזאת עמומה לא מקבל כאן עמוד, גם אם הוא מצוין.
+    </p>
+    <p>
+      חסר לכם כלי שאתם שוקלים? <a href="/#hearshmu">כתבו לנו איזה</a> — אנחנו מוסיפים לפי מה ששואלים אותנו.
+    </p>
+  </section>
+
+  <SignupBand />
+</Base>
+
+<style>
+  .head { padding-block: 3rem 1.5rem; }
+  .head__title { font-size: clamp(2.2rem, 5vw, 3.4rem); margin-block-end: 0.9rem; }
+  .head__sub { font-size: var(--t-xl); color: var(--ink-muted); font-weight: 300; max-inline-size: 60ch; margin-block-end: 1.1rem; }
+  .head__note { font-size: var(--t-sm); color: var(--ink-faint); max-inline-size: 68ch; line-height: 1.7; }
+  .head__note strong { color: var(--ink-muted); font-weight: 500; }
+
+  .sec__title { font-size: var(--t-2xl); margin-block: 0 0.5rem; }
+  .sec__sub { color: var(--ink-muted); margin-block-end: 1.2rem; font-size: var(--t-sm); }
+
+  .tbl-sec { padding-block: 2rem 1rem; }
+  .tbl-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--r-card); background: var(--surface); }
+  .tbl { border-collapse: collapse; inline-size: 100%; min-inline-size: 780px; font-size: var(--t-sm); }
+  .tbl th, .tbl td { padding: 0.85rem 1rem; text-align: start; vertical-align: top; border-block-end: 1px solid var(--rule); }
+  .tbl thead th { font-size: var(--t-xs); color: var(--ink-faint); font-weight: 500; background: var(--surface-sunk); white-space: nowrap; }
+  .tbl tbody th { font-weight: 700; white-space: nowrap; }
+  .tbl tbody th a { color: var(--ink-strong); text-decoration: none; border-block-end: 2px solid var(--accent); }
+  .tbl tbody th a:hover { color: var(--accent-deep); }
+  .tbl tbody tr:last-child th, .tbl tbody tr:last-child td { border-block-end: 0; }
+  .tbl td { color: var(--ink-muted); line-height: 1.55; }
+  .tbl__warn, .tbl__ok { display: block; }
+  .tbl__warn { color: var(--ink-strong); }
+  .tbl__ok { color: var(--ink-faint); margin-block-start: 0.2rem; }
+  .tbl__after { font-size: var(--t-sm); color: var(--ink-muted); max-inline-size: 68ch; margin-block-start: 1rem; line-height: 1.7; }
+  .tbl__after a { color: var(--ink-strong); }
+
+  .cat { padding-block: 1.75rem 0.5rem; }
+  .cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+  .card__inner { display: flex; flex-direction: column; gap: 0.3rem; background: var(--surface); border-radius: var(--r-card); padding: 1.25rem 1.4rem; text-decoration: none; box-shadow: var(--shadow-1); block-size: 100%; }
+  .card__inner:hover { box-shadow: var(--shadow-2); }
+  .card__name { font-family: var(--font-display); font-size: var(--t-xl); color: var(--ink-strong); }
+  .card__vendor { font-size: var(--t-xs); color: var(--ink-faint); }
+  .card__tag { font-size: var(--t-sm); color: var(--ink); margin-block: 0.5rem; line-height: 1.6; }
+  .card__row { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.55; }
+  .card__row span { color: var(--ink-faint); font-size: var(--t-xs); display: block; }
+  .card__cta { margin-block-start: auto; padding-block-start: 0.9rem; font-size: var(--t-sm); color: var(--accent-deep); font-weight: 500; }
+
+  .missing { padding-block: 2.5rem 3rem; }
+  .missing p { color: var(--ink-muted); max-inline-size: 68ch; }
+  .missing a { color: var(--ink-strong); }
+</style>
