@@ -1,0 +1,376 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 4.3.
+ * מחולל אישי: מסמנים אילו קטגוריות מידע על עובדים ומועמדים באמת מוחזקות בארגון,
+ * קובעים לכל אחת כמה זמן שומרים, ומקבלים טבלת שמירה להעתקה + התרעות.
+ * ההתרעה המרכזית: "לא החלטנו" אינו מצב ניטרלי — הוא שמירה לנצח.
+ * כל ההיגיון מקומי. אין קריאות רשת ואין מודל.
+ */
+---
+<div class="rp" data-rp>
+  <p class="rp__label">מה מוחזק אצלכם בפועל על עובדים ומועמדים?</p>
+  <p class="rp__hint">סמנו קטגוריה, ואז קבעו לה זמן שמירה. אם התשובה האמיתית היא "לא החלטנו" — בחרו בזה. זו התשובה הכי שכיחה, והיא כל העניין.</p>
+
+  <div class="rp__cats" data-cats></div>
+
+  <div class="rp__out" data-out hidden>
+    <div class="rp__stats" data-stats></div>
+    <div class="rp__flags" data-flags></div>
+
+    <p class="rp__docH">טבלת השמירה שלכם</p>
+    <pre class="rp__doc" data-doc></pre>
+    <button type="button" class="rp__copy" data-copy>העתקה</button>
+
+    <div class="rp__first" data-first></div>
+  </div>
+
+  <p class="rp__empty" data-empty>סמנו לפחות קטגוריה אחת.</p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-rp]');
+  if (!root) return;
+
+  // sens = מידע שרגיש במיוחד, ולכן טעות בו יקרה יותר.
+  // note = מה שנכון לומר על הקטגוריה הזאת, בלי לפסוק משפטית.
+  const CATS = [
+    { k: 'cv', t: 'קורות חיים של מועמדים שלא התקבלו', sens: false,
+      note: 'המאגר שגדל לבד. כמעט אף ארגון לא החליט עליו כלום, והוא ממשיך להתמלא כל חודש.' },
+    { k: 'assess', t: 'חוות דעת ממכון מיון', sens: true,
+      note: 'מועמד רשאי לעיין בחוות הדעת המלאה, לא רק בהמלצה שהועברה אליכם. שווה לוודא שאתם יודעים איפה היא יושבת לפני שמישהו מבקש.' },
+    { k: 'perf', t: 'הערכות ביצועים ומשובים', sens: true,
+      note: 'מידע שנכתב על אדם בידי אדם אחר. זה גם המידע שהכי מפתה להדביק לכלי כדי "לסכם".' },
+    { k: 'pay', t: 'שכר, תנאים ובונוסים', sens: true,
+      note: 'לרוב יש כאן חובת שמירה מקבילה מדיני עבודה ומס — כאן דווקא לא מוחקים מוקדם, אלא מצמצמים מי רואה.' },
+    { k: 'time', t: 'דוחות נוכחות ושעות', sens: false,
+      note: 'נראה תפעולי לגמרי, ומאפשר לשחזר את השעות והיעדרויות של אדם לאורך שנים.' },
+    { k: 'health', t: 'מידע רפואי — אישורי מחלה, התאמות, הריון', sens: true,
+      note: 'הקטגוריה הרגישה ביותר ברשימה. השאלה הראשונה כאן היא לא כמה זמן אלא כמה אנשים בכלל רואים.' },
+    { k: 'cam', t: 'הקלטות ומצלמות במקום העבודה', sens: true,
+      note: 'מותנה בצורך אמיתי, במידתיות ובידיעת העובדים מראש. ככל שהפגיעה חמורה יותר, כך פחות אפשר להישען על הסכמה.' },
+    { k: 'mail', t: 'תכתובת מייל של עובדים', sens: true,
+      note: 'תיבה מקצועית, תיבה מעורבת ותיבה פרטית הן שלושה דברים שונים לגמרי מבחינת מה מותר. סעיף בחוזה אינו הסכמה.' },
+    { k: 'usage', t: 'נתוני שימוש בכלים — מי השתמש במה ומתי', sens: false,
+      note: 'המידע הכי חדש ברשימה, והכי פחות מוסדר אצל רוב הארגונים. הוא נוצר לבד ברגע שקניתם רישיונות.' },
+  ];
+
+  const KEEP = [
+    { k: 'none',  t: 'לא החלטנו' },
+    { k: 'end',   t: 'עד סוף ההעסקה' },
+    { k: 'y1',    t: 'עד שנה' },
+    { k: 'y2',    t: 'שנתיים' },
+    { k: 'y7',    t: 'שבע שנים ומעלה' },
+  ];
+
+  const catsEl = root.querySelector('[data-cats]');
+  const outEl = root.querySelector('[data-out]');
+  const emptyEl = root.querySelector('[data-empty]');
+  const statsEl = root.querySelector('[data-stats]');
+  const flagsEl = root.querySelector('[data-flags]');
+  const docEl = root.querySelector('[data-doc]');
+  const firstEl = root.querySelector('[data-first]');
+  const copyBtn = root.querySelector('[data-copy]');
+
+  const on = {};    // k -> true
+  const keep = {};  // k -> KEEP.k
+
+  CATS.forEach((c) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'rpc';
+
+    const tog = document.createElement('button');
+    tog.type = 'button';
+    tog.className = 'rpc__t';
+    tog.textContent = c.t;
+    tog.setAttribute('aria-pressed', 'false');
+
+    const row = document.createElement('div');
+    row.className = 'rpc__row';
+    row.hidden = true;
+
+    const nt = document.createElement('p');
+    nt.className = 'rpc__note';
+    nt.textContent = c.note;
+    row.appendChild(nt);
+
+    const q = document.createElement('span');
+    q.className = 'rpc__q';
+    q.textContent = 'כמה זמן שומרים?';
+    row.appendChild(q);
+
+    KEEP.forEach((o) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'rpc__k';
+      b.textContent = o.t;
+      b.addEventListener('click', () => {
+        keep[c.k] = o.k;
+        [...row.querySelectorAll('.rpc__k')].forEach((x) => x.classList.remove('is-on'));
+        b.classList.add('is-on');
+        render();
+      });
+      row.appendChild(b);
+    });
+
+    tog.addEventListener('click', () => {
+      on[c.k] = !on[c.k];
+      tog.classList.toggle('is-on', !!on[c.k]);
+      tog.setAttribute('aria-pressed', on[c.k] ? 'true' : 'false');
+      row.hidden = !on[c.k];
+      if (!on[c.k]) {
+        delete keep[c.k];
+        [...row.querySelectorAll('.rpc__k')].forEach((x) => x.classList.remove('is-on'));
+      }
+      render();
+    });
+
+    wrap.appendChild(tog);
+    wrap.appendChild(row);
+    catsEl.appendChild(wrap);
+  });
+
+  function label(k) {
+    const f = KEEP.find((x) => x.k === k);
+    return f ? f.t : 'טרם נקבע';
+  }
+
+  // עברית, לא מתמטיקה: "קטגוריה אחת" ולא "1 קטגוריות".
+  function n(count, one, many) {
+    return count === 1 ? one : count + ' ' + many;
+  }
+
+  function stat(count, one, many) {
+    return '<span class="rp__stat"><b>' + count + '</b>' + (count === 1 ? one : many) + '</span>';
+  }
+
+  function render() {
+    const picked = CATS.filter((c) => on[c.k]);
+    if (!picked.length) {
+      outEl.hidden = true;
+      emptyEl.hidden = false;
+      return;
+    }
+    outEl.hidden = false;
+    emptyEl.hidden = true;
+
+    const undecided = picked.filter((c) => !keep[c.k] || keep[c.k] === 'none');
+    const sensitive = picked.filter((c) => c.sens);
+
+    statsEl.innerHTML =
+      stat(picked.length, 'קטגוריה מוחזקת', 'קטגוריות מוחזקות') +
+      stat(undecided.length, 'בלי החלטת שמירה', 'בלי החלטת שמירה') +
+      stat(sensitive.length, 'רגישה במיוחד', 'רגישות במיוחד');
+
+    // התרעות — רק מה שבאמת בעייתי, לפי סדר חומרה.
+    const flags = [];
+
+    if (undecided.length) {
+      flags.push({
+        s: 'high',
+        t: 'שמירה בלי החלטה היא שמירה לנצח',
+        b: 'אין אצלכם תשובה לשאלה כמה זמן עבור ' + n(undecided.length, 'קטגוריה אחת', 'קטגוריות') + '. זה לא אומר שהמידע יימחק מתישהו — זה אומר שהוא לא יימחק אף פעם, וימשיך להיות באחריותכם גם בעוד חמש שנים. ' +
+             'החלטה על שנה היא החלטה. "עוד נראה" היא לא.',
+      });
+    }
+
+    if (on.cv && (!keep.cv || keep.cv === 'none' || keep.cv === 'y7')) {
+      flags.push({
+        s: 'high',
+        t: 'מאגר קורות החיים הוא החשיפה שאף אחד לא סופר',
+        b: 'קורות חיים של מי שלא התקבל הם המאגר היחיד שגדל בלי הגבלה ובלי שאף אחד ביקש. שווה לקבוע לו תאריך, ולומר למועמדים מראש מה קורה לקובץ שלהם אחרי שההליך נסגר.',
+      });
+    }
+
+    if (on.health) {
+      flags.push({
+        s: 'high',
+        t: 'מידע רפואי — קודם מי רואה, אחר כך כמה זמן',
+        b: 'בדקו כמה אנשים בארגון יכולים להגיע לאישורי המחלה ולהתאמות בפועל, לא כמה אמורים. ברוב הארגונים התשובה מפתיעה לרעה, והתיקון הוא הרשאות ולא מחיקה.',
+      });
+    }
+
+    if (on.mail || on.cam) {
+      flags.push({
+        s: 'mid',
+        t: 'מעקב אינו נפתר בסעיף בחוזה',
+        b: 'תכתובת ומצלמות דורשות צורך אמיתי, את האמצעי הפוגעני פחות מבין הקיימים, ויידוע מראש. סעיף כללי בהסכם העבודה לא מספיק — וככל שהפגיעה חמורה יותר, כך פחות אפשר להישען על הסכמה של עובד בכלל.',
+      });
+    }
+
+    if (on.usage) {
+      flags.push({
+        s: 'mid',
+        t: 'נתוני השימוש בכלים הם מידע על עובדים',
+        b: 'דוח שמראה מי השתמש בכלי, כמה ומתי, הוא מידע אישי לכל דבר — גם אם קיבלתם אותו כדי למדוד אימוץ. תחליטו מראש אם הוא מצטבר או ברמת עובד, ומי רשאי לראות את הגרסה הפרטנית.',
+      });
+    }
+
+    if (on.pay && (keep.pay === 'y1' || keep.pay === 'end')) {
+      flags.push({
+        s: 'mid',
+        t: 'בשכר דווקא לא ממהרים למחוק',
+        b: 'לנתוני שכר יש בדרך כלל חובת שמירה מקבילה מדיני עבודה וממס, ומחיקה מוקדמת עלולה להיות הבעיה ולא הפתרון. כאן הצמצום הנכון הוא בהרשאות — מי רואה — ולא בלוח הזמנים.',
+      });
+    }
+
+    flagsEl.innerHTML = flags.length
+      ? '<p class="rp__flagsH">מה קופץ</p>' + flags.map((f) =>
+          '<div class="rpf rpf--' + f.s + '"><p class="rpf__t">' + f.t + '</p><p class="rpf__b">' + f.b + '</p></div>'
+        ).join('')
+      : '<div class="rpf rpf--ok"><p class="rpf__t">לכל קטגוריה שסימנתם יש החלטה</p>' +
+        '<p class="rpf__b">זה נדיר. מה שנשאר הוא לוודא שההחלטות האלה כתובות במקום אחד ושמישהו אחראי עליהן בשם — אחרת הן ייעלמו עם מי שקיבל אותן.</p></div>';
+
+    // הטבלה להעתקה
+    const lines = [
+      'טבלת שמירת מידע — עובדים ומועמדים',
+      'עודכן: ' + new Date().toLocaleDateString('he-IL'),
+      'בעלים: ______________________',
+      '',
+    ];
+    picked.forEach((c) => {
+      lines.push(c.t);
+      lines.push('  כמה זמן : ' + label(keep[c.k]));
+      lines.push('  מי רואה : ______________________');
+      lines.push('  מי מוחק : ______________________');
+      lines.push('');
+    });
+    lines.push('שתי השורות הריקות הן העבודה האמיתית.');
+    docEl.textContent = lines.join('\n');
+
+    // מה עושים ראשון — נגזר מהמצב, לא רשימה קבועה.
+    const first = [];
+    if (undecided.length) {
+      first.push('קבעו תאריך <strong>לקטגוריה אחת</strong> — זו שהכי קל להחליט עליה. אל תפתחו את כל הרשימה ביחד.');
+    }
+    if (sensitive.length) {
+      first.push('לקטגוריות הרגישות, בדקו <strong>מי בפועל יכול להגיע אליהן</strong> היום. זה נבדק בחמש דקות ומפתיע כמעט תמיד.');
+    }
+    first.push('מלאו את השורה <strong>"מי מוחק"</strong> בשם של אדם. שמירה שאין לה מוחק היא שמירה לנצח, גם כשכתוב אחרת.');
+    first.push('הוסיפו למודעות הדרושים ולטופס הקליטה משפט אחד: מה נאסף, למה, וכמה זמן. זה החלק שהכי זול לתקן וכמעט אף אחד לא עשה.');
+
+    firstEl.innerHTML = '<p class="rp__firstH">מה עושים ראשון</p><ul class="rp__list">' +
+      first.map((x) => '<li>' + x + '</li>').join('') + '</ul>';
+  }
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(docEl.textContent);
+      copyBtn.textContent = 'הועתק';
+      setTimeout(() => { copyBtn.textContent = 'העתקה'; }, 1600);
+    } catch (e) {
+      copyBtn.textContent = 'סמנו והעתיקו ידנית';
+    }
+  });
+
+  render();
+})();
+</script>
+
+<style>
+  .rp {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .rp__label { font-size: var(--t-sm); color: var(--ink-strong); margin: 0 0 0.4rem; }
+  .rp__hint { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1.35rem; line-height: 1.65; }
+
+  .rp__cats { display: flex; flex-direction: column; gap: 0.55rem; }
+
+  .rp :global(.rpc__t) {
+    font-family: var(--font-body); font-size: var(--t-sm); color: var(--ink-muted);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.6rem 0.9rem;
+    cursor: pointer; min-block-size: 40px; inline-size: 100%; text-align: start;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .rp :global(.rpc__t:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .rp :global(.rpc__t.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+
+  .rp :global(.rpc__row) {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+    margin-block-start: 0.5rem; padding-inline-start: 0.9rem;
+    border-inline-start: 2px solid var(--rule);
+  }
+  .rp :global(.rpc__row[hidden]) { display: none; }
+  .rp :global(.rpc__note) {
+    flex: 1 0 100%; margin: 0 0 0.15rem;
+    font-size: var(--t-xs); color: var(--ink-muted); line-height: 1.7;
+  }
+  .rp :global(.rpc__q) { font-size: var(--t-xs); color: var(--ink-faint); margin-inline-end: 0.25rem; }
+  .rp :global(.rpc__k) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.4rem 0.7rem;
+    cursor: pointer; min-block-size: 34px;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .rp :global(.rpc__k:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .rp :global(.rpc__k.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+
+  .rp__empty { margin: 1.35rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .rp__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .rp__out[hidden] { display: none; }
+
+  .rp__stats { display: flex; flex-wrap: wrap; gap: 1.35rem; margin-block-end: 1.35rem; }
+  .rp :global(.rp__stat) { font-size: var(--t-xs); color: var(--ink-faint); }
+  .rp :global(.rp__stat b) {
+    display: block; font-family: var(--font-display); font-weight: 400;
+    font-size: var(--t-xl); color: var(--ink-strong); line-height: 1.2;
+  }
+
+  .rp :global(.rp__flagsH),
+  .rp__docH,
+  .rp :global(.rp__firstH) { margin: 0 0 0.6rem; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .rp__flags { display: flex; flex-direction: column; gap: 0.7rem; }
+  .rp :global(.rpf) {
+    padding: 0.85rem 1rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+  }
+  .rp :global(.rpf--high) { border-inline-start-color: #C25A3E; }
+  .rp :global(.rpf--mid) { border-inline-start-color: #C08A2E; }
+  .rp :global(.rpf--ok) { border-inline-start-color: var(--accent); }
+  .rp :global(.rpf__t) { margin: 0 0 0.3rem; font-size: var(--t-sm); color: var(--ink-strong); font-weight: 500; }
+  .rp :global(.rpf__b) { margin: 0; font-size: var(--t-xs); color: var(--ink-muted); line-height: 1.7; }
+
+  .rp__docH { margin-block-start: 1.5rem; }
+  .rp__doc {
+    margin: 0; padding: 1rem 1.1rem; overflow-x: auto;
+    background: var(--surface-sunk); border: 1px solid var(--rule);
+    border-radius: var(--r-control);
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: var(--t-xs); color: var(--ink); line-height: 1.85;
+    white-space: pre-wrap; direction: rtl; text-align: start;
+  }
+  .rp__copy {
+    margin-block-start: 0.7rem;
+    font-family: var(--font-body); font-size: var(--t-xs);
+    background: var(--accent); color: var(--accent-ink);
+    border: 1px solid var(--accent); border-radius: var(--r-control);
+    padding: 0.5rem 1rem; cursor: pointer; min-block-size: 38px; font-weight: 500;
+  }
+
+  .rp__first { margin-block-start: 1.5rem; padding-block-start: 1.2rem; border-block-start: 1px solid var(--rule); }
+  .rp :global(.rp__list) { margin: 0; padding-inline-start: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .rp :global(.rp__list li) { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.7; }
+  .rp :global(.rp__list strong) { color: var(--ink-strong); }
+
+  @media (max-width: 620px) {
+    .rp { padding: 1.2rem 1.1rem; }
+    .rp :global(.rpc__row) { flex-direction: column; align-items: stretch; }
+    .rp :global(.rpc__k) { inline-size: 100%; }
+    .rp__stats { gap: 1rem; }
+  }
+</style>
