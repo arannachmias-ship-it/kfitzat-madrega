@@ -1,0 +1,219 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 3.3.
+ * מחולל אישי: שבע שאלות שהופכות למסמך מפרט להעתקה.
+ * הרכיב מתעקש דווקא על שני השדות שאף אחד לא ממלא —
+ * מה קורה כשזה נכשל, ומי האדם שאחראי.
+ * הכול מקומי. אין קריאה לשום שירות.
+ */
+---
+<div class="as" data-as>
+  <p class="as__label">שבע שאלות. בסוף יש לכם מסמך להעתיק ולשלוח.</p>
+
+  <div class="as__fields" data-fields></div>
+
+  <div class="as__out">
+    <div class="as__outTop">
+      <p class="as__outH">המפרט</p>
+      <button type="button" class="as__copy" data-copy>העתקה</button>
+    </div>
+    <pre class="as__doc" dir="rtl" data-doc></pre>
+    <div class="as__checks" data-checks></div>
+  </div>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-as]');
+  if (!root) return;
+
+  const F = [
+    { k: 'what', label: 'מה זה עושה, במשפט אחד', tag: 'מה זה',
+      ph: 'שומר קורות חיים שמגיעים לתיבת הגיוס ורושם אותם בגיליון' },
+    { k: 'when', label: 'כש — מה מתחיל את זה', tag: 'טריגר',
+      ph: 'מגיע מייל ל־jobs@ עם קובץ מצורף' },
+    { k: 'if', label: 'אם — מה גורם לזה לא לרוץ', tag: 'תנאי',
+      ph: 'רק PDF או DOCX, וגדול מ־20KB' },
+    { k: 'then', label: 'אז — הצעדים, לפי הסדר', tag: 'פעולות', area: true,
+      ph: '1. שמירה בתיקיית המשרה\n2. שורה בגיליון המועמדים\n3. הודעה בערוץ הגיוס' },
+    { k: 'fail', label: 'מה קורה כשזה נכשל', tag: 'כשל', crit: true,
+      opts: ['מייל אליי עם השגיאה, והשורה נשמרת בגיליון "נכשלו"',
+             'הודעה בערוץ הצוות, והזרימה מנסה שוב אחרי שעה',
+             'שום דבר — נגלה כשמישהו ישאל'],
+      ph: 'מייל אליי עם השגיאה, והשורה נשמרת בגיליון נפרד' },
+    { k: 'who', label: 'מי האדם שאחראי — שם, לא תפקיד', tag: 'בעלים', crit: true,
+      ph: 'יעל כהן' },
+    { k: 'alive', label: 'איך נדע שהיא עדיין חיה', tag: 'בדיקה',
+      opts: ['סיכום שבועי אוטומטי במייל — כמה רצה השבוע',
+             'בדיקה ידנית של הגיליון בתחילת כל חודש',
+             'נגלה כשתיפול'],
+      ph: 'סיכום שבועי אוטומטי: כמה פעמים רצה' },
+  ];
+
+  const fieldsEl = root.querySelector('[data-fields]');
+  const docEl = root.querySelector('[data-doc]');
+  const checksEl = root.querySelector('[data-checks]');
+  const copyBtn = root.querySelector('[data-copy]');
+  const val = {};
+
+  F.forEach((f) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'asf' + (f.crit ? ' is-crit' : '');
+
+    const lab = document.createElement('label');
+    lab.className = 'asf__l';
+    lab.textContent = f.label;
+    lab.htmlFor = 'as-' + f.k;
+    wrap.appendChild(lab);
+
+    const input = f.area ? document.createElement('textarea') : document.createElement('input');
+    input.className = 'asf__i';
+    input.id = 'as-' + f.k;
+    input.dir = 'rtl';
+    input.placeholder = f.ph;
+    if (f.area) input.rows = 3; else input.type = 'text';
+    input.addEventListener('input', () => { val[f.k] = input.value; render(); });
+    wrap.appendChild(input);
+
+    if (f.opts) {
+      const row = document.createElement('div');
+      row.className = 'asf__opts';
+      f.opts.forEach((o) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'asf__o'; b.textContent = o;
+        b.addEventListener('click', () => {
+          input.value = o; val[f.k] = o; render();
+        });
+        row.appendChild(b);
+      });
+      wrap.appendChild(row);
+    }
+
+    fieldsEl.appendChild(wrap);
+  });
+
+  function render() {
+    const g = (k) => (val[k] || '').trim();
+    const miss = '— לא מולא —';
+
+    const lines = [
+      'מפרט אוטומציה',
+      '',
+      'מה זה עושה:  ' + (g('what') || miss),
+      '',
+      'כש:  ' + (g('when') || miss),
+      'אם:  ' + (g('if') || miss),
+      'אז:',
+    ];
+    (g('then') || miss).split('\n').forEach((l) => lines.push('     ' + l));
+    lines.push('');
+    lines.push('כשזה נכשל:  ' + (g('fail') || miss));
+    lines.push('אחראי:  ' + (g('who') || miss));
+    lines.push('איך נדע שהיא חיה:  ' + (g('alive') || miss));
+    docEl.textContent = lines.join('\n');
+
+    const c = [];
+    if (!g('when')) c.push('**חסר הטריגר.** בלי "כש" אין אוטומציה, יש רצון. אם אתם לא מצליחים לנסח אותו — זה לא סימן שאתם לא טכניים, זה סימן שהתהליך עצמו לא מוגדר.');
+    if (!g('if')) c.push('**אין תנאי.** שאלו את עצמכם מה הדבר הכי מטופש שיכול להיכנס לכאן. התשובה היא התנאי שחסר, והיא גם הסיבה שמישהו מקבל 340 שורות בשם signature.png.');
+    if (g('fail').indexOf('שום דבר') === 0) c.push('בחרתם שלא יקרה כלום כשזה נכשל. זו בחירה לגיטימית לאוטומציה שאף אחד לא נשען עליה — אבל שימו לב שברגע שמישהו מתחיל להסתמך על הגיליון הזה, כשל שקט גרוע יותר מאין אוטומציה בכלל, כי הוא נראה בדיוק כמו "לא היו מועמדים השבוע".');
+    else if (!g('fail')) c.push('**לא כתבתם מה קורה כשזה נכשל.** זה השדה שאף אחד לא ממלא, וזה גם הסיבה שאוטומציות מתות בשקט. זרימה שנופלת ומודיעה על עצמה היא תקלה של עשר דקות; זרימה שנופלת בשקט היא שבועיים של נתונים חסרים שאף אחד לא סופר.');
+    if (!g('who')) c.push('**אין שם של אדם.** "משאבי אנוש" הוא לא אחראי, ו"מי שבנה" הוא לא אחראי אחרי שהוא מתקדם לתפקיד אחר. שם אחד, שאפשר לשלוח לו הודעה.');
+    else if (g('who').length < 3 || /^(משאבי אנוש|hr|IT|מערכות מידע|ההנהלה|כולם)$/i.test(g('who'))) c.push('**זה תפקיד, לא אדם.** מחלקה לא פותחת את הזרימה בשבע בבוקר ובודקת למה היא נפלה. אדם עושה את זה.');
+    if (g('alive').indexOf('נגלה כשתיפול') === 0) c.push('"נגלה כשתיפול" עובד בדיוק עד הפעם שבו היא נופלת בלי להיות מורגשת — וזה הסוג הנפוץ יותר. סיכום שבועי אוטומטי הוא שני צעדים נוספים בזרימה, וזו ההשקעה הכי משתלמת בכל המפרט הזה.');
+
+    const filled = F.filter((f) => g(f.k)).length;
+    if (filled === F.length && !c.length) {
+      checksEl.className = 'as__checks is-done';
+      checksEl.innerHTML = '<p class="as__check"><strong>המפרט שלם.</strong> העתיקו אותו, שלחו אותו לעוד אדם אחד בארגון, ורק אז פתחו את הכלי. מהרגע ששני אנשים ראו את המסמך הזה, יש בארגון דבר שמישהו יודע להסביר גם כשאתם לא בחדר.</p>';
+    } else {
+      checksEl.className = 'as__checks';
+      checksEl.innerHTML = c.length
+        ? c.map((x) => '<p class="as__check">' + x.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') + '</p>').join('')
+        : '<p class="as__check as__check--calm">ממלאים למעלה, והמסמך נכתב כאן. שני השדות המסומנים הם אלה שאף אחד לא ממלא — והם אלה שיקבעו אם האוטומציה הזאת תשרוד את הרבעון.</p>';
+    }
+  }
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(docEl.textContent);
+      copyBtn.textContent = 'הועתק';
+      setTimeout(() => { copyBtn.textContent = 'העתקה'; }, 1600);
+    } catch (e) {
+      copyBtn.textContent = 'סמנו והעתיקו ידנית';
+    }
+  });
+
+  render();
+})();
+</script>
+
+<style>
+  .as {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .as__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1.35rem; }
+
+  .as__fields { display: flex; flex-direction: column; gap: 1.05rem; }
+  .as :global(.asf) { display: flex; flex-direction: column; gap: 0.4rem; }
+  .as :global(.asf.is-crit) {
+    border-inline-start: 2px solid var(--accent);
+    padding-inline-start: 0.85rem;
+  }
+  .as :global(.asf__l) { font-size: var(--t-xs); color: var(--ink-muted); font-weight: 500; }
+  .as :global(.asf__i) {
+    inline-size: 100%; font-family: var(--font-body); font-size: var(--t-sm);
+    color: var(--ink-strong); background: var(--surface-sunk);
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control);
+    padding: 0.6rem 0.8rem; min-block-size: 42px;
+    line-height: 1.6; resize: vertical;
+  }
+  .as :global(.asf__i::placeholder) { color: var(--ink-faint); }
+  .as :global(.asf__i:focus-visible) { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .as :global(.asf__opts) { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-block-start: 0.15rem; }
+  .as :global(.asf__o) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-faint);
+    background: transparent; border: 1px dashed var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.35rem 0.7rem;
+    cursor: pointer; text-align: start; min-block-size: 32px;
+    transition: color 0.12s ease, border-color 0.12s ease;
+  }
+  .as :global(.asf__o:hover) { color: var(--ink-strong); border-color: var(--ink-faint); border-style: solid; }
+
+  .as__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .as__outTop {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; margin-block-end: 0.75rem;
+  }
+  .as__outH { margin: 0; font-size: var(--t-xs); color: var(--ink-faint); }
+  .as__copy {
+    font-family: var(--font-body); font-size: var(--t-xs); font-weight: 500;
+    background: var(--accent); color: var(--accent-ink);
+    border: 0; border-radius: var(--r-control);
+    padding: 0.5rem 1rem; cursor: pointer; min-block-size: 36px; white-space: nowrap;
+  }
+  .as__doc {
+    background: var(--surface-sunk); border-radius: var(--r-control);
+    padding: 1rem 1.1rem; margin: 0; overflow-x: auto;
+    font-family: var(--font-body); font-size: var(--t-sm);
+    color: var(--ink-strong); line-height: 1.9; white-space: pre-wrap;
+  }
+
+  .as__checks { margin-block-start: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .as :global(.as__check) {
+    margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65;
+    border-inline-start: 2px solid #8A5A16; padding-inline-start: 0.85rem;
+  }
+  .as :global(.as__check--calm) { border-inline-start-color: var(--rule-strong); }
+  .as__checks.is-done :global(.as__check) { border-inline-start-color: #7E8B1F; }
+  .as :global(.as__check strong) { color: var(--ink-strong); }
+
+  @media (max-width: 620px) {
+    .as { padding: 1.2rem 1.1rem; }
+  }
+</style>
