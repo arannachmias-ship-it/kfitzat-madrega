@@ -16,6 +16,11 @@ import SignupBand from '../components/SignupBand.astro';
 
   <section class="wrap story band-story" aria-labelledby="story-t">
     <div class="story__grid">
+      <div class="story__stat">
+        <p class="story__num" data-count="88" data-suffix="%">88%</p>
+        <p class="story__numLabel">מהם עברו</p>
+        <p class="story__sub">ושביעות רצון הלקוחות עלתה, מ־90% ל־94%</p>
+      </div>
       <div class="story__text">
         <h2 id="story-t" class="story__q">
           במרץ 2020 היה צריך להעביר 3,000 מתנדבים, שכל העבודה שלהם עד אז הייתה פנים אל פנים,
@@ -26,16 +31,12 @@ import SignupBand from '../components/SignupBand.astro';
           בבת אחת, ולוח זמנים שלא מחכה לאף אחד.
         </p>
       </div>
-      <div class="story__stat">
-        <p class="story__num" data-count="88" data-suffix="%">88%</p>
-        <p class="story__numLabel">מהם עברו</p>
-        <p class="story__sub">ושביעות רצון הלקוחות עלתה, מ־90% ל־94%</p>
-      </div>
     </div>
   </section>
 
   <section class="wrap people">
     <article class="p">
+      <img class="p__photo" src="/anachnu/aran.webp" alt="ארן נחמיאס" width="480" height="480" loading="lazy" decoding="async" />
       <h2 class="p__name">ארן נחמיאס</h2>
       <p class="p__role">ניהול מוצר ותפעול · למידה והדרכה בארגונים</p>
       <p class="p__line">
@@ -54,6 +55,7 @@ import SignupBand from '../components/SignupBand.astro';
     </article>
 
     <article class="p">
+      <img class="p__photo" src="/anachnu/mati.webp" alt="מתי מצוינים" width="480" height="480" loading="lazy" decoding="async" />
       <h2 class="p__name">מתי מצוינים</h2>
       <p class="p__role">טכנולוג ראשי בתעשייה לשעבר · M.Sc. ביוטכנולוגיה</p>
       <p class="p__line">
@@ -100,19 +102,20 @@ import SignupBand from '../components/SignupBand.astro';
     margin-block-end: 3rem;
     max-inline-size: none;
   }
-  .story__grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.85fr); gap: clamp(1.75rem, 4vw, 3.25rem); align-items: center; }
+  .story__grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.3fr); gap: clamp(1.75rem, 4vw, 3.25rem); align-items: center; }
   .story__q { font-size: var(--t-xl); line-height: 1.55; color: var(--ink-on-deep); font-family: var(--font-body); font-weight: 400; max-inline-size: 44ch; margin-block: 0 1rem; }
   .story__note { color: var(--ink-on-deep-mute); font-weight: 300; max-inline-size: 50ch; margin: 0; font-size: var(--t-sm); }
-  .story__stat { border-inline-start: 2px solid var(--accent); padding-inline-start: clamp(1.25rem, 2.5vw, 2rem); }
+  .story__stat { border-inline-end: 2px solid var(--accent); padding-inline-end: clamp(1.25rem, 2.5vw, 2rem); }
   .story__num { font-family: var(--font-display); font-size: clamp(3.4rem, 7.5vw, 5.25rem); line-height: 0.95; color: var(--accent); margin: 0 0 0.4rem; }
   .story__numLabel { font-family: var(--font-display); font-size: var(--t-2xl); color: var(--ink-on-deep); margin: 0 0 0.7rem; }
   .story__sub { color: var(--ink-on-deep-mute); font-weight: 300; font-size: var(--t-sm); margin: 0; max-inline-size: 28ch; }
   @media (max-width: 900px) {
     .story__grid { grid-template-columns: 1fr; gap: 1.75rem; }
-    .story__stat { border-inline-start: 0; border-block-start: 2px solid var(--accent); padding-inline-start: 0; padding-block-start: 1.25rem; }
+    .story__stat { border-inline-end: 0; border-block-end: 2px solid var(--accent); padding-inline-end: 0; padding-block-end: 1.25rem; }
   }
 
   .people { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; padding-block-end: 3rem; }
+  .p__photo { inline-size: 132px; block-size: 132px; border-radius: var(--r-card); object-fit: cover; box-shadow: var(--shadow-2); margin-block-end: 1.1rem; display: block; }
   .p__name { font-size: var(--t-2xl); margin-block-end: 0.25rem; }
   .p__role { font-size: var(--t-sm); color: var(--ink-faint); margin-block-end: 1.1rem; }
   .p__line { color: var(--ink); font-size: var(--t-lg); line-height: 1.75; border-inline-start: 3px solid var(--accent); padding-inline-start: 1.1rem; margin-block-end: 1.3rem; }

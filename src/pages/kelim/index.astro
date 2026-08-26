@@ -39,8 +39,6 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
           <tr>
             <th scope="col">הכלי</th>
             <th scope="col">הכי טוב ל־</th>
-            <th scope="col">עברית</th>
-            <th scope="col">חינם</th>
             <th scope="col">ארגוני</th>
             <th scope="col">מאמנים על התוכן שלכם?</th>
           </tr>
@@ -48,10 +46,8 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
         <tbody>
           {all.map((e) => (
             <tr>
-              <th scope="row"><a href={`/kelim/${e.id}`}>{e.data.name}</a></th>
+              <th scope="row"><a href={`/kelim/${e.id}`} class="tbl__tool"><img class="logo logo--sm" src={`/kelim-logos/${e.id}.svg`} alt="" width="28" height="28" loading="lazy" />{e.data.name}</a></th>
               <td>{e.data.bestFor}</td>
-              <td>{e.data.hebrew}</td>
-              <td>{e.data.priceFree}</td>
               <td>{e.data.priceOrg}</td>
               <td>
                 <span class="tbl__warn">אישי: {e.data.trainsPersonal}</span>
@@ -62,6 +58,18 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
         </tbody>
       </table>
     </div>
+    <ul class="tbl-cards" aria-label="השוואת כלים">
+      {all.map((e) => (
+        <li>
+          <a href={`/kelim/${e.id}`} class="tc">
+            <span class="tc__head"><img class="logo" src={`/kelim-logos/${e.id}.svg`} alt="" width="36" height="36" loading="lazy" /><span class="tc__name">{e.data.name}</span></span>
+            <span class="tc__row"><span>הכי טוב ל־</span>{e.data.bestFor}</span>
+            <span class="tc__row"><span>ארגוני</span>{e.data.priceOrg}</span>
+            <span class="tc__row"><span>מאמנים על התוכן?</span>אישי: {e.data.trainsPersonal} · ארגוני: {e.data.trainsOrg}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
     <p class="tbl__after">
       העמודה האחרונה היא הסיבה המרכזית שהמדור הזה קיים. כמעט בכל כלי ברשימה,
       חשבון אישי וחשבון ארגוני הם שני מוצרים שונים מבחינת מה קורה למידע שהדבקתם —
@@ -77,8 +85,7 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
         {g.items.map((e) => (
           <li class="card">
             <a href={`/kelim/${e.id}`} class="card__inner">
-              <span class="card__name">{e.data.name}</span>
-              <span class="card__vendor">{e.data.vendor}</span>
+              <span class="card__top"><img class="logo" src={`/kelim-logos/${e.id}.svg`} alt="" width="40" height="40" loading="lazy" /><span><span class="card__name">{e.data.name}</span><span class="card__vendor">{e.data.vendor}</span></span></span>
               <span class="card__tag">{e.data.tagline}</span>
               <span class="card__row"><span>הכי טוב ל־</span>{e.data.bestFor}</span>
               <span class="card__row"><span>פחות מתאים ל־</span>{e.data.notFor}</span>
@@ -117,11 +124,26 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
 
   .tbl-sec { padding-block: 2rem 1rem; }
   .tbl-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--r-card); background: var(--surface); }
-  .tbl { border-collapse: collapse; inline-size: 100%; min-inline-size: 780px; font-size: var(--t-sm); }
+  .tbl { border-collapse: collapse; inline-size: 100%; font-size: var(--t-sm); }
+  .tbl__tool { display: inline-flex; align-items: center; gap: 0.6rem; }
+  /* logo tile: same box for every tool, the mark itself keeps its own colours */
+  .logo { inline-size: 40px; block-size: 40px; padding: 7px; border-radius: 9px; background: var(--surface); border: 1px solid var(--rule); object-fit: contain; flex: none; box-sizing: border-box; }
+  .logo--sm { inline-size: 30px; block-size: 30px; padding: 5px; border-radius: 7px; }
+  .tbl-cards { display: none; list-style: none; margin: 0; padding: 0; flex-direction: column; gap: 0.7rem; }
+  .tc { display: flex; flex-direction: column; gap: 0.45rem; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); padding: 1rem 1.1rem; text-decoration: none; color: var(--ink); }
+  .tc__head { display: flex; align-items: center; gap: 0.7rem; margin-block-end: 0.2rem; }
+  .tc__name { font-family: var(--font-display); font-size: var(--t-lg); color: var(--ink-strong); }
+  .tc__row { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.55; }
+  .tc__row span { display: block; font-size: var(--t-xs); color: var(--ink-faint); }
+  @media (max-width: 720px) {
+    .tbl-scroll { display: none; }
+    .tbl-cards { display: flex; }
+  }
   .tbl th, .tbl td { padding: 0.85rem 1rem; text-align: start; vertical-align: top; border-block-end: 1px solid var(--rule); }
   .tbl thead th { font-size: var(--t-xs); color: var(--ink-faint); font-weight: 500; background: var(--surface-sunk); white-space: nowrap; }
   .tbl tbody th { font-weight: 700; white-space: nowrap; }
-  .tbl tbody th a { color: var(--ink-strong); text-decoration: none; border-block-end: 2px solid var(--accent); }
+  .tbl tbody th a { color: var(--ink-strong); text-decoration: none; }
+  .tbl tbody th a:hover .logo { border-color: var(--accent); }
   .tbl tbody th a:hover { color: var(--accent-deep); }
   .tbl tbody tr:last-child th, .tbl tbody tr:last-child td { border-block-end: 0; }
   .tbl td { color: var(--ink-muted); line-height: 1.55; }
@@ -135,7 +157,9 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
   .cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
   .card__inner { display: flex; flex-direction: column; gap: 0.3rem; background: var(--surface); border-radius: var(--r-card); padding: 1.25rem 1.4rem; text-decoration: none; box-shadow: var(--shadow-1); block-size: 100%; }
   .card__inner:hover { box-shadow: var(--shadow-2); }
-  .card__name { font-family: var(--font-display); font-size: var(--t-xl); color: var(--ink-strong); }
+  .card__top { display: flex; align-items: center; gap: 0.8rem; }
+  .card__top > span { display: flex; flex-direction: column; }
+  .card__name { font-family: var(--font-display); font-size: var(--t-xl); color: var(--ink-strong); line-height: 1.2; }
   .card__vendor { font-size: var(--t-xs); color: var(--ink-faint); }
   .card__tag { font-size: var(--t-sm); color: var(--ink); margin-block: 0.5rem; line-height: 1.6; }
   .card__row { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.55; }
