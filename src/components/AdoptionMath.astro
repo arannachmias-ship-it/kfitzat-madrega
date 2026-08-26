@@ -1,0 +1,282 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 4.7.
+ * מחשבון: שלושה מספרים שאפשר להוציא מכל דוח שימוש, והם מייצרים את המדד
+ * שההנהלה לא ביקשה — שיעור החזרה. הרכיב מציג במפורש את הפער בין
+ * המספר שמוצג בישיבה (כיסוי) למספר שקובע אם זה נתפס.
+ * כל ההיגיון מקומי.
+ */
+---
+<div class="am" data-am>
+  <p class="am__label">שלושה מספרים מדוח השימוש שלכם</p>
+
+  <div class="am__ins">
+    <label class="am__in">
+      <span class="am__q">כמה אנשים בקבוצת היעד</span>
+      <span class="am__sub">מי אמור להשתמש, לא כמה רישיונות קניתם</span>
+      <input type="number" min="1" step="1" inputmode="numeric" data-target placeholder="40" />
+    </label>
+
+    <label class="am__in">
+      <span class="am__q">כמה מהם השתמשו בשבוע שעבר</span>
+      <span class="am__sub">לפחות פעם אחת</span>
+      <input type="number" min="0" step="1" inputmode="numeric" data-used placeholder="24" />
+    </label>
+
+    <label class="am__in">
+      <span class="am__q">כמה מתוך אלה השתמשו גם בשבוע שלפניו</span>
+      <span class="am__sub">אותם אנשים, שבועיים ברצף</span>
+      <input type="number" min="0" step="1" inputmode="numeric" data-back placeholder="9" />
+    </label>
+  </div>
+
+  <div class="am__sat">
+    <span class="am__q">אם מדדתם שביעות רצון, מה יצא?</span>
+    <div class="am__satRow" data-sat></div>
+  </div>
+
+  <p class="am__err" data-err hidden></p>
+
+  <div class="am__out" data-out hidden>
+    <div class="am__nums" data-nums></div>
+    <div class="am__contrast" data-contrast></div>
+    <div class="am__verdict" data-verdict></div>
+    <div class="am__next" data-next></div>
+  </div>
+
+  <p class="am__empty" data-empty>מלאו את שלושת המספרים.</p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-am]');
+  if (!root) return;
+
+  const tEl = root.querySelector('[data-target]');
+  const uEl = root.querySelector('[data-used]');
+  const bEl = root.querySelector('[data-back]');
+  const satEl = root.querySelector('[data-sat]');
+  const errEl = root.querySelector('[data-err]');
+  const outEl = root.querySelector('[data-out]');
+  const emptyEl = root.querySelector('[data-empty]');
+  const numsEl = root.querySelector('[data-nums]');
+  const contrastEl = root.querySelector('[data-contrast]');
+  const verdictEl = root.querySelector('[data-verdict]');
+  const nextEl = root.querySelector('[data-next]');
+
+  const SAT = [
+    { k: 'none', t: 'לא מדדנו' },
+    { k: 'high', t: 'גבוהה' },
+    { k: 'mid',  t: 'בינונית' },
+    { k: 'low',  t: 'נמוכה' },
+  ];
+  let sat = 'none';
+
+  SAT.forEach((s) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'am__satB' + (s.k === 'none' ? ' is-on' : '');
+    b.textContent = s.t;
+    b.addEventListener('click', () => {
+      sat = s.k;
+      [...satEl.children].forEach((c) => c.classList.remove('is-on'));
+      b.classList.add('is-on');
+      render();
+    });
+    satEl.appendChild(b);
+  });
+
+  [tEl, uEl, bEl].forEach((el) => el.addEventListener('input', render));
+
+  function pct(a, b) { return Math.round((a / b) * 100); }
+
+  function render() {
+    const t = parseInt(tEl.value, 10);
+    const u = parseInt(uEl.value, 10);
+    const b = parseInt(bEl.value, 10);
+
+    if (!(t > 0) || !(u >= 0) || !(b >= 0)) {
+      outEl.hidden = true; emptyEl.hidden = false; errEl.hidden = true;
+      return;
+    }
+
+    // אימות: אי אפשר לחזור בלי להשתמש, ואי אפשר להשתמש יותר מכולם.
+    if (u > t) {
+      errEl.textContent = 'מספר המשתמשים גדול מקבוצת היעד. אם באמת יש יותר — כדאי לבדוק את ההגדרה של קבוצת היעד, כי כנראה היא צרה מדי.';
+      errEl.hidden = false; outEl.hidden = true; emptyEl.hidden = true;
+      return;
+    }
+    if (b > u) {
+      errEl.textContent = 'מי שחזר חייב להיות חלק ממי שהשתמש. המספר השלישי לא יכול להיות גדול מהשני.';
+      errEl.hidden = false; outEl.hidden = true; emptyEl.hidden = true;
+      return;
+    }
+    errEl.hidden = true; outEl.hidden = false; emptyEl.hidden = true;
+
+    const coverage = pct(u, t);
+    const ret = u === 0 ? 0 : pct(b, u);
+    const core = pct(b, t);
+
+    numsEl.innerHTML =
+      '<div class="amn"><b>' + coverage + '%</b><span>כיסוי — נגעו בכלי</span></div>' +
+      '<div class="amn amn--key"><b>' + ret + '%</b><span>שיעור חזרה — הגיעו שוב</span></div>' +
+      '<div class="amn"><b>' + core + '%</b><span>ליבה יציבה מכלל היעד</span></div>';
+
+    contrastEl.innerHTML =
+      '<p class="am__cRow"><span class="am__cTag">מה יוצג בישיבה</span>' +
+      '<span class="am__cVal">' + coverage + '% מהצוות השתמש בכלי</span></p>' +
+      '<p class="am__cRow"><span class="am__cTag am__cTag--key">מה באמת קרה</span>' +
+      '<span class="am__cVal">' + b + ' מתוך ' + t + ' אנשים עובדים עם זה בפועל</span></p>';
+
+    // ההכרעה נקבעת לפי שיעור החזרה, לא לפי הכיסוי. זה כל הלקח.
+    let v, why;
+    if (u === 0) {
+      v = 'אף אחד לא נגע בזה';
+      why = 'זה נשמע גרוע והוא למעשה המצב הכי קל לתקן, כי אין כאן שאלה של התאמה — פשוט לא התחילו. ' +
+            'החסם כמעט תמיד אחד משלושה: אנשים לא יודעים שיש להם גישה, לא יודעים במה זה עוזר להם ספציפית, או ניסו פעם אחת בהתחלה ונכשלו בשקט.';
+    } else if (ret >= 60) {
+      v = 'זה נתפס';
+      why = 'שיעור חזרה מעל שישים אחוז אומר שהכלי נכנס לשגרה של מי שהתחיל. מכאן הצמיחה מגיעה מהרחבת הכיסוי — ' +
+            'להביא עוד אנשים לניסיון ראשון — ולא משכנוע מחדש של מי שכבר בפנים. זה גם הרגע להתחיל לתעד מה בדיוק הם עושים, כי זה החומר שישכנע את הבאים.';
+    } else if (ret >= 35) {
+      v = 'יש התחלה, הליבה עוד לא יציבה';
+      why = 'חלק מהאנשים חוזרים וחלק לא, וזה בדרך כלל לא עניין של מוטיבציה אלא של התאמה: למי שחזר יש משימה שבועית קבועה שהכלי פותר, ולמי שלא — אין. ' +
+            'הדרך קדימה היא לדבר עם שלושה שחזרו ולגלות מה המשימה, ולא לשלוח תזכורת לכולם.';
+    } else {
+      v = 'זה לא נתפס — והכיסוי מסתיר את זה';
+      why = 'רוב מי שניסה לא חזר, וזו התוצאה שהכי קל לפספס: אחוז הכיסוי נראה סביר, ומתחתיו אין כמעט אף אחד שממשיך. ' +
+            'ניסיון אחד שלא חוזרים עליו הוא כמעט תמיד סימן שהכלי לא נגע במשימה אמיתית של אותו אדם — לא שהוא לא הבין איך להשתמש בו.';
+    }
+
+    verdictEl.innerHTML =
+      '<p class="am__vLabel">ההכרעה</p><p class="am__vT">' + v + '</p><p class="am__vWhy">' + why + '</p>';
+
+    // צעדים — נגזרים מהמצב, כולל האזהרה על שביעות רצון גבוהה.
+    const next = [];
+
+    if (sat === 'high' && ret < 35 && u > 0) {
+      next.push('<strong>שביעות רצון גבוהה עם חזרה נמוכה היא לא הצלחה חלקית — היא אזהרה מוקדמת.</strong> אנשים אהבו את זה ובכל זאת לא חזרו, כלומר הכלי לא נגע בעבודה שלהם. אל תשקיעו עוד בהסברה: חפשו את המשימה.');
+    }
+    if (sat === 'low' && ret >= 60) {
+      next.push('שביעות הרצון נמוכה והשימוש חוזר — כלומר אנשים עובדים עם זה למרות שהוא מעצבן אותם. שווה לברר מה מעצבן, כי זה בדרך כלל חיכוך אחד קטן וניתן לתיקון שמונע מהיתר להצטרף.');
+    }
+    if (u === 0) {
+      next.push('בדקו קודם שלכולם באמת <strong>יש גישה</strong>. בערך בשליש מהמקרים שראינו זו הייתה כל הסיבה.');
+      next.push('בחרו <strong>משימה אחת שבועית</strong> שקיימת אצל כולם, והראו אותה. לא הדרכה על הכלי — הדגמה על המשימה.');
+    } else if (ret < 35) {
+      next.push('דברו עם <strong>שלושה אנשים שניסו ולא חזרו</strong>. לא סקר — שיחה של עשר דקות. השאלה היחידה: מה ניסית לעשות, ומה קרה.');
+      next.push('הפסיקו למדוד כיסוי כמדד ראשי. הוא ימשיך לעלות בזמן שכלום לא משתנה.');
+    } else if (ret < 60) {
+      next.push('דברו עם <strong>שלושה שחזרו</strong> וגלו מה המשימה השבועית שהם פתרו. זו המשימה שצריך להראות לכל השאר.');
+      next.push('בדקו אם החוזרים מרוכזים בצוות אחד. אם כן — זו לא תכונה של אנשים, זו תכונה של סוג עבודה.');
+    } else {
+      next.push('הרחיבו כיסוי: מי בקבוצת היעד עוד לא ניסה אף פעם, ומה חוסם אותו.');
+      next.push('קבעו מדידה חוזרת <strong>באותו יום בכל חודש</strong>. מדד שנמדד פעם אחת הוא אנקדוטה.');
+    }
+    next.push('כשמציגים להנהלה, הביאו את <strong>שני המספרים יחד</strong>. כיסוי לבדו נשמע טוב יותר ומלמד פחות.');
+
+    nextEl.innerHTML = '<p class="am__nextH">מה עושים עם זה</p><ul class="am__list">' +
+      next.map((x) => '<li>' + x + '</li>').join('') + '</ul>';
+  }
+
+  render();
+})();
+</script>
+
+<style>
+  .am {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .am__label { font-size: var(--t-sm); color: var(--ink-strong); margin: 0 0 1.35rem; }
+
+  .am__ins { display: flex; flex-direction: column; gap: 1.1rem; }
+  .am__in { display: block; }
+  .am__q { display: block; font-size: var(--t-sm); color: var(--ink-strong); }
+  .am__sub { display: block; font-size: var(--t-xs); color: var(--ink-faint); margin-block-start: 0.15rem; }
+  .am__in input {
+    margin-block-start: 0.45rem; inline-size: 100%; max-inline-size: 9rem;
+    font-family: var(--font-body); font-size: var(--t-base); color: var(--ink-strong);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.5rem 0.7rem; min-block-size: 42px;
+  }
+  .am__in input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .am__sat { margin-block-start: 1.35rem; }
+  .am__satRow { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-block-start: 0.5rem; }
+  .am :global(.am__satB) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.45rem 0.8rem;
+    cursor: pointer; min-block-size: 36px;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .am :global(.am__satB:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .am :global(.am__satB.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+
+  .am__err {
+    margin: 1.2rem 0 0; padding: 0.75rem 0.9rem;
+    background: var(--surface-sunk); border-inline-start: 3px solid #C25A3E;
+    border-radius: var(--r-control);
+    font-size: var(--t-xs); color: var(--ink-muted); line-height: 1.65;
+  }
+  .am__err[hidden] { display: none; }
+  .am__empty { margin: 1.35rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .am__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .am__out[hidden] { display: none; }
+
+  .am__nums { display: flex; flex-wrap: wrap; gap: 1.6rem; }
+  .am :global(.amn b) {
+    display: block; font-family: var(--font-display); font-weight: 400;
+    font-size: var(--t-3xl); color: var(--ink-strong); line-height: 1.1;
+  }
+  .am :global(.amn span) { display: block; font-size: var(--t-xs); color: var(--ink-faint); margin-block-start: 0.2rem; }
+  .am :global(.amn--key) {
+    border-inline-start: 3px solid var(--accent); padding-inline-start: 0.8rem;
+  }
+  .am :global(.amn--key b) { color: var(--ink-strong); }
+
+  .am__contrast {
+    margin-block-start: 1.5rem; padding: 1rem 1.1rem;
+    background: var(--surface-sunk); border-radius: var(--r-control);
+    display: flex; flex-direction: column; gap: 0.6rem;
+  }
+  .am :global(.am__cRow) { margin: 0; display: flex; flex-wrap: wrap; gap: 0.3rem 0.6rem; align-items: baseline; }
+  .am :global(.am__cTag) {
+    font-size: var(--t-xs); color: var(--ink-faint);
+    flex: 0 0 auto; min-inline-size: 8.5rem;
+  }
+  .am :global(.am__cTag--key) { color: var(--accent-deep); font-weight: 500; }
+  .am :global(.am__cVal) { font-size: var(--t-sm); color: var(--ink-strong); }
+
+  .am__verdict { margin-block-start: 1.6rem; }
+  .am :global(.am__vLabel) { margin: 0 0 0.35rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .am :global(.am__vT) {
+    margin: 0 0 0.85rem; font-family: var(--font-display); line-height: 1.15;
+    font-size: clamp(1.35rem, 3.5vw, 1.85rem); color: var(--ink-strong);
+    border-inline-start: 3px solid var(--accent); padding-inline-start: 0.85rem;
+  }
+  .am :global(.am__vWhy) { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.7; }
+
+  .am__next { margin-block-start: 1.4rem; padding-block-start: 1.1rem; border-block-start: 1px solid var(--rule); }
+  .am :global(.am__nextH) { margin: 0 0 0.6rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .am :global(.am__list) { margin: 0; padding-inline-start: 1.1rem; display: flex; flex-direction: column; gap: 0.55rem; }
+  .am :global(.am__list li) { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.7; }
+  .am :global(.am__list strong) { color: var(--ink-strong); }
+
+  @media (max-width: 620px) {
+    .am { padding: 1.2rem 1.1rem; }
+    .am__in input { max-inline-size: 100%; }
+    .am__nums { gap: 1.1rem; }
+    .am :global(.am__satB) { flex: 1 1 auto; }
+    .am :global(.am__cTag) { min-inline-size: 100%; }
+  }
+</style>
