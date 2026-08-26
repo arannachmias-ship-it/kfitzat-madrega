@@ -1,0 +1,217 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 2.1.
+ * מפצל משימות: הקוראת מחלקת את תשעת שלבי הדוח בין עצמה למודל,
+ * והרכיב מסמן אילו חלוקות שגויות ולמה, ומחשב כמה זמן באמת נחסך.
+ * הכללים כתובים מראש ומוסברים, כדי שאפשר יהיה לחלוק עליהם.
+ */
+---
+<div class="rs" data-rs>
+  <p class="rs__label">מי עושה מה בדוח הרבעוני שלכם?</p>
+
+  <ul class="rs__list" data-list></ul>
+
+  <div class="rs__out" data-out hidden>
+    <div class="rs__head">
+      <div class="rs__stat">
+        <p class="rs__num" data-saved>0</p>
+        <p class="rs__numLabel">דקות שנחסכות</p>
+      </div>
+      <p class="rs__verdict" data-verdict></p>
+    </div>
+    <div class="rs__flags" data-flags></div>
+  </div>
+
+  <p class="rs__empty" data-empty>חלקו את כל תשעת השלבים.</p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-rs]');
+  if (!root) return;
+
+  // best: 'model' = כדאי לתת · 'you' = חייב להישאר אצלכם · 'both' = טיוטה שלו, החלטה שלכם
+  // mins = כמה דקות השלב לוקח ביד
+  const STEPS = [
+    { k: 'collect', t: 'לאסוף את הנתונים מהמערכות', best: 'both', mins: 40,
+      why: 'האיסוף עצמו הוא עבודה טכנית, אבל הוא נוגע במערכות שלכם. אם יש חיבור — זו בדיוק אוטומציה מ<a href="/maslul/automatzia-rishona">שלב 3</a>. אם אין, זו העתקה ידנית, ואין מה לתת למודל.' },
+    { k: 'verify', t: 'לוודא שהמספרים נכונים', best: 'you', mins: 25,
+      why: '**זה השלב היחיד ברשימה שאסור לתת בשום צורה.** מודל שמוודא מספרים מייצר ביטחון, לא בדיקה. כל מספר שנכנס למסמך — מול המקור, בעיניים.' },
+    { k: 'story', t: 'להחליט מה הסיפור של הרבעון', best: 'you', mins: 30,
+      why: '**המודל תמיד ימצא סיפור, גם כשאין.** עלייה מ־4.1% ל־5.3% בארגון של 80 איש היא אדם אחד — והוא יכתוב על מגמת נטישה מדאיגה. אתם יודעים מה קרה בחצי שנה האחרונה; הוא לא, והוא לא יגיד שהוא לא.' },
+    { k: 'pick', t: 'לבחור אילו חמישה מספרים נכנסים', best: 'you', mins: 20,
+      why: 'הוא יבחר את אלה שהכי קל לספר עליהם, לא את אלה שהכי חשובים. זו החלטה ניהולית שלוקחת חמש דקות ומחזיקה את כל המסמך.' },
+    { k: 'write', t: 'לנסח את הטקסט', best: 'model', mins: 90,
+      why: 'הכי כדאי לתת מכל הרשימה. זו העבודה שגוזלת הכי הרבה שעות ואף אחד לא ייזכר בה לטובה.' },
+    { k: 'titles', t: 'לכתוב כותרות וכותרות משנה', best: 'model', mins: 25,
+      why: 'תנו לו לייצר חמש אפשרויות ובחרו. זה בדיוק סוג המשימה שבה כמות מייצרת איכות, וידנית אף אחד לא כותב חמש.' },
+    { k: 'slides', t: 'לפרוס לשקפים', best: 'model', mins: 60,
+      why: 'הזזת תיבות טקסט היא היום הראשון מתוך היומיים. ראו את <a href="/kelim/gamma">מדריך הכלים</a> למה שעושה בדיוק את זה.' },
+    { k: 'qa', t: 'להכין תשובות לשאלות שיישאלו', best: 'model', mins: 35,
+      why: 'השימוש הכי מוערך פחות מדי ברשימה. בקשו ממנו את שלוש השאלות הקשות שיישאלו — הוא טוב בזה במיוחד, ובדרך כלל הוא צודק.' },
+    { k: 'check', t: 'לבדוק אם הנתונים סותרים את המסקנה שלכם', best: 'both', mins: 20,
+      why: 'כאן המודל הופך מכותב לבודק, וזה השימוש הכי שווה בו. אבל ההכרעה מה לעשות עם סתירה שהוא מצא — היא שלכם.' },
+  ];
+
+  const OPTS = [
+    { k: 'you',   t: 'אני' },
+    { k: 'both',  t: 'ביחד' },
+    { k: 'model', t: 'המודל' },
+  ];
+
+  const listEl = root.querySelector('[data-list]');
+  const outEl = root.querySelector('[data-out]');
+  const emptyEl = root.querySelector('[data-empty]');
+  const savedEl = root.querySelector('[data-saved]');
+  const verdEl = root.querySelector('[data-verdict]');
+  const flagsEl = root.querySelector('[data-flags]');
+  const pick = {};
+
+  STEPS.forEach((s) => {
+    const li = document.createElement('li');
+    li.className = 'rsq';
+    const h = document.createElement('p');
+    h.className = 'rsq__t';
+    h.innerHTML = s.t + '<span class="rsq__m">' + s.mins + ' דק׳ ביד</span>';
+    li.appendChild(h);
+    const row = document.createElement('div');
+    row.className = 'rsq__row';
+    OPTS.forEach((o) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'rsq__b'; b.textContent = o.t;
+      b.addEventListener('click', () => {
+        pick[s.k] = o.k;
+        [...row.children].forEach((c) => c.classList.remove('is-on'));
+        b.classList.add('is-on');
+        render();
+      });
+      row.appendChild(b);
+    });
+    li.appendChild(row);
+    listEl.appendChild(li);
+  });
+
+  function render() {
+    if (STEPS.some((s) => !pick[s.k])) { outEl.hidden = true; emptyEl.hidden = false; return; }
+    outEl.hidden = false; emptyEl.hidden = true;
+
+    let saved = 0;
+    const risky = [];   // נתנו למודל משהו שחייב להישאר אצלכם
+    const missed = [];  // שמרתם אצלכם משהו שהיה כדאי לתת
+
+    STEPS.forEach((s) => {
+      const p = pick[s.k];
+      if (s.best === 'model') {
+        if (p === 'model') saved += s.mins;
+        else if (p === 'both') saved += Math.round(s.mins * 0.5);
+        else missed.push(s);
+      } else if (s.best === 'both') {
+        if (p === 'both' || p === 'model') saved += Math.round(s.mins * 0.4);
+      } else {
+        // best === 'you' — מסירה של שלב כזה לא חוסכת זמן, היא קונה סבב תיקון.
+        // לכן היא מחסירה: הזמן חוזר, ועוד טיוטה שנבנתה על עמוד שדרה שגוי.
+        if (p === 'model') { risky.push(s); saved -= s.mins; }
+        else if (p === 'both') { risky.push(s); saved -= Math.round(s.mins * 0.5); }
+      }
+    });
+
+    savedEl.textContent = Math.max(0, saved);
+
+    if (risky.length === 0 && missed.length === 0) {
+      verdEl.className = 'rs__verdict is-good';
+      verdEl.textContent = 'זו החלוקה. שימו לב שהיא לא "המודל עושה את הדוח" ולא "המודל לא מתאים לדוחות" — היא קו באמצע, וכל הערך נמצא בזה שהקו במקום הנכון. שלוש השורות שאתם כותבים לפני הן עשר דקות שמחזירות את כל השאר.';
+    } else if (risky.length) {
+      verdEl.className = 'rs__verdict is-warn';
+      verdEl.textContent = risky.length === 1
+        ? 'שלב אחד שמסרתם הוא שלב שכל הדוח עומד עליו. שימו לב שהמספר למעלה ירד: מסירה של שלב כזה לא חוסכת זמן, היא קונה סבב תיקון על טיוטה שנבנתה על עמוד שדרה שגוי.'
+        : risky.length + ' שלבים שמסרתם הם אלה שכל הדוח עומד עליהם. זה בדיוק המצב שבו יוצא דוח שנראה מצוין ואומר כלום — וזה גם המצב שבו אנשים מסיקים ש"AI לא עובד לדוחות".';
+    } else {
+      verdEl.className = 'rs__verdict is-mid';
+      verdEl.textContent = 'החלוקה בטוחה — שום דבר קריטי לא נמסר. אבל השארתם אצלכם עבודה שאף אחד לא ייזכר בה לטובה, וזה בדיוק הזמן שהתכוונתם להחזיר.';
+    }
+
+    const out = [];
+    risky.forEach((s) => out.push({ cls: 'is-risk', h: 'זה חייב להישאר אצלכם — ' + s.t, b: s.why }));
+    missed.forEach((s) => out.push({ cls: 'is-miss', h: 'זה שווה לתת — ' + s.t, b: s.why }));
+
+    flagsEl.innerHTML = out.length
+      ? out.map((f) =>
+          '<div class="rsf ' + f.cls + '"><p class="rsf__h">' + f.h + '</p>' +
+          '<p class="rsf__b">' + f.b.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') + '</p></div>'
+        ).join('')
+      : '';
+  }
+})();
+</script>
+
+<style>
+  .rs {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .rs__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1.25rem; }
+
+  .rs__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.85rem; }
+  .rs :global(.rsq__t) {
+    margin: 0 0 0.45rem; font-size: var(--t-sm); color: var(--ink-strong);
+    display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .rs :global(.rsq__m) {
+    font-size: 0.75em; color: var(--ink-faint); flex: none;
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control); padding: 0.05rem 0.4rem;
+  }
+  .rs :global(.rsq__row) { display: flex; gap: 0.4rem; }
+  .rs :global(.rsq__b) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.45rem 1rem;
+    cursor: pointer; min-block-size: 36px;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .rs :global(.rsq__b:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .rs :global(.rsq__b.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+
+  .rs__empty { margin: 1.25rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .rs__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .rs__out[hidden] { display: none; }
+
+  .rs__head {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem clamp(1rem, 3vw, 2rem); align-items: center;
+  }
+  .rs__stat { border-inline-start: 2px solid var(--accent); padding-inline-start: 0.9rem; }
+  .rs__num {
+    margin: 0; font-family: var(--font-display); line-height: 0.95;
+    font-size: clamp(2.2rem, 6vw, 3.2rem); color: var(--ink-strong); white-space: nowrap;
+  }
+  .rs__numLabel { margin: 0.3rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+  .rs__verdict { margin: 0; font-size: var(--t-sm); line-height: 1.7; color: var(--ink-muted); }
+  .rs__verdict.is-good { border-inline-start: 2px solid #7E8B1F; padding-inline-start: 0.85rem; }
+  .rs__verdict.is-mid  { border-inline-start: 2px solid #8A5A16; padding-inline-start: 0.85rem; }
+  .rs__verdict.is-warn { border-inline-start: 2px solid #A0282F; padding-inline-start: 0.85rem; }
+
+  .rs__flags { margin-block-start: 1.2rem; display: flex; flex-direction: column; gap: 0.85rem; }
+  .rs :global(.rsf) { border-inline-start: 2px solid var(--rule-strong); padding-inline-start: 0.85rem; }
+  .rs :global(.rsf.is-risk) { border-inline-start-color: #A0282F; }
+  .rs :global(.rsf.is-miss) { border-inline-start-color: #8A5A16; }
+  .rs :global(.rsf__h) { margin: 0 0 0.25rem; font-size: var(--t-sm); font-weight: 600; color: var(--ink-strong); }
+  .rs :global(.rsf__b) { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
+  .rs :global(.rsf__b strong) { color: var(--ink-strong); }
+  .rs :global(.rsf__b a) { color: inherit; }
+
+  @media (max-width: 620px) {
+    .rs { padding: 1.2rem 1.1rem; }
+    .rs :global(.rsq__row) { flex-wrap: wrap; }
+    .rs :global(.rsq__b) { flex: 1 1 auto; }
+    .rs__head { grid-template-columns: 1fr; }
+    .rs__stat { border-inline-start: 0; border-block-start: 2px solid var(--accent); padding-inline-start: 0; padding-block-start: 0.85rem; }
+  }
+</style>
