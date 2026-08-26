@@ -1,0 +1,298 @@
+---
+/**
+ * הרכיב האינטראקטיבי של שיעור 3.1.
+ * מחולל אישי: הקוראת מרכיבה את המשפט בשלושה חלקים על משימה שלה,
+ * ומקבלת מפרט להעתקה + חשבון קרדיטים אמיתי מול הטיר החינמי של Make.
+ * אין כאן קריאה למודל. כל החישוב מקומי.
+ */
+---
+<div class="fb" data-fb>
+  <p class="fb__label">הרכיבו את המשפט על משימה אמיתית שלכם</p>
+
+  <div class="fb__step">
+    <p class="fb__h"><span class="fb__n">כש</span> מה מתחיל את זה?</p>
+    <div class="fb__opts" data-trigs></div>
+  </div>
+
+  <div class="fb__step" data-freqwrap hidden>
+    <p class="fb__h"><span class="fb__n">כמה</span> בערך כמה פעמים בחודש זה קורה?</p>
+    <div class="fb__opts fb__opts--tight" data-freqs></div>
+  </div>
+
+  <div class="fb__step">
+    <p class="fb__h"><span class="fb__n">אם</span> מה יגרום לזה <em>לא</em> לרוץ?</p>
+    <input class="fb__in" type="text" data-cond dir="rtl" placeholder="למשל: רק אם הקובץ הוא PDF, והנושא מכיל שם משרה פתוחה" />
+  </div>
+
+  <div class="fb__step">
+    <p class="fb__h"><span class="fb__n">אז</span> מה קורה? (כל פעולה = קרדיט אחד בכל הרצה)</p>
+    <div class="fb__opts" data-acts></div>
+  </div>
+
+  <div class="fb__out" data-out hidden>
+    <div class="fb__outTop">
+      <p class="fb__outH">המפרט שלכם</p>
+      <button type="button" class="fb__copy" data-copy>העתקה</button>
+    </div>
+    <pre class="fb__spec" dir="rtl" data-spec></pre>
+    <div class="fb__calc">
+      <p class="fb__num"><span data-credits>0</span> <span class="fb__unit">קרדיטים בחודש</span></p>
+      <p class="fb__verdict" data-verdict></p>
+    </div>
+    <div class="fb__flags" data-flags></div>
+  </div>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-fb]');
+  if (!root) return;
+
+  const TRIGS = [
+    { k: 'mail', t: 'מגיע מייל לתיבה ייעודית', kind: 'instant',
+      line: 'מגיע מייל לכתובת הייעודית עם קובץ מצורף',
+      warn: 'טריגר מיידי — הזרימה מתעוררת רק כשבאמת הגיע מייל, ולכן היא לא שורפת קרדיטים בזמן שקט. זה הסוג הזול והמהיר ביותר.' },
+    { k: 'form', t: 'מולא טופס (Google Forms / Microsoft Forms)', kind: 'instant',
+      line: 'מישהו שולח את הטופס',
+      warn: 'טריגר מיידי, והנקי מכולם: הטופס מגדיר לכם את השדות מראש, ולכן כמעט אף פעם לא מגיע לזרימה משהו שלא ציפיתם לו.' },
+    { k: 'row', t: 'נוספה שורה לגיליון', kind: 'poll',
+      line: 'נוספת שורה חדשה לגיליון',
+      warn: 'סקירה: הכלי מתעורר לפי שעון ובודק אם יש שורה חדשה, גם כשאין. שקלו לשים כפתור בגיליון שדוחף את השורה במקום שהכלי יחפש אותה — זה הופך את זה לטריגר מיידי.' },
+    { k: 'time', t: 'הגיע הזמן — כל בוקר בשעה קבועה', kind: 'clock',
+      line: 'השעה מגיעה (כל בוקר בשבע)',
+      warn: 'שעון: 30 הרצות בחודש, ידוע מראש. זו הבחירה הכי צפויה מבחינת עלות, והיא פותרת יותר מקרים ממה שנדמה — רוב מה ש"חייב להיות מיידי" בעצם לא חייב.' },
+    { k: 'file', t: 'הועלה קובץ לתיקייה משותפת', kind: 'poll',
+      line: 'קובץ חדש מופיע בתיקייה',
+      warn: 'סקירה. שימו לב שתיקייה משותפת היא המקום שבו מגיעים גם קבצים שלא התכוונתם אליהם — כאן התנאי הוא לא נחמד שיהיה, הוא חובה.' },
+    { k: 'sys', t: 'שונה סטטוס במערכת השכר / הגיוס הפנימית', kind: 'poll',
+      line: 'הסטטוס במערכת הפנימית משתנה',
+      warn: 'זו הבחירה שהכי הרבה אוטומציות ראשונות נתקעות עליה: למערכות השכר והגיוס הישראליות אין ברוב המקרים חיבור מוכן ב־Make. בדקו את זה **לפני** שאתם בונים משהו סביבו. לרוב הפתרון הוא דוח מתוזמן שהמערכת שולחת במייל — וזה מחזיר אתכם לטריגר הראשון ברשימה.' },
+  ];
+
+  const FREQS = [
+    { k: 5, t: 'עד 5' }, { k: 20, t: 'בערך 20' },
+    { k: 60, t: 'בערך 60' }, { k: 200, t: '200 ומעלה' },
+  ];
+
+  const ACTS = [
+    { k: 'save',  t: 'לשמור קובץ בתיקייה הנכונה' },
+    { k: 'sheet', t: 'להוסיף שורה לגיליון מעקב' },
+    { k: 'notify',t: 'לשלוח הודעה בערוץ הצוות' },
+    { k: 'mail',  t: 'לשלוח מייל לאדם ספציפי' },
+    { k: 'cal',   t: 'לפתוח אירוע או תזכורת ביומן' },
+    { k: 'ai',    t: 'להעביר את התוכן למודל שיסכם או יחלץ שדות' },
+  ];
+
+  const trigsEl = root.querySelector('[data-trigs]');
+  const freqsEl = root.querySelector('[data-freqs]');
+  const freqWrap = root.querySelector('[data-freqwrap]');
+  const actsEl = root.querySelector('[data-acts]');
+  const condEl = root.querySelector('[data-cond]');
+  const outEl = root.querySelector('[data-out]');
+  const specEl = root.querySelector('[data-spec]');
+  const credEl = root.querySelector('[data-credits]');
+  const verdEl = root.querySelector('[data-verdict]');
+  const flagsEl = root.querySelector('[data-flags]');
+  const copyBtn = root.querySelector('[data-copy]');
+
+  let trig = null, freq = 20, acts = [];
+
+  TRIGS.forEach((x) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'fb__b'; b.textContent = x.t;
+    b.addEventListener('click', () => {
+      trig = x;
+      [...trigsEl.children].forEach((c) => c.classList.remove('is-on'));
+      b.classList.add('is-on');
+      freqWrap.hidden = (x.kind === 'clock');
+      render();
+    });
+    trigsEl.appendChild(b);
+  });
+
+  FREQS.forEach((x, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'fb__b fb__b--sm'; b.textContent = x.t;
+    if (i === 1) b.classList.add('is-on');
+    b.addEventListener('click', () => {
+      freq = x.k;
+      [...freqsEl.children].forEach((c) => c.classList.remove('is-on'));
+      b.classList.add('is-on');
+      render();
+    });
+    freqsEl.appendChild(b);
+  });
+
+  ACTS.forEach((x) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'fb__b'; b.textContent = x.t;
+    b.addEventListener('click', () => {
+      const i = acts.indexOf(x);
+      if (i > -1) { acts.splice(i, 1); b.classList.remove('is-on'); }
+      else { acts.push(x); b.classList.add('is-on'); }
+      render();
+    });
+    actsEl.appendChild(b);
+  });
+
+  condEl.addEventListener('input', render);
+
+  function render() {
+    if (!trig || !acts.length) { outEl.hidden = true; return; }
+    outEl.hidden = false;
+
+    const runs = trig.kind === 'clock' ? 30 : freq;
+    const cond = condEl.value.trim();
+
+    const lines = [];
+    lines.push('כש: ' + trig.line);
+    lines.push('אם: ' + (cond || '— לא הוגדר תנאי —'));
+    lines.push('אז:');
+    acts.forEach((a, i) => lines.push('    ' + (i + 1) + '. ' + a.t));
+    lines.push('');
+    lines.push('תדירות משוערת: ' + runs + ' הרצות בחודש');
+    lines.push('סוג טריגר: ' + (trig.kind === 'instant' ? 'מיידי' : trig.kind === 'clock' ? 'שעון' : 'סקירה'));
+    specEl.textContent = lines.join('\n');
+
+    // קרדיט אחד לטריגר + קרדיט לכל פעולה, בכל הרצה. מודול AI יקר יותר.
+    const perRun = 1 + acts.length + (acts.some((a) => a.k === 'ai') ? 2 : 0);
+    let credits = perRun * runs;
+    if (trig.kind === 'poll') credits += 2880; // סקירה כל רבע שעה
+    credEl.textContent = credits.toLocaleString('he-IL');
+
+    verdEl.className = 'fb__verdict';
+    if (credits <= 1000) {
+      verdEl.classList.add('is-ok');
+      verdEl.textContent = 'נכנס בנוחות בטיר החינמי של Make (1,000 קרדיטים בחודש). האוטומציה הראשונה שלכם לא צריכה לעלות כלום.';
+    } else if (trig.kind === 'poll') {
+      verdEl.classList.add('is-warn');
+      verdEl.textContent = 'רוב המספר הזה הוא לא העבודה — הוא הבדיקות עצמן. סקירה כל רבע שעה היא כ־2,880 בדיקות בחודש, לפני שקרה משהו. הורידו לפעם ביום, או מצאו טריגר מיידי, וזה יורד למאות בודדות.';
+    } else {
+      verdEl.classList.add('is-warn');
+      verdEl.textContent = 'חורג מהטיר החינמי. או שמורידים תדירות, או שזו כבר אוטומציה שמצדיקה 12 דולר בחודש — ואם היא חוסכת שעה בשבוע, היא מצדיקה.';
+    }
+
+    const flags = [];
+    flags.push(trig.warn);
+    if (!cond) flags.push('**אין לכם תנאי.** זה החלק שאנשים מדלגים עליו, וזה גם החלק שאחראי לרוב סיפורי האימה. שאלו את עצמכם מה הדבר הכי מטופש שיכול להיכנס לכאן — התשובה היא התנאי שחסר.');
+    if (acts.some((a) => a.k === 'ai')) flags.push('שלב שמעביר תוכן למודל הוא גם הצעד היקר ביותר וגם היחיד שיכול להחזיר תשובה שגויה בלי להיכשל. אל תשימו אותו ראשון: תנו לפילטר לעצור את מה שלא רלוונטי לפניו.');
+    if (acts.length >= 4) flags.push('ארבע פעולות ומעלה זה הרבה לאוטומציה ראשונה. אם אפשר לחתוך אותה לשתיים ולהריץ שבוע — עשו את זה. אפשר תמיד להוסיף, וקשה מאוד לאבחן זרימה שנשברה כשיש בה שישה צעדים.');
+
+    flagsEl.innerHTML = flags.map((f) =>
+      '<p class="fb__flag">' + f.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') + '</p>'
+    ).join('');
+  }
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(specEl.textContent);
+      copyBtn.textContent = 'הועתק';
+      setTimeout(() => { copyBtn.textContent = 'העתקה'; }, 1600);
+    } catch (e) {
+      copyBtn.textContent = 'סמנו והעתיקו ידנית';
+    }
+  });
+})();
+</script>
+
+<style>
+  .fb {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.6rem;
+    margin-block: 2rem;
+  }
+  .fb__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1.35rem; }
+
+  .fb__step { margin-block-end: 1.35rem; }
+  .fb__h {
+    margin: 0 0 0.7rem; font-size: var(--t-sm); color: var(--ink-strong);
+    display: flex; align-items: baseline; gap: 0.55rem; flex-wrap: wrap;
+  }
+  .fb__h em { color: var(--ink-muted); font-style: italic; }
+  .fb__n {
+    font-family: var(--font-display); font-size: var(--t-xs);
+    color: var(--accent-deep); font-weight: 700;
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control);
+    padding: 0.15rem 0.5rem; flex: none;
+  }
+
+  .fb__opts { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .fb__opts--tight :global(.fb__b) { min-inline-size: 0; }
+
+  .fb :global(.fb__b) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.55rem 0.9rem;
+    cursor: pointer; min-block-size: 38px; text-align: start;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .fb :global(.fb__b:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  /* הציטרון הוא מה ששורד את שני המצבים: --ink-strong ו---ink-on-deep
+     שניהם בהירים במצב כהה, ולכן טקסט לבן על רקע לבן. */
+  .fb :global(.fb__b.is-on) {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-ink); font-weight: 500;
+  }
+
+  .fb__in {
+    inline-size: 100%; font-family: var(--font-body); font-size: var(--t-sm);
+    color: var(--ink-strong); background: var(--surface-sunk);
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control);
+    padding: 0.65rem 0.85rem; min-block-size: 44px;
+  }
+  .fb__in::placeholder { color: var(--ink-faint); }
+  .fb__in:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .fb__out {
+    margin-block-start: 1.6rem; padding-block-start: 1.35rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .fb__outTop {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; margin-block-end: 0.75rem;
+  }
+  .fb__outH { margin: 0; font-size: var(--t-xs); color: var(--ink-faint); }
+  .fb__copy {
+    font-family: var(--font-body); font-size: var(--t-xs); font-weight: 500;
+    background: var(--accent); color: var(--accent-ink);
+    border: 0; border-radius: var(--r-control);
+    padding: 0.5rem 1rem; cursor: pointer; min-block-size: 36px; white-space: nowrap;
+  }
+  .fb__spec {
+    background: var(--surface-sunk); border-radius: var(--r-control);
+    padding: 1rem 1.1rem; margin: 0; overflow-x: auto;
+    font-family: var(--font-body); font-size: var(--t-sm);
+    color: var(--ink-strong); line-height: 1.9; white-space: pre-wrap;
+  }
+
+  .fb__calc {
+    margin-block-start: 1.1rem; padding-block-start: 1rem;
+    border-block-start: 1px solid var(--rule);
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem clamp(1rem, 3vw, 2rem); align-items: center;
+  }
+  .fb__num {
+    margin: 0; font-family: var(--font-display); line-height: 1;
+    font-size: clamp(1.9rem, 5vw, 2.6rem); color: var(--ink-strong);
+    white-space: nowrap;
+  }
+  .fb__unit { font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-faint); display: block; margin-block-start: 0.3rem; }
+  .fb__verdict { margin: 0; font-size: var(--t-sm); line-height: 1.65; color: var(--ink-muted); }
+  .fb__verdict.is-ok { border-inline-start: 2px solid #7E8B1F; padding-inline-start: 0.85rem; }
+  .fb__verdict.is-warn { border-inline-start: 2px solid #8A5A16; padding-inline-start: 0.85rem; }
+
+  .fb__flags { margin-block-start: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .fb :global(.fb__flag) {
+    margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65;
+  }
+  .fb :global(.fb__flag strong) { color: var(--ink-strong); }
+
+  @media (max-width: 620px) {
+    .fb { padding: 1.2rem 1.1rem; }
+    .fb__opts { flex-direction: column; align-items: stretch; }
+    .fb :global(.fb__b) { inline-size: 100%; }
+    .fb__opts--tight { flex-direction: row; }
+    .fb__opts--tight :global(.fb__b) { inline-size: auto; flex: 1 1 auto; text-align: center; }
+    .fb__calc { grid-template-columns: 1fr; }
+  }
+</style>
