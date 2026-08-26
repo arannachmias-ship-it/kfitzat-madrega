@@ -82,12 +82,12 @@ export const STAGES: Stage[] = [
     items: [
       { slug: 'ma-asur-lehachnis', n: '4.1', title: 'מה אסור להכניס ל־AI: המדריך למשאבי אנוש', note: 'מידע עובדים, מועמדים, לקוחות וכספים. הקווים האדומים.', interactive: true },
       { slug: 'mediniyut-amud-echad', n: '4.2', title: 'מדיניות AI בעמוד אחד', note: 'תבנית להעתקה, כתובה בשפה שעובדים מבינים.' },
-      { slug: 'pratiyut-ovdim', n: '4.3', title: 'פרטיות עובדים ומועמדים', note: 'מה החוק דורש ומה פשוט לא כדאי.' },
+      { slug: 'pratiyut-ovdim', n: '4.3', title: 'פרטיות עובדים ומועמדים', note: 'מה החוק דורש ומה פשוט לא כדאי.', interactive: true },
       { slug: 'lama-hatzevet-lo-mishtamesh', n: '4.4', title: 'למה הצוות לא משתמש במה שקניתם', note: 'חמש סיבות אמיתיות, ומה עוזר לכל אחת.' },
       { slug: 'shloshet-alafim-be-30-yom', n: '4.5', title: 'איך מעבירים 3,000 אנשים לטכנולוגיה חדשה ב־30 יום', note: 'חמישה לקחים מהשטח, עם מספרים אמיתיים.' },
       { slug: 'lelamed-mi-shebatuach-shelo-bishvilo', n: '4.6', title: 'ללמד את מי שבטוח שזה לא בשבילו', note: 'עשרים שנות הוראה, מזוקקות לשבעה כללים.' },
-      { slug: 'eich-modedim-imutz', n: '4.7', title: 'איך מודדים אימוץ, ולא שביעות רצון', note: 'המדד שההנהלה מבקשת הוא בדרך כלל המדד הלא נכון.' },
-      { slug: 'tochnit-90-yom', n: '4.8', title: 'תוכנית 90 יום להטמעת AI בארגון', note: 'מה עושים בכל שבוע, ומי אחראי על מה.' },
+      { slug: 'eich-modedim-imutz', n: '4.7', title: 'איך מודדים אימוץ, ולא שביעות רצון', note: 'המדד שההנהלה מבקשת הוא בדרך כלל המדד הלא נכון.', interactive: true },
+      { slug: 'tochnit-90-yom', n: '4.8', title: 'תוכנית 90 יום להטמעת AI בארגון', note: 'מה עושים בכל שבוע, ומי אחראי על מה.', interactive: true },
     ],
   },
 ];
