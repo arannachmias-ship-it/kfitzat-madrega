@@ -69,9 +69,9 @@ export const STAGES: Stage[] = [
       { slug: 'metrigger-lepeula', n: '3.1', title: 'מטריגר לפעולה: איך אוטומציה בנויה', note: 'המבנה שחוזר בכל אוטומציה, בלי קוד.', interactive: true },
       { slug: 'lechaber-kelim-kayamim', n: '3.2', title: 'לחבר את הכלים שכבר יש לכם', note: 'מייל, יומן, אקסל, CRM. מה מתחבר למה.', interactive: true },
       { slug: 'automatzia-rishona', n: '3.3', title: 'האוטומציה הראשונה שלכם, מקצה לקצה', note: 'אחת קטנה שעובדת, מההתחלה עד שהיא רצה.', interactive: true },
-      { slug: 'matai-sochen', n: '3.4', title: 'מתי סוכן ומתי סתם סקריפט', note: 'רוב מה שקוראים לו סוכן לא צריך להיות סוכן.' },
-      { slug: 'kshe-ze-nishbar', n: '3.5', title: 'מה קורה כשזה נשבר, ומי אחראי', note: 'השאלה שאף אחד לא שואל לפני שבונים.' },
-      { slug: 'letachzek-bli-mefateach', n: '3.6', title: 'לתחזק אוטומציה בלי מפתח', note: 'איך לא להיות תלויים באדם שבנה את זה.' },
+      { slug: 'matai-sochen', n: '3.4', title: 'מתי סוכן ומתי סתם סקריפט', note: 'רוב מה שקוראים לו סוכן לא צריך להיות סוכן.', interactive: true },
+      { slug: 'kshe-ze-nishbar', n: '3.5', title: 'מה קורה כשזה נשבר, ומי אחראי', note: 'השאלה שאף אחד לא שואל לפני שבונים.', interactive: true },
+      { slug: 'letachzek-bli-mefateach', n: '3.6', title: 'לתחזק אוטומציה בלי מפתח', note: 'איך לא להיות תלויים באדם שבנה את זה.', interactive: true },
     ],
   },
   {
