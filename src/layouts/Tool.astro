@@ -1,0 +1,135 @@
+---
+import Base from './Base.astro';
+import SignupBand from '../components/SignupBand.astro';
+
+interface Props {
+  name: string; vendor: string; category: string; tagline: string;
+  bestFor: string; notFor: string; hebrew: string;
+  priceFree: string; pricePersonal: string; priceOrg: string;
+  trainsPersonal: string; trainsOrg: string;
+  startUrl?: string; checked: Date;
+}
+const p = Astro.props;
+const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<Base title={`${p.name} · מדריך הכלים · קפיצת מדרגה`} description={p.tagline}>
+  <article class="tl">
+    <header class="wrap tl__head">
+      <nav class="tl__crumb" aria-label="מיקום">
+        <a href="/kelim">מדריך הכלים</a>
+        <span aria-hidden="true">/</span>
+        <span>{p.category}</span>
+      </nav>
+      <h1 class="tl__title">{p.name}</h1>
+      <p class="tl__kicker">{p.tagline}</p>
+      <div class="tl__meta">
+        <span>{p.vendor}</span>
+        <span>נבדק: {checked}</span>
+      </div>
+    </header>
+
+    <div class="wrap tl__facts">
+      <h2 class="tl__factsTitle">בשורה התחתונה</h2>
+      <dl class="tl__grid">
+        <div class="tl__cell"><dt>הכי טוב ל־</dt><dd>{p.bestFor}</dd></div>
+        <div class="tl__cell"><dt>לא הכלי הנכון ל־</dt><dd>{p.notFor}</dd></div>
+        <div class="tl__cell"><dt>עברית</dt><dd>{p.hebrew}</dd></div>
+        <div class="tl__cell"><dt>חינם</dt><dd>{p.priceFree}</dd></div>
+        <div class="tl__cell"><dt>אישי בתשלום</dt><dd>{p.pricePersonal}</dd></div>
+        <div class="tl__cell"><dt>ארגוני</dt><dd>{p.priceOrg}</dd></div>
+        <div class="tl__cell tl__cell--warn"><dt>מאמנים על התוכן — חשבון אישי</dt><dd>{p.trainsPersonal}</dd></div>
+        <div class="tl__cell"><dt>מאמנים על התוכן — חשבון ארגוני</dt><dd>{p.trainsOrg}</dd></div>
+      </dl>
+      {p.startUrl && <a class="tl__start" href={p.startUrl} rel="noopener nofollow" target="_blank">לעמוד ההרשמה של {p.name}</a>}
+    </div>
+
+    <div class="wrap tl__body">
+      <slot />
+    </div>
+
+    <div class="wrap tl__foot">
+      <p>
+        המחירים והפרטים נבדקו מול העמודים הרשמיים של הספק ב־{checked}, ומשתנים לעיתים קרובות.
+        אנחנו לא מקבלים עמלה מאף ספק ואין לנו שותפות עם אף אחד מהם.
+        מצאתם משהו שהשתנה? <a href="/#hearshmu">כתבו לנו</a> ונעדכן.
+      </p>
+    </div>
+  </article>
+
+  <SignupBand />
+</Base>
+
+<style is:global>
+  .tl__body { font-size: var(--t-lg); line-height: 1.85; }
+  .tl__body > * { max-inline-size: 68ch; }
+  .tl__body h2 { font-size: var(--t-2xl); margin-block: 2.4rem 0.85rem; }
+  .tl__body h3 { font-size: var(--t-lg); font-family: var(--font-body); font-weight: 700; margin-block: 1.7rem 0.5rem; }
+  .tl__body p { margin-block-end: 1.1rem; }
+  .tl__body ul, .tl__body ol { padding-inline-start: 1.4rem; margin-block-end: 1.3rem; }
+  .tl__body li { margin-block-end: 0.55rem; }
+  .tl__body li::marker { color: var(--accent-deep); }
+  .tl__body pre {
+    background: var(--deep); color: var(--ink-on-deep);
+    padding: 1.15rem 1.3rem; border-radius: var(--r-card);
+    overflow-x: auto; direction: rtl; text-align: start;
+    font-size: var(--t-sm); line-height: 1.7; max-inline-size: 68ch;
+    white-space: pre-wrap; word-spacing: normal;
+  }
+  .tl__body [dir="ltr"] { direction: ltr; text-align: left; }
+  .tl__body .note {
+    margin-block: 1.5rem; padding: 0.95rem 1.15rem;
+    border: 1px solid var(--rule); border-radius: var(--r-card); max-inline-size: 68ch;
+  }
+  .tl__body .note p { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
+  .tl__body .note p + p { margin-block-start: 0.55rem; }
+  .tl__body blockquote {
+    margin: 1.6rem 0; padding-inline-start: 1.3rem;
+    border-inline-start: 3px solid var(--ink-strong); max-inline-size: 62ch;
+  }
+  .tl__body blockquote p { margin: 0; font-size: var(--t-lg); color: var(--ink-strong); }
+  /* טבלאות בגוף העמוד — נגללות לרוחב במקום לשבור את הדף */
+  .tl__body table {
+    border-collapse: collapse; inline-size: 100%; font-size: var(--t-sm);
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); overflow: hidden; margin-block: 1.5rem;
+    display: block; overflow-x: auto; white-space: normal;
+  }
+  .tl__body table th, .tl__body table td {
+    padding: 0.75rem 0.9rem; text-align: start; vertical-align: top;
+    border-block-end: 1px solid var(--rule); line-height: 1.55;
+  }
+  .tl__body table thead th { background: var(--surface-sunk); font-size: var(--t-xs); color: var(--ink-faint); font-weight: 500; }
+  .tl__body table td { color: var(--ink-muted); }
+  .tl__body table tbody tr:last-child th, .tl__body table tbody tr:last-child td { border-block-end: 0; }
+</style>
+
+<style>
+  .tl :global(.wrap) { max-inline-size: 940px; }
+  .tl__head { padding-block: 2.5rem 1.4rem; }
+  .tl__crumb { display: flex; gap: 0.6rem; font-size: var(--t-sm); color: var(--ink-faint); margin-block-end: 1.1rem; flex-wrap: wrap; }
+  .tl__crumb a { color: var(--ink-muted); text-decoration: none; }
+  .tl__crumb a:hover { color: var(--ink-strong); }
+  .tl__title { font-size: clamp(2rem, 4.4vw, 3rem); margin-block-end: 0.7rem; }
+  .tl__kicker { font-size: var(--t-xl); color: var(--ink-muted); font-weight: 300; max-inline-size: 54ch; margin-block-end: 1.1rem; }
+  .tl__meta { display: flex; gap: 1.4rem; font-size: var(--t-sm); color: var(--ink-faint); flex-wrap: wrap; }
+
+  .tl__facts { padding-block: 0 2.2rem; }
+  .tl__factsTitle { font-size: var(--t-lg); font-family: var(--font-body); font-weight: 700; margin-block: 0 0.9rem; }
+  .tl__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: var(--r-card); overflow: hidden; margin: 0; }
+  .tl__cell { background: var(--surface); padding: 0.95rem 1.15rem; }
+  .tl__cell dt { font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 0.25rem; }
+  .tl__cell dd { margin: 0; font-size: var(--t-sm); color: var(--ink-strong); line-height: 1.6; }
+  .tl__cell--warn { background: var(--surface-sunk); }
+  .tl__start {
+    display: inline-block; margin-block-start: 1.2rem;
+    background: var(--accent); color: var(--accent-ink);
+    padding: 0.6rem 1.3rem; border-radius: var(--r-control);
+    text-decoration: none; font-weight: 500; font-size: var(--t-sm);
+  }
+  .tl__start:hover { background: var(--accent-ink); color: var(--accent); }
+
+  .tl__body { padding-block-end: 2rem; }
+  .tl__foot { padding-block: 1.5rem 3.5rem; border-block-start: 1px solid var(--rule); }
+  .tl__foot p { font-size: var(--t-sm); color: var(--ink-faint); max-inline-size: 68ch; margin: 0; }
+  .tl__foot a { color: var(--ink-muted); }
+</style>

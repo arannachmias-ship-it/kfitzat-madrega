@@ -1,0 +1,22 @@
+---
+import { getCollection, render } from 'astro:content';
+import Tool from '../../layouts/Tool.astro';
+
+export async function getStaticPaths() {
+  const all = await getCollection('kelim', (e) => e.data.published);
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+<Tool
+  name={d.name} vendor={d.vendor} category={d.category} tagline={d.tagline}
+  bestFor={d.bestFor} notFor={d.notFor} hebrew={d.hebrew}
+  priceFree={d.priceFree} pricePersonal={d.pricePersonal} priceOrg={d.priceOrg}
+  trainsPersonal={d.trainsPersonal} trainsOrg={d.trainsOrg}
+  startUrl={d.startUrl} checked={d.checked}
+>
+  <Content />
+</Tool>
