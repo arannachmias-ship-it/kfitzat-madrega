@@ -40,9 +40,9 @@ export const STAGES: Stage[] = [
     items: [
       { slug: 'prompt-garua-mul-tov', n: '1.1', title: 'פרומפט גרוע מול פרומפט טוב', note: 'על סיכום ישיבה אמיתי. שנו ותראו את התוצאה משתנה.', interactive: true },
       { slug: 'heksher-lifnei-bakasha', n: '1.2', title: 'הקשר לפני בקשה', note: 'השינוי היחיד שמשפר יותר מכל טכניקה אחרת.' },
-      { slug: 'dugma-bimkom-hesber', n: '1.3', title: 'לתת דוגמה במקום להסביר', note: 'למה פלט אחד לדוגמה שווה פסקה של הנחיות.' },
-      { slug: 'levakesh-mivne', n: '1.4', title: 'לבקש מבנה, לא טקסט', note: 'טבלה, רשימה, שדות. פלט שאפשר להשתמש בו ישר.' },
-      { slug: 'prompt-kavua-latzevet', n: '1.5', title: 'פרומפט קבוע לצוות', note: 'לבנות אחד, לשמור, ולהשתמש בו שוב במקום להמציא כל פעם.' },
+      { slug: 'dugma-bimkom-hesber', n: '1.3', title: 'לתת דוגמה במקום להסביר', note: 'למה פלט אחד לדוגמה שווה פסקה של הנחיות.', interactive: true },
+      { slug: 'levakesh-mivne', n: '1.4', title: 'לבקש מבנה, לא טקסט', note: 'טבלה, רשימה, שדות. פלט שאפשר להשתמש בו ישר.', interactive: true },
+      { slug: 'prompt-kavua-latzevet', n: '1.5', title: 'פרומפט קבוע לצוות', note: 'לבנות אחד, לשמור, ולהשתמש בו שוב במקום להמציא כל פעם.', interactive: true },
     ],
   },
   {
@@ -52,44 +52,4 @@ export const STAGES: Stage[] = [
     outcome: 'תהיה מדידה ראשונה: כמה שעות בשבוע חזרו לצוות, ואיפה.',
     items: [
       { slug: 'dochot-umatzagot', n: '2.1', title: 'דוחות ומצגות: מנתונים לטיוטה', note: 'איפה זה חוסך שעה, ואיפה זה עולה לכם שעה.', interactive: true },
-      { slug: 'sikum-yeshiva-lemesimot', n: '2.2', title: 'מסיכום ישיבה לרשימת משימות', note: 'בארבע דקות במקום ארבעים, כולל מי אחראי.' },
-      { slug: 'lechaletz-netunim', n: '2.3', title: 'לחלץ נתונים ממסמכים בלי להקליד', note: 'הרגע שבו זה מפסיק להיות צעצוע.' },
-      { slug: 'tikshoret-pnim-irgunit', n: '2.4', title: 'תקשורת פנים־ארגונית שנקראת עד הסוף', note: 'הודעות שאנשים באמת פותחים.', interactive: true },
-      { slug: 'teur-misra', n: '2.5', title: 'תיאור משרה שלא נשמע כמו כולם', note: 'הדוגמה הכי קרובה לעבודה היומיומית של HR.' },
-      { slug: 'miyun-korot-chaim', n: '2.6', title: 'מיון קורות חיים, ואיפה זה נהיה מסוכן', note: 'מה מותר, מה אסור, ומה חושף אתכם לתביעה.', interactive: true },
-      { slug: 'yeda-pnimi', n: '2.7', title: 'לתת למודל את הידע הפנימי של הארגון', note: 'נהלים, מסמכים, היסטוריה. בלי להעלות הכל לאינטרנט.' },
-    ],
-  },
-  {
-    n: 3,
-    title: 'לבנות מערכת שרצה לבד',
-    question: 'אפשר שזה יקרה בלי שמישהו לוחץ על כלום?',
-    outcome: 'תהיה בארגון אוטומציה אחת שרצה בלי תלות באדם ספציפי.',
-    items: [
-      { slug: 'metrigger-lepeula', n: '3.1', title: 'מטריגר לפעולה: איך אוטומציה בנויה', note: 'המבנה שחוזר בכל אוטומציה, בלי קוד.', interactive: true },
-      { slug: 'lechaber-kelim-kayamim', n: '3.2', title: 'לחבר את הכלים שכבר יש לכם', note: 'מייל, יומן, אקסל, CRM. מה מתחבר למה.', interactive: true },
-      { slug: 'automatzia-rishona', n: '3.3', title: 'האוטומציה הראשונה שלכם, מקצה לקצה', note: 'אחת קטנה שעובדת, מההתחלה עד שהיא רצה.', interactive: true },
-      { slug: 'matai-sochen', n: '3.4', title: 'מתי סוכן ומתי סתם סקריפט', note: 'רוב מה שקוראים לו סוכן לא צריך להיות סוכן.', interactive: true },
-      { slug: 'kshe-ze-nishbar', n: '3.5', title: 'מה קורה כשזה נשבר, ומי אחראי', note: 'השאלה שאף אחד לא שואל לפני שבונים.', interactive: true },
-      { slug: 'letachzek-bli-mefateach', n: '3.6', title: 'לתחזק אוטומציה בלי מפתח', note: 'איך לא להיות תלויים באדם שבנה את זה.', interactive: true },
-    ],
-  },
-  {
-    n: 4,
-    title: 'ממשל, סיכון והטמעה',
-    question: 'מה מותר, מה אסור, ואיך גורמים לאנשים באמת להשתמש?',
-    outcome: 'יהיו לכם מסמך מדיניות ותוכנית 90 יום שאפשר להביא להנהלה.',
-    items: [
-      { slug: 'ma-asur-lehachnis', n: '4.1', title: 'מה אסור להכניס ל־AI: המדריך למשאבי אנוש', note: 'מידע עובדים, מועמדים, לקוחות וכספים. הקווים האדומים.', interactive: true },
-      { slug: 'mediniyut-amud-echad', n: '4.2', title: 'מדיניות AI בעמוד אחד', note: 'תבנית להעתקה, כתובה בשפה שעובדים מבינים.' },
-      { slug: 'pratiyut-ovdim', n: '4.3', title: 'פרטיות עובדים ומועמדים', note: 'מה החוק דורש ומה פשוט לא כדאי.', interactive: true },
-      { slug: 'lama-hatzevet-lo-mishtamesh', n: '4.4', title: 'למה הצוות לא משתמש במה שקניתם', note: 'חמש סיבות אמיתיות, ומה עוזר לכל אחת.' },
-      { slug: 'shloshet-alafim-be-30-yom', n: '4.5', title: 'איך מעבירים 3,000 אנשים לטכנולוגיה חדשה ב־30 יום', note: 'חמישה לקחים מהשטח, עם מספרים אמיתיים.' },
-      { slug: 'lelamed-mi-shebatuach-shelo-bishvilo', n: '4.6', title: 'ללמד את מי שבטוח שזה לא בשבילו', note: 'עשרים שנות הוראה, מזוקקות לשבעה כללים.' },
-      { slug: 'eich-modedim-imutz', n: '4.7', title: 'איך מודדים אימוץ, ולא שביעות רצון', note: 'המדד שההנהלה מבקשת הוא בדרך כלל המדד הלא נכון.', interactive: true },
-      { slug: 'tochnit-90-yom', n: '4.8', title: 'תוכנית 90 יום להטמעת AI בארגון', note: 'מה עושים בכל שבוע, ומי אחראי על מה.', interactive: true },
-    ],
-  },
-];
-
-export const TOTAL_LESSONS = STAGES.reduce((n, s) => n + s.items.length, 0);
+      { slug: 'sikum-yeshiva-lemesimot', n: '2.2', title: 'מסיכום ישיבה לרשימת משימוע���FS�}yyz�yz"y=z}y]z�yy�z}y]y�yz�yz-y�y��y�y]y�y�y�y�yy}z�yy��r����6�Vs�v�V6��WG���WGV��r��s"�2r�F�F�S�}y�y}y�zRzz�y]zy�y�y�y�zy�y�y�y�yy�y�y�yMz}y�y�y2r���FS�}yMz�y-z"z�yyRymyBy�zMzy�zry�yMy�y]z�zmz-zmy]z"�r����6�Vs�wF��6��&WB���֗&wV�Br��s"�Br�F�F�S�}z�z}z�y]z�z�zMzy�y�k�yz�y-y]zy�z�z�zz}z�yz�z-y2yMzy]z2r���FS�}yMy]y=z-y]z�z�yzz�y�y�yyy�z�zMy]z�y}y�y��r���FW&7F�fS�G'VR����6�Vs�wFWW"�֗7&r��s"�Rr�F�F�S�}z�y�yy]z�y�z�z�yBz�y�yzz�y�z"y�y�yRy�y]y�y�r���FS�}yMy=y]y-y�yByMy�y�z}z�y]yyBy�z-yy]y=yByMy�y]y�y�y]y�y�z�z�y��"�r����6�Vs�v֗�V�ֶ�&�B�6���r��s"�br�F�F�S�}y�y�y]y�z}y]z�y]z�y}y�y�y��y]yy�zMyBymyBzyMy�yBy�zy]y�y�r���FS�}y�yBy�y]z�z��y�yByzy]z��y]y�yBy}y]z�z2yz�y�y�y�z�yy�z-yB�r���FW&7F�fS�G'VR����6�Vs�w�VF��֒r��s"�rr�F�F�S�}y�z�z�y�y�y]y=y�yz�yMy�y=z"yMzMzy�y�y�z�y�yMyz�y-y]y�r���FS�}zyMy�y�y��y�zy�y�y�y��yMy�zy�y]z�y�yB�yy�y�y�yMz-y�y]z�yMy�y�y�yy�zy�z�zy��r������������2��F�F�S�}y�yzy]z�y�z-z�y�z�z�z�zmyBy�yy2r��VW7F���}yzMz�z�z�ymyBy�z}z�yByy�y�z�y�y�z�yMyRy�y]y}zRz-y�y�y�y]y��r���WF6��S�}z�yMy�yByyz�y-y]y�yy]y�y]y�zmy�yByy}z�z�z�zmyByy�y�z�y�y]z�yyy=y�zzMzmy�zMy��r���FV�3����6�Vs�v�WG&�vvW"��WWV�r��s2�r�F�F�S�}y�y�z�y�y-z�y�zMz-y]y�yC�yy�y�yy]y�y]y�zmy�yByzy]y�yBr���FS�}yMy�yzyBz�y}y]ymz�yy�y�yy]y�y]y�zmy�yB�yy�y�z}y]y2�r���FW&7F�fS�G'VR����6�Vs�v�V6�&W"ֶVƖ�ֶ�֖�r��s2�"r�F�F�S�}y�y}yz�yz�yMy�y�y�y�z�y�yz�y�z�y�y�y�r���FS�}y�y�y�y��y�y]y�y��yz}zy��5$��y�yBy�z�y}yz�y�y�yB�r���FW&7F�fS�G'VR����6�Vs�vWF��G���&�6���r��s2�2r�F�F�S�}yMyy]y�y]y�zmy�yByMz�yz�y]zyBz�y�y�y��y�z}zmyBy�z}zmyBr���FS�}yy}z�z}y�zyBz�z-y]yy=z��y�yMyMz�y}y�yBz-y2z�yMy�yz�zmyB�r���FW&7F�fS�G'VR����6�Vs�v�F��6�6�V�r��s2�Br�F�F�S�}y�z�y�zy]y�y�y]y�z�y�zz�y�zz}z�y�zMy�r���FS�}z�y]yy�yBz�z}y]z�yy�y�y�yRzy]y�y�y�yzmz�y�y�y�yMy�y]z�zy]y�y��r���FW&7F�fS�G'VR����6�Vs�v�6�RצR��6�&"r��s2�Rr�F�F�S�}y�yBz}y]z�yBy�z�ymyBzz�yz��y]y�y�yy}z�yy�r���FS�}yMz�yy�yBz�yz2yy}y2y�yz�y]yy�y�zMzy�z�yy]zy�y��r���FW&7F�fS�G'VR����6�Vs�v�WF6��V��&ƒ��VfFV6�r��s2�br�F�F�S�}y�z�y}ymzryy]y�y]y�zmy�yByy�y�y�zMz�yrr���FS�}yy�y�y�yy�yMy�y]z�z�y�y]y�y�y�yyy=y�z�yzyByz�ymyB�r���FW&7F�fS�G'VR������������B��F�F�S�}y�y�z�y��zy�y�y]y�y]yMy�y�z-yBr��VW7F���}y�yBy�y]z�z��y�yByzy]z��y]yy�y�y-y]z�y�y�y�y�yzz�y�y�yyy�z�y�yMz�z�y�z��r���WF6��S�}y�yMy�yRy�y�y�y�zy�y�y�y=y�zy�y]z�y]z�y]y�zy�z��y�y]y�z�yzMz�z�y�yMyy�yy�yMzyMy�yB�r���FV�3����6�Vs�v��7W"��V�6��2r��sB�r�F�F�S�}y�yByzy]z�y�yMy�zy�zy�k���yMy�y=z�y�y�y�y�z�yyy�yzy]z�r���FS�}y�y�y=z"z-y]yy=y�y��y�y]z-y�y=y�y��y�z}y]y}y]z�y]y�zzMy�y��yMz}y]y]y�y�yMyy=y]y�y�y��r���FW&7F�fS�G'VR����6�Vs�v�VF�旗WB��VB�V6�Br��sB�"r�F�F�S�}y�y=y�zy�y]z��yz-y�y]y2yy}y2r���FS�}z�yzy�z�y�yMz-z�z}yB�y�z�y]yyByz�zMyBz�z-y]yy=y�y�y�yy�zy�y��r����6�Vs�w&F��WB��fF��r��sB�2r�F�F�S�}zMz�y�y�y]z�z-y]yy=y�y�y]y�y]z-y�y=y�y�r���FS�}y�yByMy}y]zry=y]z�z�y]y�yBzMz�y]y�y�yy�y=yy��r���FW&7F�fS�G'VR����6�Vs�v��ֆG�WfWB����֗6�F�W6�r��sB�Br�F�F�S�}y�y�yByMzmy]y]z�y�yy�z�z�y�z�yy�yBz�z}zy�z�y�r���FS�}y}y�z�zy�yy]z�yy�y�z�y�y]z��y]y�yBz-y]ymz�y�y�y�yy}z��r����6�Vs�w6���6�WB��f���&R�3ז��r��sB�Rr�F�F�S�}yy�y�y�z-yy�z�y�y�2�yzz�y�y�y�y�y�zy]y�y]y-y�yBy}y=z�yByk�3y�y]y�r���FS�}y}y�y�z�yBy�z}y}y�y�y�yMz�y�yr�z-y�y�zzMz�y�y�yy�y�z�y�y�y��r����6�Vs�v�V��VB�֒�6�V&GV6��6�V���&�6�f���r��sB�br�F�F�S�}y�y�y�y2yz�y�y�z�yy�y]yrz�ymyBy�yyz�yy�y�yRr���FS�}z-z�z�y�y�z�zy]z�yMy]z�yyB�y�ymy]z}z}y]z�y�z�yz-yBy�y�y�y�y��r����6�Vs�vV�6����FVF��֖�WG�r��sB�rr�F�F�S�}yy�y�y�y]y=y=y�y�yy�y�y]zR�y]y�yz�yy�z-y]z�z�zmy]y�r���FS�}yMy�y=y2z�yMyMzyMy�yBy�yz}z�z�yMy]yyy=z�y�y�y�y�yMy�y=y2yMy�yzy�y]y��r���FW&7F�fS�G'VR����6�Vs�wF�6��Bӓז��r��sB�r�F�F�S�}z�y]y�zy�z��y�y]y�y�yMy�y�z-z��yyz�y-y]y�r���FS�}y�yBz-y]z�y�y�yy�y�z�yy]z"�y]y�y�yy}z�yy�z-y�y�yB�r���FW&7F�fS�G'VR���������Ӱ��W��'B6��7BD�D���U54��2�5DtU2�&VGV6R����2�����2�FV�2��V�wF����
