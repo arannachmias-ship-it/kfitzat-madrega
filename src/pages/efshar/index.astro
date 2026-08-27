@@ -1,0 +1,153 @@
+---
+import Base from '../../layouts/Base.astro';
+import SignupBand from '../../components/SignupBand.astro';
+import { getCollection } from 'astro:content';
+
+const all = (await getCollection('efshar', (e) => e.data.published))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const lead = all[0];
+const rest = all.slice(1);
+
+const newest = all.reduce((d, e) => (e.data.checked > d ? e.data.checked : d), new Date(0));
+const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<Base
+  title="מה כבר אפשר · קפיצת מדרגה"
+  description="הדגמות חיות של דברים שנהיו אפשריים בארגון — לא הסבר עליהם. כל אחת עם מה היה קודם, מה יש עכשיו, כמה זמן זה לקח, ותאריך."
+>
+  <section class="wrap ef-head">
+    <h1 class="ef-head__title">מה כבר אפשר</h1>
+    <p class="ef-head__sub">
+      המסלול מלמד עקרונות שלא מתיישנים. מדריך הכלים עונה על "באיזה כלי להשתמש".
+      המדור הזה עושה דבר שלישי: <strong>הוא מראה, ולא מסביר.</strong>
+    </p>
+    <p class="ef-head__note">
+      כל פריט כאן הוא משהו שבנינו בפועל, עם מה שהיה לפני, כמה זמן זה לקח, ומה צריך כדי לעשות את זה אצלכם.
+      זה גם המדור <strong>שמתיישן הכי מהר</strong> באתר — מה שנראה מרשים היום יהיה מובן מאליו בעוד שנה — ולכן לכל פריט יש תאריך גלוי.
+      עודכן לאחרונה: {updated}.
+    </p>
+  </section>
+
+  {lead && (
+    <section class="wrap ef-lead reveal" aria-labelledby="ef-lead-t">
+      <a href={`/efshar/${lead.id}`} class="ef-lead__link">
+        <p class="ef-lead__eyebrow">ההדגמה הראשונה</p>
+        <h2 id="ef-lead-t" class="ef-lead__title">{lead.data.title}</h2>
+        <p class="ef-lead__kicker">{lead.data.kicker}</p>
+        <div class="ef-lead__ba">
+          <span class="ef-lead__cell"><b>לפני</b>{lead.data.before}</span>
+          <span class="ef-lead__cell ef-lead__cell--after"><b>אחרי</b>{lead.data.after}</span>
+        </div>
+        <span class="ef-lead__cta">לראות את זה עובד →</span>
+      </a>
+    </section>
+  )}
+
+  {rest.length > 0 && (
+    <section class="wrap ef-more reveal" aria-labelledby="ef-more-t">
+      <h2 id="ef-more-t" class="sec__title">עוד הדגמות</h2>
+      <ul class="ef-grid" data-stagger>
+        {rest.map((e) => (
+          <li>
+            <a href={`/efshar/${e.id}`} class="ef-card">
+              <span class="ef-card__title">{e.data.title}</span>
+              <span class="ef-card__kicker">{e.data.kicker}</span>
+              <span class="ef-card__built">נבנה ב{e.data.built}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="wrap ef-why reveal" aria-labelledby="ef-why-t">
+    <h2 id="ef-why-t" class="sec__title">מה לא תמצאו כאן, ולמה</h2>
+    <div class="ef-why__grid">
+      <div class="ef-why__item">
+        <h3>הדגמות שאי אפשר לנסות</h3>
+        <p>
+          צילום מסך של משהו מרשים לא מוכיח כלום — לא שהוא עובד, ולא שהוא עובד כשמזינים לו משהו אחר.
+          כל דבר כאן אפשר לגעת בו בדף.
+        </p>
+      </div>
+      <div class="ef-why__item">
+        <h3>המקרים שבהם זה עובד יפה בלבד</h3>
+        <p>
+          לכל הדגמה כאן יש גם המצב שבו היא לא מוצאת תשובה, או מגלה בעיה. זה לא הסתייגות בסוף —
+          זה חלק מההדגמה, כי זו ההתנהגות שקובעת אם אפשר לפתוח כזה דבר לארגון שלם.
+        </p>
+      </div>
+      <div class="ef-why__item">
+        <h3>הבטחות על מה שיהיה</h3>
+        <p>
+          רק דברים שבנינו, עם תאריך. אם משהו כאן דורש כלי שעוד לא יצא או תוכנית שאין לכם —
+          זה כתוב בפריט עצמו, ולא בכוכבית.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <SignupBand />
+</Base>
+
+<style>
+  .ef-head { max-inline-size: 46rem; padding-block: clamp(2.5rem, 6vw, 4rem) clamp(2rem, 5vw, 3rem); }
+  .ef-head__title {
+    font-family: var(--font-display); font-weight: 400; line-height: 1.05;
+    font-size: clamp(2.4rem, 7vw, 4rem); color: var(--ink-strong); margin: 0 0 1.1rem;
+  }
+  .ef-head__sub { font-size: var(--t-lg); color: var(--ink-muted); line-height: 1.7; margin: 0 0 1.1rem; }
+  .ef-head__sub strong { color: var(--ink-strong); }
+  .ef-head__note { font-size: var(--t-sm); color: var(--ink-faint); line-height: 1.75; margin: 0; }
+  .ef-head__note strong { color: var(--ink-muted); }
+
+  .ef-lead { margin-block-end: clamp(2.5rem, 6vw, 3.5rem); }
+  .ef-lead__link {
+    display: block; text-decoration: none; color: inherit;
+    padding: clamp(1.5rem, 4vw, 2.25rem);
+    border-radius: var(--r-card); background: var(--deep); color: var(--ink-on-deep);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .ef-lead__link:hover { transform: translateY(-2px); }
+  .ef-lead__eyebrow { margin: 0 0 0.6rem; font-size: var(--t-xs); color: var(--accent); }
+  .ef-lead__title {
+    font-family: var(--font-display); font-weight: 400; line-height: 1.12;
+    font-size: clamp(1.7rem, 4.5vw, 2.6rem); margin: 0 0 0.85rem; color: var(--ink-on-deep);
+  }
+  .ef-lead__kicker { margin: 0 0 1.35rem; font-size: var(--t-base); line-height: 1.75; color: var(--ink-on-deep-mute); max-inline-size: 42rem; }
+  .ef-lead__ba { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-block-end: 1.35rem; }
+  .ef-lead__cell {
+    display: block; padding: 0.9rem 1rem; border-radius: var(--r-control);
+    background: rgba(255, 255, 255, 0.06); font-size: var(--t-sm); line-height: 1.7; color: var(--ink-on-deep-mute);
+  }
+  .ef-lead__cell b {
+    display: block; font-weight: 400; font-size: var(--t-xs);
+    color: var(--ink-on-deep); margin-block-end: 0.3rem;
+  }
+  .ef-lead__cell--after { border-inline-start: 3px solid var(--accent); }
+  .ef-lead__cta { font-size: var(--t-sm); color: var(--accent); font-weight: 500; }
+
+  .ef-more { margin-block-end: clamp(2.5rem, 6vw, 3.5rem); }
+  .ef-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; }
+  .ef-card {
+    display: flex; flex-direction: column; gap: 0.5rem; block-size: 100%;
+    padding: 1.25rem 1.35rem; border-radius: var(--r-card);
+    border: 1px solid var(--rule); background: var(--surface);
+    text-decoration: none; color: inherit;
+    transition: border-color var(--dur-fast) ease, transform var(--dur-base) var(--ease-out);
+  }
+  .ef-card:hover { border-color: var(--ink-faint); transform: translateY(-2px); }
+  .ef-card__title { font-family: var(--font-display); font-size: var(--t-lg); color: var(--ink-strong); line-height: 1.25; }
+  .ef-card__kicker { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.7; }
+  .ef-card__built { margin-block-start: auto; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .ef-why { padding-block-end: clamp(2.5rem, 6vw, 4rem); }
+  .ef-why__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.5rem; }
+  .ef-why__item h3 { font-family: var(--font-display); font-weight: 400; font-size: var(--t-lg); color: var(--ink-strong); margin: 0 0 0.5rem; }
+  .ef-why__item p { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.75; }
+
+  @media (max-width: 620px) {
+    .ef-lead__ba { grid-template-columns: 1fr; }
+  }
+</style>
