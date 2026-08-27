@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import TrackNav from '../../components/TrackNav.astro';
 import SignupBand from '../../components/SignupBand.astro';
 import { getCollection } from 'astro:content';
 
@@ -16,6 +17,7 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
   title="מה כבר אפשר · קפיצת מדרגה"
   description="הדגמות חיות של דברים שנהיו אפשריים בארגון — לא הסבר עליהם. כל אחת עם מה היה קודם, מה יש עכשיו, כמה זמן זה לקח, ותאריך."
 >
+  <TrackNav />
   <section class="wrap ef-head">
     <h1 class="ef-head__title">מה כבר אפשר</h1>
     <p class="ef-head__sub">

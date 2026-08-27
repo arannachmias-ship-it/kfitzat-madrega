@@ -1,22 +1,33 @@
 ---
 import Base from './Base.astro';
 import SignupBand from '../components/SignupBand.astro';
+import TrackNav from '../components/TrackNav.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { STAGES } from '../data/track';
 
 interface Props {
   title: string; kicker: string;
   before: string; after: string; built: string; needs: string;
-  checked: Date;
+  checked: Date; stage?: number; tools?: string[];
 }
 const p = Astro.props;
+const slug = Astro.params.slug ?? '';
+// שכבות המסלול שמובילות להדגמה הזאת: הכלים שבהם נבנתה, והשיעורים שמצביעים עליה
+const usedTools = (await Promise.all((p.tools ?? []).map((t) => getEntry('kelim', t)))).filter(Boolean);
+const lessons = (await getCollection('maslul', (e) => e.data.published && e.data.demo === slug))
+  .sort((a, b) => a.data.stage - b.data.stage || a.data.order - b.data.order);
+const stageInfo = p.stage !== undefined ? STAGES.find((s) => s.n === p.stage) : undefined;
 const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
 <Base title={`${p.title} · מה כבר אפשר · קפיצת מדרגה`} description={p.kicker}>
+  <TrackNav />
   <article class="dm">
     <header class="wrap dm__head">
       <nav class="dm__crumb" aria-label="מיקום">
-        <a href="/efshar">מה כבר אפשר</a>
+        <a href="/maslul">המסלול</a>
         <span aria-hidden="true">/</span>
-        <span>הדגמה</span>
+        <a href="/efshar">מה כבר אפשר</a>
+        {stageInfo && <><span aria-hidden="true">/</span><span>שלב {p.stage} · {stageInfo.title}</span></>}
       </nav>
       <h1 class="dm__title">{p.title}</h1>
       <p class="dm__kicker">{p.kicker}</p>
@@ -46,6 +57,31 @@ const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: '
       <slot />
     </div>
 
+    {(usedTools.length > 0 || lessons.length > 0) && (
+      <section class="wrap dm__layers reveal" aria-label="מה צריך כדי לבנות את זה">
+        {usedTools.length > 0 && (
+          <div class="dm__layer">
+            <p class="dm__layerLabel">נבנה עם</p>
+            <ul class="dm__chips">
+              {usedTools.map((t) => (
+                <li><a href={`/kelim/${t!.id}`} class="dm__chip"><img src={`/kelim-logos/${t!.id}.svg`} alt="" width="22" height="22" loading="lazy" /><span>{t!.data.name}</span></a></li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {lessons.length > 0 && (
+          <div class="dm__layer">
+            <p class="dm__layerLabel">השיעורים שצריך כדי לבנות את זה בעצמכם</p>
+            <ul class="dm__lessons">
+              {lessons.map((l) => (
+                <li><a href={`/maslul/${l.id}`}><span class="dm__lessonN">{l.data.stage}.{l.data.order}</span> {l.data.title}</a></li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+    )}
+
     <section class="wrap dm__cta reveal" aria-labelledby="dm-cta">
       <h2 id="dm-cta" class="dm__ctaTitle">רוצים לראות את זה על הנהלים שלכם?</h2>
       <p class="dm__ctaText">
@@ -61,6 +97,17 @@ const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: '
 </Base>
 
 <style>
+  .dm__layers { display: grid; grid-template-columns: auto 1fr; gap: 1rem; max-inline-size: 46rem; padding-block: 0 2.5rem; }
+  .dm__layer { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); padding: 1rem 1.2rem; }
+  .dm__layerLabel { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 0.6rem; }
+  .dm__chips, .dm__lessons { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .dm__lessons { flex-direction: column; gap: 0.4rem; }
+  .dm__chip { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem 0.4rem 0.55rem; border: 1px solid var(--rule); border-radius: 999px; background: var(--surface-sunk); text-decoration: none; color: var(--ink); font-size: var(--t-sm); font-weight: 500; }
+  .dm__chip img { inline-size: 22px; block-size: 22px; border-radius: 4px; }
+  .dm__lessons a { text-decoration: none; color: var(--ink); font-weight: 500; }
+  .dm__lessons a:hover { color: var(--ink-strong); text-decoration: underline; }
+  .dm__lessonN { font-family: var(--font-display); color: var(--accent-deep); margin-inline-end: 0.3rem; }
+  @media (max-width: 600px) { .dm__layers { grid-template-columns: 1fr; } }
   .dm__head { padding-block: clamp(2.5rem, 6vw, 4rem) 1.5rem; max-inline-size: 46rem; }
   .dm__crumb { display: flex; gap: 0.5rem; font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 1.1rem; }
   .dm__crumb a { color: var(--ink-muted); text-decoration: none; }

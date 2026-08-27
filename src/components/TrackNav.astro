@@ -1,0 +1,52 @@
+---
+/**
+ * ניווט-משנה של המסלול: שלוש שכבות של אותה למידה.
+ * שיעורים (מה לומדים) · הכלים (במה) · מה כבר אפשר (מה יוצא מזה).
+ * הכתובות לא השתנו: /maslul, /kelim, /efshar.
+ */
+const tabs = [
+  { href: '/maslul', label: 'השיעורים', hint: '29 שיעורים' },
+  { href: '/kelim', label: 'הכלים', hint: 'מדריך הכלים' },
+  { href: '/efshar', label: 'מה כבר אפשר', hint: 'הדגמות חיות' },
+];
+const path = Astro.url.pathname;
+---
+<nav class="wrap tnav" aria-label="שכבות המסלול">
+  <ul class="tnav__list">
+    {tabs.map((t) => {
+      const on = path === t.href || path.startsWith(t.href + '/');
+      return (
+        <li>
+          <a href={t.href} aria-current={on ? 'page' : undefined} class="tnav__tab">
+            <span class="tnav__label">{t.label}</span>
+            <span class="tnav__hint">{t.hint}</span>
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</nav>
+
+<style>
+  .tnav { padding-block: 0.75rem 0; }
+  .tnav__list {
+    list-style: none; margin: 0; padding: 0.3rem;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.3rem;
+    border: 1px solid var(--rule); border-radius: var(--r-card);
+    background: var(--glass); backdrop-filter: blur(8px);
+  }
+  .tnav__tab {
+    display: flex; flex-direction: column; align-items: center; gap: 0.1rem;
+    padding: 0.55rem 0.6rem; border-radius: var(--r-control); text-decoration: none; color: var(--ink-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+  .tnav__tab:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 5%, transparent); }
+  .tnav__tab[aria-current="page"] { background: var(--deep); color: var(--ink-on-deep); }
+  .tnav__label { font-weight: 600; font-size: var(--t-base); }
+  .tnav__hint { font-size: var(--t-xs); opacity: 0.8; }
+  @media (max-width: 480px) {
+    .tnav__hint { display: none; }
+    .tnav__tab { padding: 0.5rem 0.3rem; }
+    .tnav__label { font-size: var(--t-sm); }
+  }
+</style>

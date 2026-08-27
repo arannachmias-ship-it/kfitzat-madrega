@@ -2,7 +2,17 @@
 import Base from '../../layouts/Base.astro';
 import SignupBand from '../../components/SignupBand.astro';
 import { getCollection } from 'astro:content';
+import TrackNav from '../../components/TrackNav.astro';
 import { STAGES, TOTAL_LESSONS } from '../../data/track';
+
+// שכבה שנייה ושלישית של המסלול: הכלים וההדגמות שמשויכים לכל שלב
+const tools = (await getCollection('kelim', (e) => e.data.published && e.data.stage !== undefined))
+  .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.order - b.data.order);
+const demos = (await getCollection('efshar', (e) => e.data.published && e.data.stage !== undefined))
+  .sort((a, b) => a.data.order - b.data.order);
+const toolsFor = (n: number) => tools.filter((t) => t.data.stage === n);
+const demosFor = (n: number) => demos.filter((d) => d.data.stage === n);
+const toolCount = tools.length;
 
 const live = await getCollection('maslul', (e) => e.data.published);
 const liveSlugs = new Set(live.map((e) => e.id));
@@ -23,13 +33,17 @@ const lastLiveIndex = (items: { slug: string }[]) => items.reduce((m, it, i) => 
     <p class="head__count">
       <strong>{liveCount}</strong> שיעורים באוויר · שיעור חדש בכל שבוע · השאר כבר כתובים בתוכנית ומופיעים למטה
     </p>
+    <p class="head__layers">שלוש שכבות של אותה למידה: <strong>{TOTAL_LESSONS} שיעורים</strong>, <strong>{toolCount} כלים</strong> שנכנסים בדיוק בשלב שצריך אותם, ו<strong>הדגמות חיות</strong> של מה שנהיה אפשרי.</p>
     </div>
     <div class="head__media rise">
       <img src="/photos/maslul.webp" width="1200" height="800" alt="עובדת לומדת לבד מול מחשב נייד במשרד שקט, עם מחברת וכוס קפה" fetchpriority="high" decoding="async" />
     </div>
   </section>
 
+  <TrackNav />
+
   {STAGES.map((s) => (
+
     <section class="wrap stage" aria-labelledby={`stage-${s.n}`}>
       <div class="stage__head">
         <div class="stage__n" aria-hidden="true">{s.n}</div>
@@ -68,6 +82,39 @@ const lastLiveIndex = (items: { slug: string }[]) => items.reduce((m, it, i) => 
           );
         })}
       </ol>
+
+      {(toolsFor(s.n).length > 0 || demosFor(s.n).length > 0) && (
+        <div class="layers reveal">
+          {toolsFor(s.n).length > 0 && (
+            <div class="layers__tools">
+              <p class="layers__label">הכלים לשלב הזה</p>
+              <ul class="layers__list">
+                {toolsFor(s.n).map((t) => (
+                  <li>
+                    <a href={`/kelim/${t.id}`} class:list={['chip', { 'chip--featured': t.data.featured }]}>
+                      <img src={`/kelim-logos/${t.id}.svg`} alt="" width="22" height="22" loading="lazy" />
+                      <span>{t.data.name}</span>
+                      {t.data.featured && <em>מתחילים כאן</em>}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {demosFor(s.n).length > 0 && (
+            <div class="layers__demos">
+              {demosFor(s.n).map((d) => (
+                <a href={`/efshar/${d.id}`} class="layers__demo">
+                  <span class="layers__demoLabel">מה כבר אפשר בשלב הזה</span>
+                  <strong>{d.data.title}</strong>
+                  <span class="layers__demoAfter">{d.data.after}</span>
+                  <span class="layers__demoMeta">נבנה ב{d.data.built} <i aria-hidden="true">←</i></span>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </section>
   ))}
 
@@ -76,6 +123,35 @@ const lastLiveIndex = (items: { slug: string }[]) => items.reduce((m, it, i) => 
 
 <style>
   .head { padding-block: 3rem 2rem; }
+  .head__layers { font-size: var(--t-base); color: var(--ink-muted); max-inline-size: 56ch; margin-block: 0.9rem 0; }
+  .head__layers strong { color: var(--ink-strong); font-weight: 600; }
+
+  /* שכבות הכלים וההדגמות של כל שלב */
+  .layers { display: grid; gap: 1rem; margin-block: 1.4rem 0.5rem; padding-inline-start: 2.6rem; }
+  .layers__demos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+  .layers__tools, .layers__demo {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); padding: 1.1rem 1.25rem;
+  }
+  .layers__label, .layers__demoLabel { display: block; font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 0.6rem; }
+  .layers__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.8rem 0.45rem 0.6rem;
+    border: 1px solid var(--rule); border-radius: 999px; background: var(--surface-sunk); text-decoration: none; color: var(--ink);
+    font-size: var(--t-sm); font-weight: 500; transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .chip:hover { transform: translateY(-2px); border-color: var(--rule-strong); }
+  .chip img { inline-size: 22px; block-size: 22px; border-radius: 4px; }
+  .chip--featured { border-color: var(--accent); background: var(--accent-soft); }
+  .chip em { font-style: normal; font-size: var(--t-xs); color: var(--accent-deep); font-weight: 600; }
+  .layers__demo { display: flex; flex-direction: column; gap: 0.3rem; text-decoration: none; color: var(--ink);
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+  .layers__demo:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+  .layers__demo strong { font-family: var(--font-display); font-weight: 400; font-size: var(--t-lg); color: var(--ink-strong); }
+  .layers__demoAfter { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.55; }
+  .layers__demoMeta { font-size: var(--t-xs); color: var(--accent-deep); font-weight: 600; margin-block-start: 0.3rem; }
+  .layers__demoMeta i { font-style: normal; display: inline-block; transition: transform var(--dur-fast) var(--ease-out); }
+  .layers__demo:hover .layers__demoMeta i { transform: translateX(-4px); }
+  @media (max-width: 640px) { .layers { padding-inline-start: 1.9rem; } }
   .head__title { font-size: clamp(2.4rem, 5vw, 3.4rem); margin-block-end: 0.9rem; }
   .head__sub { font-size: var(--t-xl); color: var(--ink-muted); font-weight: 300; max-inline-size: 56ch; margin-block-end: 1.2rem; }
   .head__count { font-size: var(--t-sm); color: var(--ink-muted); margin: 0; }

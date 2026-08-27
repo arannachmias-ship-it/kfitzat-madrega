@@ -69,6 +69,7 @@ const liveCount = live.length;
             {TOTAL_LESSONS} שיעורים בחמישה שלבים, מהאפס עד הטמעה בארגון. פתוח לכולם, בלי תשלום ובלי הרשמה.
             {live.length} כבר באוויר, שיעור חדש בכל שבוע.
           </p>
+          <p class="track__layers"><span>{TOTAL_LESSONS} שיעורים</span><i aria-hidden="true">·</i><span>7 כלים, כל אחד בשלב שלו</span><i aria-hidden="true">·</i><span>הדגמות חיות</span></p>
         </div>
         <a class="track__all link-draw" href="/maslul">כל המסלול ←</a>
       </div>
@@ -240,6 +241,8 @@ const liveCount = live.length;
   .track__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 2.5rem; margin-block-end: 2rem; }
   .track__title { font-size: var(--t-3xl); margin-block-end: 0.6rem; }
   .track__sub { color: var(--ink-on-deep-mute); font-weight: 300; max-inline-size: 52ch; margin: 0; }
+  .track__layers { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.9rem 0 0; font-size: var(--t-sm); color: var(--ink-on-deep); }
+  .track__layers i { font-style: normal; color: var(--accent); }
   .track__all { color: var(--accent); font-weight: 500; white-space: nowrap; text-decoration: none; }
   .track__all:hover { color: var(--accent); text-decoration: underline; }
 

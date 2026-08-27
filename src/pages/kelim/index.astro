@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import TrackNav from '../../components/TrackNav.astro';
 import SignupBand from '../../components/SignupBand.astro';
 import { getCollection } from 'astro:content';
 
@@ -17,6 +18,7 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
   title="מדריך הכלים · קפיצת מדרגה"
   description="מה כל כלי AI באמת עושה, למי הוא מתאים, כמה הוא עולה, מה המצב עם עברית, ומה קורה למידע שאתם מדביקים בו. נבדק מול העמודים הרשמיים, עם תאריך."
 >
+  <TrackNav />
   <section class="wrap head head--photo">
     <div class="head__text">
     <h1 class="head__title">מדריך הכלים</h1>

@@ -1,10 +1,10 @@
 ---
+// שלושה פריטים ראשיים בלבד. מדור חדש נכנס לפוטר, לדף הבית או לתוך המסלול (TrackNav) — לא לכאן.
+// מדריך הכלים ו"מה כבר אפשר" הם שכבות של המסלול ומגיעים דרך /maslul.
 const links = [
-  { href: '/maslul', label: 'המסלול' },
-  { href: '/kelim', label: 'מדריך הכלים' },
-  { href: '/efshar', label: 'מה כבר אפשר' },
-  { href: '/irgunim', label: 'לארגונים' },
-  { href: '/anachnu', label: 'מי אנחנו' },
+  { href: '/maslul', label: 'המסלול', match: ['/maslul', '/kelim', '/efshar'] },
+  { href: '/irgunim', label: 'לארגונים', match: ['/irgunim'] },
+  { href: '/anachnu', label: 'מי אנחנו', match: ['/anachnu'] },
 ];
 const path = Astro.url.pathname;
 ---
@@ -14,7 +14,7 @@ const path = Astro.url.pathname;
     <nav aria-label="ניווט ראשי" class="nav__links">
       <div class="nav__strip">
         {links.map((l) => (
-          <a href={l.href} aria-current={path.startsWith(l.href) ? 'page' : undefined}>{l.label}</a>
+          <a href={l.href} aria-current={l.match.some((m) => path.startsWith(m)) ? 'page' : undefined}>{l.label}</a>
         ))}
       </div>
       <a href="/#hearshmu" class="nav__cta"><span class="nav__ctaLong">קבלו שיעור בשבוע</span><span class="nav__ctaShort">שיעור בשבוע</span></a>

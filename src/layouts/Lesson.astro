@@ -2,16 +2,21 @@
 import Base from './Base.astro';
 import SignupBand from '../components/SignupBand.astro';
 import { STAGES } from '../data/track';
+import { getEntry } from 'astro:content';
 
 interface Props {
   title: string; kicker: string; goal: string;
   stage: number; order: number; readingTime: number;
   author: string; interactive: boolean;
+  tool?: string; demo?: string;
   prev?: { id: string; title: string } | null;
   next?: { id: string; title: string } | null;
 }
-const { title, kicker, goal, stage, order, readingTime, author, interactive, prev, next } = Astro.props;
+const { title, kicker, goal, stage, order, readingTime, author, interactive, prev, next, tool, demo } = Astro.props;
 const stageInfo = STAGES.find((s) => s.n === stage);
+// השכבה השנייה והשלישית של השיעור: הכלי שבו מתרגלים, וההדגמה שמראה לאן זה מוביל
+const toolEntry = tool ? await getEntry('kelim', tool) : undefined;
+const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
 ---
 <Base title={`${title} · קפיצת מדרגה`} description={kicker}>
   <div class="lsn__progress" aria-hidden="true"><i></i></div>
@@ -40,6 +45,30 @@ const stageInfo = STAGES.find((s) => s.n === stage);
     <div class="wrap lsn__body">
       <slot />
     </div>
+
+    {(toolEntry || demoEntry) && (
+      <aside class="wrap lsn__next reveal" aria-label="להמשיך מכאן">
+        {toolEntry && (
+          <a href={`/kelim/${toolEntry.id}`} class="lsn__nextCard">
+            <span class="lsn__nextLabel">הכלי לשיעור הזה</span>
+            <span class="lsn__nextRow">
+              <img src={`/kelim-logos/${toolEntry.id}.svg`} alt="" width="32" height="32" loading="lazy" />
+              <strong>{toolEntry.data.name}</strong>
+            </span>
+            <span class="lsn__nextText">{toolEntry.data.bestFor}</span>
+            <span class="lsn__nextMore">לעמוד הכלי במדריך <i aria-hidden="true">←</i></span>
+          </a>
+        )}
+        {demoEntry && (
+          <a href={`/efshar/${demoEntry.id}`} class="lsn__nextCard lsn__nextCard--demo">
+            <span class="lsn__nextLabel">ראו את זה עובד</span>
+            <strong class="lsn__nextTitle">{demoEntry.data.title}</strong>
+            <span class="lsn__nextText">{demoEntry.data.after}</span>
+            <span class="lsn__nextMore">להדגמה החיה <i aria-hidden="true">←</i></span>
+          </a>
+        )}
+      </aside>
+    )}
 
     <nav class="wrap lsn__nav" aria-label="ניווט בין שיעורים">
       {prev ? <a class="lsn__navItem" href={`/maslul/${prev.id}`}><span>הקודם</span><strong>{prev.title}</strong></a> : <span></span>}
@@ -215,6 +244,25 @@ const stageInfo = STAGES.find((s) => s.n === stage);
   }
 
   .lsn__body { padding-block-end: 2.5rem; }
+
+  /* שכבות הכלי וההדגמה בסוף השיעור */
+  .lsn__next { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding-block: 0 2rem; }
+  .lsn__next:has(> :only-child) { grid-template-columns: 1fr; }
+  .lsn__nextCard { display: flex; flex-direction: column; gap: 0.4rem; padding: 1.2rem 1.35rem; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); text-decoration: none; color: var(--ink); transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+  .lsn__nextCard:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+  .lsn__nextCard--demo { background: var(--deep); color: var(--ink-on-deep); border-color: transparent; }
+  .lsn__nextLabel { font-size: var(--t-xs); color: var(--ink-faint); }
+  .lsn__nextCard--demo .lsn__nextLabel { color: var(--accent); }
+  .lsn__nextRow { display: flex; align-items: center; gap: 0.6rem; }
+  .lsn__nextRow img { inline-size: 32px; block-size: 32px; border-radius: 6px; }
+  .lsn__nextRow strong, .lsn__nextTitle { font-family: var(--font-display); font-weight: 400; font-size: var(--t-xl); color: inherit; }
+  .lsn__nextText { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.55; }
+  .lsn__nextCard--demo .lsn__nextText { color: var(--ink-on-deep-mute); }
+  .lsn__nextMore { margin-block-start: 0.3rem; font-size: var(--t-sm); font-weight: 600; color: var(--accent-deep); }
+  .lsn__nextCard--demo .lsn__nextMore { color: var(--accent); }
+  .lsn__nextMore i { font-style: normal; display: inline-block; transition: transform var(--dur-fast) var(--ease-out); }
+  .lsn__nextCard:hover .lsn__nextMore i { transform: translateX(-4px); }
+  @media (max-width: 720px) { .lsn__next { grid-template-columns: 1fr; } }
 
   .lsn__nav { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding-block: 2rem 3.5rem; border-block-start: 1px solid var(--rule); }
   .lsn__navItem { display: flex; flex-direction: column; gap: 0.2rem; background: var(--surface); border-radius: var(--r-card); padding: 1.1rem 1.35rem; text-decoration: none; box-shadow: var(--shadow-1); transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }

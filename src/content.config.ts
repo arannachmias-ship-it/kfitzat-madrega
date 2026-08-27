@@ -14,11 +14,13 @@ const maslul = defineCollection({
     interactive: z.boolean().default(false),
     published: z.boolean().default(true),
     date: z.date(),
+    tool: z.string().optional(),   // slug במדריך הכלים: הכלי האחד שמומלץ לשיעור הזה
+    demo: z.string().optional(),   // slug ב"מה כבר אפשר": ההדגמה שמראה את זה עובד
   }),
 });
 
 /**
- * מדור הכלים. בכוונה מחוץ למסלול.
+ * מדור הכלים. שכבה שנייה של המסלול: כל כלי משויך לשלב (stage) ומופיע במפת המסלול לידו.
  * המסלול בנוי מעקרונות שלא מתיישנים; מדור הכלים מתיישן כל רבעון,
  * ולכן לכל כלי יש `checked` — תאריך הבדיקה — והוא מוצג בגלוי.
  */
@@ -41,6 +43,8 @@ const kelim = defineCollection({
     startUrl: z.string().optional(),   // עמוד השוואה אינו כלי יחיד, ולכן אין לו עמוד הרשמה
     checked: z.date(),            // תאריך הבדיקה האחרון
     published: z.boolean().default(true),
+    stage: z.number().optional(), // השלב במסלול שבו הכלי נכנס לשימוש (0-4)
+    featured: z.boolean().default(false), // הכלי שמומלץ להתחיל איתו בשלב הזה
   }),
 });
 
@@ -62,6 +66,8 @@ const efshar = defineCollection({
     needs: z.string(),         // מה צריך כדי לעשות את זה אצלכם
     checked: z.date(),
     published: z.boolean().default(true),
+    stage: z.number().optional(),            // השלב במסלול שבו זה נהיה אפשרי
+    tools: z.array(z.string()).default([]),  // slugs במדריך הכלים שבהם זה נבנה
   }),
 });
 

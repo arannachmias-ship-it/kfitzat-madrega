@@ -3,6 +3,9 @@ import Base from './Base.astro';
 import SignupBand from '../components/SignupBand.astro';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import TrackNav from '../components/TrackNav.astro';
+import { getCollection } from 'astro:content';
+import { STAGES } from '../data/track';
 
 interface Props {
   name: string; vendor: string; category: string; tagline: string;
@@ -15,13 +18,20 @@ const p = Astro.props;
 const slug = Astro.params.slug ?? '';
 // a real screenshot of the lesson-2.2 demo (meeting transcript to task list) running inside this tool, if we have one
 const hasScreen = existsSync(join(process.cwd(), 'public', 'kelim-screens', `${slug}.webp`));
+// השיעורים במסלול שבהם הכלי הזה הוא הכלי המומלץ
+const usedIn = (await getCollection('maslul', (e) => e.data.published && e.data.tool === slug))
+  .sort((a, b) => a.data.stage - b.data.stage || a.data.order - b.data.order);
+const stageOf = (n: number) => STAGES.find((s) => s.n === n)?.title ?? '';
 const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
 <Base title={`${p.name} · מדריך הכלים · קפיצת מדרגה`} description={p.tagline}>
+  <TrackNav />
   <article class="tl">
     <header class="wrap tl__head">
       <nav class="tl__crumb" aria-label="מיקום">
-        <a href="/kelim">מדריך הכלים</a>
+        <a href="/maslul">המסלול</a>
+        <span aria-hidden="true">/</span>
+        <a href="/kelim">הכלים</a>
         <span aria-hidden="true">/</span>
         <span>{p.category}</span>
       </nav>
@@ -50,6 +60,23 @@ const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: '
       </dl>
       {p.startUrl && <a class="tl__start" href={p.startUrl} rel="noopener nofollow" target="_blank">לעמוד ההרשמה של {p.name}</a>}
     </div>
+
+    {usedIn.length > 0 && (
+      <section class="wrap tl__used reveal" aria-labelledby="tl-used">
+        <h2 id="tl-used" class="tl__factsTitle">השיעורים במסלול שבהם משתמשים בו</h2>
+        <ul class="tl__usedList">
+          {usedIn.map((l) => (
+            <li>
+              <a href={`/maslul/${l.id}`}>
+                <span class="tl__usedN">{l.data.stage}.{l.data.order}</span>
+                <span class="tl__usedT">{l.data.title}</span>
+                <span class="tl__usedS">שלב {l.data.stage} · {stageOf(l.data.stage)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
 
     {hasScreen && (
       <figure class="wrap tl__screen">
@@ -121,6 +148,13 @@ const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: '
 </style>
 
 <style>
+  .tl__used { padding-block: 0 2.5rem; }
+  .tl__usedList { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.75rem; }
+  .tl__usedList a { display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.8rem; align-items: baseline; padding: 0.9rem 1.1rem; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); text-decoration: none; color: var(--ink); transition: transform var(--dur-fast) var(--ease-out); }
+  .tl__usedList a:hover { transform: translateY(-2px); }
+  .tl__usedN { font-family: var(--font-display); color: var(--accent-deep); grid-row: span 2; }
+  .tl__usedT { font-weight: 600; }
+  .tl__usedS { font-size: var(--t-xs); color: var(--ink-faint); }
   .tl :global(.wrap) { max-inline-size: 940px; }
   .tl__head { padding-block: 2.5rem 1.4rem; }
   .tl__crumb { display: flex; gap: 0.6rem; font-size: var(--t-sm); color: var(--ink-faint); margin-block-end: 1.1rem; flex-wrap: wrap; }
