@@ -3,7 +3,7 @@ const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').match
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
 function countUp(el: HTMLElement) {
-  const to = Number(el.dataset.count ?? 0);
+  const to = Number(el.dataset.count);
   const suffix = el.dataset.suffix ?? '';
   if (reduce()) { el.textContent = to + suffix; return; }
   const ms = 1100;
@@ -25,7 +25,8 @@ export function initReveal() {
       if (!e.isIntersecting) continue;
       const el = e.target as HTMLElement;
       el.classList.add('is-in');
-      if (el.dataset.count !== undefined) countUp(el);
+      // ריק או לא־מספרי: זו לא ספירה, וזה גם לא באג בקומפוננטה — פשוט לא נוגעים בטקסט
+      if (el.dataset.count && Number.isFinite(Number(el.dataset.count))) countUp(el);
       if (el.dataset.stagger !== undefined) {
         const step = Number(el.dataset.stagger) || 80;
         Array.from(el.children).forEach((c, i) => {
