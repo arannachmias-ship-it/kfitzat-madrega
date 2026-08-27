@@ -1,0 +1,233 @@
+---
+/**
+ * 1.4 — "אותם נתונים, שלוש צורות".
+ *
+ * אותם חמישה מועמדים, מוצגים כפרוזה, כרשימה וכטבלה.
+ * שני פרטים חסרים במקור — ובכל צורה הם מתנהגים אחרת:
+ * בפרוזה החוסר נעלם, ברשימה הוא מושמט בשקט, ובטבלה הוא תא ריק שקופץ לעין.
+ *
+ * המתג השני הוא הלקח האמיתי: טבלה מחייבת למלא, ולכן בלי היתר מפורש
+ * לכתוב "לא נמצא" — היא תמולא בהמצאה שנראית כמו נתון.
+ *
+ * הכול מקומי בדף. אין קריאה למודל.
+ */
+---
+<div class="ss" data-ss>
+  <div class="ss__bar">
+    <span class="ss__barText">חמישה מועמדים, נשלפו מתוך מיילים · אותו תוכן בדיוק</span>
+  </div>
+
+  <div class="ss__body">
+    <div class="ss__q">
+      <p class="ss__label">באיזו צורה ביקשתם את הפלט</p>
+      <div class="ss__opts" data-g="fmt"></div>
+    </div>
+
+    <div class="ss__q">
+      <p class="ss__label">האם הרשיתם לכתוב "לא נמצא"</p>
+      <div class="ss__opts" data-g="miss"></div>
+    </div>
+
+    <div class="ss__out" data-out></div>
+  </div>
+
+  <p class="ss__foot">
+    ההדגמה רצה בדף הזה, בלי קריאה למודל. הנתונים הם של חמישה מועמדים בדיוניים,
+    ושני החוסרים שתולים בהם בכוונה.
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-ss]');
+  if (!root) return;
+
+  // null = הפרט לא נמסר במייל המקורי. fake = מה שממציאים כשחייבים למלא תא.
+  const ROWS = [
+    { name: 'נועה ברק',  g: 'f', role: 'רכזת גיוס',   free: 'מיידית',       pay: '18,000',                src: 'לינקדאין' },
+    { name: 'איתי לוי',  g: 'm', role: 'רכז הדרכה',   free: 'בעוד חודש',    pay: '16,500',                src: 'המלצה של עובד' },
+    { name: 'שירה כהן',  g: 'f', role: 'רכזת גיוס',   free: 'מיידית',       pay: null, fakePay: '17,000', src: 'דרושים' },
+    { name: 'עומר דגן',  g: 'm', role: 'מנהל משמרת',  free: 'בעוד שבועיים', pay: '15,000',                src: 'לינקדאין' },
+    { name: 'מאיה אשל',  g: 'f', role: 'רכזת הדרכה',  free: 'מיידית',       pay: '17,500',                src: null, fakeSrc: 'לינקדאין' },
+  ];
+
+  const FMT = [
+    { k: 'prose', label: 'פסקה' },
+    { k: 'list', label: 'רשימה' },
+    { k: 'table', label: 'טבלה עם שדות' },
+  ];
+  const MISS = [
+    { k: 'yes', label: 'כן, מותר לכתוב "לא נמצא"' },
+    { k: 'no', label: 'לא אמרתי כלום על זה' },
+  ];
+
+  const pick = { fmt: 'prose', miss: 'no' };
+  const out = root.querySelector('[data-out]');
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function fill(group, items) {
+    root.querySelector(`[data-g="${group}"]`).innerHTML = items.map((i) => `
+      <button type="button" class="ss__opt" data-g2="${group}" data-k="${i.k}" aria-pressed="${String(pick[group] === i.k)}">${esc(i.label)}</button>
+    `).join('');
+  }
+
+  root.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-g2]');
+    if (!btn) return;
+    const g = btn.dataset.g2;
+    pick[g] = btn.dataset.k;
+    root.querySelectorAll(`[data-g2="${g}"]`).forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.k === btn.dataset.k));
+    });
+    render();
+  });
+
+  // מה נכנס לתא כשאין נתון
+  function cell(val, fake) {
+    if (val) return { t: val, bad: false };
+    if (pick.miss === 'yes') return { t: 'לא נמצא', bad: false, ok: true };
+    return { t: fake, bad: true };
+  }
+
+  function renderProse() {
+    const parts = ROWS.map((r) => {
+      const pay = cell(r.pay, r.fakePay);
+      const src = cell(r.src, r.fakeSrc);
+      const payTxt = pay.ok ? 'ציפיית השכר לא הופיעה במייל' : `ציפיית שכר ${pay.t}`;
+      const srcTxt = src.ok ? 'המקור לא צוין' : `הגיע דרך ${src.t}`;
+      const cand = r.g === 'f' ? 'מועמדת' : 'מועמד';
+      const avail = r.g === 'f' ? 'זמינה' : 'זמין';
+      return `${esc(r.name)} ${cand} לתפקיד ${esc(r.role)}, ${avail} ${esc(r.free)}, ${esc(payTxt)}, ${esc(srcTxt)}.`;
+    });
+    return `<p class="ss__prose">${parts.join(' ')}</p>`;
+  }
+
+  function renderList() {
+    return `<ul class="ss__ul">${ROWS.map((r) => {
+      const pay = cell(r.pay, r.fakePay);
+      const src = cell(r.src, r.fakeSrc);
+      return `<li><strong>${esc(r.name)}</strong> · ${esc(r.role)} · ${esc(r.free)} · ${esc(pay.t)} · ${esc(src.t)}</li>`;
+    }).join('')}</ul>`;
+  }
+
+  function renderTable() {
+    const head = ['שם', 'תפקיד', 'זמינות', 'ציפיית שכר', 'מקור'];
+    return `<div class="ss__tableWrap"><table class="ss__table">
+      <thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead>
+      <tbody>${ROWS.map((r) => {
+        const pay = cell(r.pay, r.fakePay);
+        const src = cell(r.src, r.fakeSrc);
+        const td = (c) => `<td class="${c.bad ? 'ss__bad' : ''}${c.ok ? 'ss__ok' : ''}">${esc(c.t)}${c.bad ? '<span class="ss__tag">המצאה</span>' : ''}</td>`;
+        return `<tr><td>${esc(r.name)}</td><td>${esc(r.role)}</td><td>${esc(r.free)}</td>${td(pay)}${td(src)}</tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+  }
+
+  function render() {
+    const body = pick.fmt === 'prose' ? renderProse() : pick.fmt === 'list' ? renderList() : renderTable();
+    const flags = [];
+
+    if (pick.fmt === 'prose') {
+      flags.push({ lvl: 'warn', t: '<strong>בפרוזה אי אפשר לסרוק, רק לקרוא.</strong> כדי לענות על "מי לא מסר ציפיית שכר" צריך לעבור על כל החמישה עד הסוף. וכשיש עשרים מועמדים במקום חמישה, אף אחד לא עובר.' });
+    }
+    if (pick.fmt === 'list') {
+      flags.push({ lvl: 'warn', t: '<strong>רשימה נראית מסודרת, ובדיוק בזה הסכנה.</strong> אין לה שדות קבועים — פריט אחד יכול פשוט לוותר על ערך, והשורה עדיין תיראה שלמה. זה השיפור הכי קטן מבין השלושה, והוא זה שרוב האנשים עוצרים בו.' });
+    }
+    if (pick.fmt === 'table') {
+      flags.push({ lvl: 'good', t: '<strong>טבלה היא לא עיצוב, היא בדיקה.</strong> ברגע שהשדות קבועים מראש, <strong>מה שחסר נראה כחסר</strong> — בלי לקרוא מילה. זה ההבדל היחיד שבאמת משנה בין שלוש הצורות.' });
+    }
+
+    if (pick.miss === 'no') {
+      flags.push({
+        lvl: 'bad',
+        t: '<strong>וזה המחיר של מבנה, שאף אחד לא מזהיר עליו:</strong> מבנה מחייב למלא. שני הפרטים שלא הופיעו במיילים המקוריים התמלאו כאן בערכים סבירים לגמרי — ובפורמט מסודר הם נראים בדיוק כמו נתון אמיתי. סימנו אותם כאן באדום כדי שתראו — <strong>בפלט אמיתי אין תגית כזאת, ובדיוק בזה העניין: ככל שהפלט מסודר יותר, כך קשה יותר לראות שהומצא בו משהו.</strong>',
+      });
+    } else {
+      flags.push({
+        lvl: 'good',
+        t: '<strong>שש מילים שמחזירות את הביטחון:</strong> "אם פרט לא מופיע במקור, כתוב לא נמצא". בלי השורה הזאת המבנה עובד נגדכם; איתה הוא הופך לרשימת המשימות של השבוע — שתי שיחות שצריך לעשות.',
+      });
+    }
+
+    out.innerHTML = `
+      <div class="ss__render">${body}</div>
+      <ul class="ss__flags">${flags.map((f) => `<li class="ss__flag ss__flag--${f.lvl}">${f.t}</li>`).join('')}</ul>
+    `;
+  }
+
+  fill('fmt', FMT);
+  fill('miss', MISS);
+  render();
+})();
+</script>
+
+<style>
+  .ss {
+    border: 1px solid var(--rule); border-radius: var(--r-card);
+    background: var(--surface); overflow: hidden; margin-block: 2rem;
+  }
+  .ss__bar {
+    padding: 0.75rem 1.1rem; background: var(--surface-sunk);
+    border-block-end: 1px solid var(--rule); font-size: var(--t-xs); color: var(--ink-muted);
+  }
+  .ss__body { padding: 1.25rem 1.1rem 1.4rem; }
+  .ss__q { margin-block-end: 1.1rem; }
+  .ss__label { margin: 0 0 0.5rem; font-size: var(--t-sm); color: var(--ink-strong); }
+  .ss__opts { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .ss :global(.ss__opt) {
+    border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-muted);
+    border-radius: var(--r-control); padding: 0.4rem 0.9rem; font: inherit;
+    font-size: var(--t-xs); cursor: pointer; text-align: start;
+    transition: background var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+  }
+  .ss :global(.ss__opt:hover) { color: var(--ink-strong); border-color: var(--ink-muted); }
+  .ss :global(.ss__opt[aria-pressed='true']) { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .ss__out { display: grid; gap: 0.7rem; margin-block-start: 1.3rem; }
+
+  .ss :global(.ss__render) {
+    padding: 0.95rem 1rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: var(--paper);
+  }
+  .ss :global(.ss__prose) { margin: 0; font-size: var(--t-sm); color: var(--ink); line-height: 1.9; }
+  .ss :global(.ss__ul) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+  .ss :global(.ss__ul li) { font-size: var(--t-sm); color: var(--ink); line-height: 1.7; }
+
+  .ss :global(.ss__tableWrap) { overflow-x: auto; }
+  .ss :global(.ss__table) { inline-size: 100%; border-collapse: collapse; font-size: var(--t-xs); }
+  .ss :global(.ss__table th) {
+    text-align: start; padding: 0.5rem 0.6rem; color: var(--ink-faint); font-weight: 400;
+    border-block-end: 1px solid var(--rule-strong); white-space: nowrap;
+  }
+  .ss :global(.ss__table td) {
+    padding: 0.55rem 0.6rem; color: var(--ink); border-block-end: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+  .ss :global(.ss__bad) { color: #C4462F; }
+  .ss :global(.ss__ok) { color: var(--ink-faint); }
+  .ss :global(.ss__tag) {
+    margin-inline-start: 0.4rem; font-size: 0.625rem; color: #C4462F;
+    border: 1px solid currentColor; border-radius: var(--r-control); padding: 0.05rem 0.35rem;
+  }
+  :root[data-theme='dark'] .ss :global(.ss__bad),
+  :root[data-theme='dark'] .ss :global(.ss__tag) { color: #E8836B; }
+
+  .ss :global(.ss__flags) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+  .ss :global(.ss__flag) {
+    padding: 0.75rem 0.95rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+    font-size: var(--t-sm); line-height: 1.75; color: var(--ink);
+  }
+  .ss :global(.ss__flag--warn) { border-inline-start-color: #B8792A; }
+  .ss :global(.ss__flag--bad) { border-inline-start-color: #C4462F; }
+  .ss :global(.ss__flag--good) { border-inline-start-color: var(--accent-deep); }
+
+  .ss__foot {
+    margin: 0; padding: 0.85rem 1.1rem; background: var(--surface-sunk);
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.7;
+  }
+</style>
