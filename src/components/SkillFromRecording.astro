@@ -1,0 +1,416 @@
+---
+/**
+ * ההדגמה של "רוטינה שנלמדה מהקלטה אחת".
+ *
+ * מציגה עשר דקות של הקלטת מסך כרשימת רגעים שנתפסו, ומבקשת מהקוראת להכריע
+ * לכל רגע אם הוא שלב בנוהל, פרט של המקרה הספציפי, או משהו שלא צריך להיכנס.
+ * מתוך ההכרעות נבנה סקיל — ואז מורצת עליו קליטה של עובד אחר,
+ * וזה הרגע שבו טעויות ההכרעה נהיות גלויות.
+ *
+ * ארבע הקטגוריות באמת:
+ *   step — מה שעושים בכל פעם
+ *   case — פרט שנכון למקרה שהוקלט בלבד, וחייב להפוך למשתנה
+ *   risk — מה שההקלטה ראתה ולא הייתה אמורה לראות
+ *   noise — טעות, היסוס, או עקיפה שנעשתה תוך כדי
+ *
+ * הכול רץ מקומית בדף. אין קריאה למודל ואין הקלטה אמיתית.
+ */
+---
+<div class="sr" data-sr>
+  <div class="sr__bar">
+    <span class="sr__dot" aria-hidden="true"></span>
+    <span class="sr__barText">הקלטה: קליטת עובדת חדשה · 6 דקות · 8 רגעים שנתפסו</span>
+    <button type="button" class="sr__reset" data-reset>לנקות</button>
+  </div>
+
+  <div class="sr__body">
+    <p class="sr__label">מה ההקלטה ראתה, ומה מזה צריך להיכנס לנוהל</p>
+    <p class="sr__hint">
+      ההקלטה תיעדה קליטה אחת אמיתית: דנה לוי, מתחילה ב־1 בספטמבר.
+      עברו רגע־רגע והכריעו. אין כאן תשובה מובנת מאליה — בזה בדיוק העבודה.
+    </p>
+
+    <ul class="sr__list" data-list></ul>
+
+    <div class="sr__actions">
+      <button type="button" class="sr__go" data-go disabled>לבנות את הסקיל</button>
+      <span class="sr__count" data-count>0 מתוך 8</span>
+    </div>
+
+    <div class="sr__out" data-out hidden></div>
+  </div>
+
+  <p class="sr__foot">
+    ההדגמה רצה בדף הזה בלבד, בלי קריאה למודל ובלי הקלטה אמיתית. הרגעים שמופיעים כאן הם
+    מה שהקלטה של רוטינה משרדית באמת תופסת — כולל החלון שנפתח בטעות והלחיצה הכפולה על "שמור".
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-sr]');
+  if (!root) return;
+
+  // שמונת הרגעים. truth הוא הסיווג הנכון; אין אותו ב־DOM עד שמריצים.
+  const MOMENTS = [
+    {
+      id: 'm1', at: '00:12', truth: 'step',
+      text: 'פתחת את מערכת כוח האדם ולחצת על "עובד חדש"',
+      why: 'זה נעשה בכל קליטה, בלי קשר למי נקלט.',
+    },
+    {
+      id: 'm2', at: '00:40', truth: 'case', slot: 'שם העובד/ת',
+      text: 'הקלדת את השם: דנה לוי',
+      why: 'השם משתנה בכל פעם. הוא צריך להיות מקום ריק שממלאים, לא טקסט קבוע.',
+    },
+    {
+      id: 'm3', at: '01:30', truth: 'step',
+      text: 'פתחת את תיקיית התבניות ובחרת את "מכתב קליטה — תבנית"',
+      why: 'אותה תבנית, בכל קליטה.',
+    },
+    {
+      id: 'm4', at: '02:10', truth: 'risk',
+      text: 'נפתח ברקע דוח שכר של מחלקת הכספים, ומיד סגרת אותו',
+      why: 'ההקלטה תופסת כל מה שעל המסך. זה לא חלק מהנוהל, וזה גם מידע שאסור לו להישמר בשום מקום.',
+    },
+    {
+      id: 'm5', at: '02:45', truth: 'case', slot: 'תאריך תחילת עבודה',
+      text: 'מילאת תאריך התחלה: 1 בספטמבר',
+      why: 'תאריך של קליטה אחת. בפעם הבאה הוא אחר.',
+    },
+    {
+      id: 'm6', at: '03:20', truth: 'noise',
+      text: 'לחצת פעמיים על "שמור", כי לא היית בטוחה שהראשונה נתפסה',
+      why: 'זה היסוס שלך, לא שלב בנוהל.',
+    },
+    {
+      id: 'm7', at: '04:05', truth: 'step',
+      text: 'שלחת מייל למחשוב עם רשימת ההרשאות לפי התפקיד',
+      why: 'שלב אמיתי, וגם זה שהכי נשכח כשמסבירים את הנוהל בעל פה.',
+    },
+    {
+      id: 'm8', at: '05:40', truth: 'step',
+      text: 'הוספת ליומן תזכורת לשיחת סוף חודש ראשון',
+      why: 'חלק מהנוהל, גם אם אף אחד לא כתב אותו בשום מסמך.',
+    },
+  ];
+
+  const CHOICES = [
+    { k: 'step', label: 'שלב בנוהל' },
+    { k: 'var', label: 'פרט של המקרה' },
+    { k: 'drop', label: 'לא נכנס' },
+  ];
+
+  const pick = {};
+  const list = root.querySelector('[data-list]');
+  const out = root.querySelector('[data-out]');
+  const go = root.querySelector('[data-go]');
+  const count = root.querySelector('[data-count]');
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  list.innerHTML = MOMENTS.map((m) => `
+    <li class="sr__row" data-row="${m.id}">
+      <div class="sr__rowHead">
+        <span class="sr__at">${m.at}</span>
+        <span class="sr__text">${esc(m.text)}</span>
+      </div>
+      <div class="sr__picks" role="group" aria-label="סיווג הרגע ב${m.at}">
+        ${CHOICES.map((c) => `
+          <button type="button" class="sr__pick" data-m="${m.id}" data-k="${c.k}" aria-pressed="false">${c.label}</button>
+        `).join('')}
+      </div>
+    </li>
+  `).join('');
+
+  function refresh() {
+    const n = Object.keys(pick).length;
+    count.textContent = `${n} מתוך ${MOMENTS.length}`;
+    go.disabled = n < MOMENTS.length;
+  }
+
+  list.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-m]');
+    if (!btn) return;
+    const id = btn.dataset.m;
+    pick[id] = btn.dataset.k;
+    root.querySelectorAll(`[data-m="${id}"]`).forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.k === btn.dataset.k));
+    });
+    refresh();
+  });
+
+  // האם ההכרעה נכונה
+  function ok(m) {
+    const p = pick[m.id];
+    if (m.truth === 'step') return p === 'step';
+    if (m.truth === 'case') return p === 'var';
+    return p === 'drop';
+  }
+
+  function build() {
+    const steps = [];
+    const slots = [];
+    const flags = [];
+    let bakedName = null;
+    let bakedDate = null;
+
+    MOMENTS.forEach((m) => {
+      const p = pick[m.id];
+
+      if (m.truth === 'step') {
+        if (p === 'step') {
+          steps.push({ t: esc(m.text), bad: false });
+        } else if (p === 'var') {
+          steps.push({ t: esc(m.text) + ' ← נשמר כפרט משתנה', bad: true });
+          flags.push({
+            lvl: 'warn',
+            t: `<strong>${esc(m.at)}</strong> — זה לא פרט שמשתנה, זה מה שעושים בכל פעם. סקיל שמבקש לאשר אותו מחדש בכל הרצה חוזר להיות עבודה ידנית.`,
+          });
+        } else {
+          flags.push({
+            lvl: 'warn',
+            t: `<strong>${esc(m.at)}</strong> — שלב חסר. הסקיל לא יעשה את זה, ואף אחד לא ישים לב עד הפעם שבה זה יחסר: ${esc(m.text)}.`,
+          });
+        }
+      }
+
+      if (m.truth === 'case') {
+        if (p === 'var') {
+          slots.push(m.slot);
+        } else if (p === 'step') {
+          if (m.id === 'm2') bakedName = 'דנה לוי';
+          if (m.id === 'm5') bakedDate = '1 בספטמבר';
+          steps.push({ t: esc(m.text) + ' ← נצרב כטקסט קבוע', bad: true });
+          flags.push({
+            lvl: 'bad',
+            t: `<strong>${esc(m.at)}</strong> — ${esc(m.slot)} נצרב לתוך הסקיל. מכאן כל עובד שייקלט יקבל את הפרט של דנה.`,
+          });
+        } else {
+          flags.push({
+            lvl: 'warn',
+            t: `<strong>${esc(m.at)}</strong> — בלי ${esc(m.slot)} הסקיל לא יודע על מי הוא עובד, ויעצור באמצע כדי לשאול.`,
+          });
+        }
+      }
+
+      if (m.truth === 'risk' && p !== 'drop') {
+        steps.push({ t: 'לפתוח את דוח השכר של מחלקת הכספים', bad: true });
+        flags.push({
+          lvl: 'bad',
+          t: '<strong>02:10</strong> — דוח השכר נכנס לסקיל. חלון שנפתח לשנייה ברקע נתפס בהקלטה בדיוק כמו כל דבר אחר, ומהרגע שהוא נשמר בנוהל הוא נוסע איתו לכל מי שהנוהל משותף אליו. <strong>זו הסיבה שמנקים שולחן עבודה לפני שמקליטים.</strong>',
+        });
+      }
+
+      if (m.truth === 'noise' && p !== 'drop') {
+        steps.push({ t: 'ללחוץ פעמיים על "שמור"', bad: true });
+        flags.push({
+          lvl: 'warn',
+          t: '<strong>03:20</strong> — ההיסוס שלך נהיה חלק מהנוהל. הסקיל ילחץ פעמיים על שמור לנצח, כי פעם אחת לא היית בטוחה.',
+        });
+      }
+    });
+
+    const right = MOMENTS.filter(ok).length;
+
+    // מכתב הקליטה של הקליטה הבאה — כאן הטעויות נהיות גלויות
+    const nextName = bakedName ? bakedName : 'יונתן ברק';
+    const nextDate = bakedDate ? bakedDate : '15 באוקטובר';
+    const nameBad = Boolean(bakedName);
+    const dateBad = Boolean(bakedDate);
+
+    const skill = [
+      'name: קליטת-עובד-חדש',
+      'description: מפעילים כשנקלט עובד חדש — פותח כרטיס, מכין מכתב קליטה,',
+      '  מעדכן מחשוב וקובע שיחת חודש ראשון.',
+      '',
+      slots.length ? 'מה צריך לקבל:' : 'מה צריך לקבל: (כלום — וזו בעיה)',
+      ...(slots.length ? slots.map((s) => `  · ${s}`) : []),
+      '',
+      'מה עושים:',
+      ...steps.map((s, i) => `  ${i + 1}. ${s.bad ? '‼ ' : ''}${s.t.replace(/<[^>]+>/g, '')}`),
+    ].join('\n');
+
+    const verdict =
+      right === MOMENTS.length
+        ? { t: 'הסקיל תקין', c: 'good' }
+        : right >= 6
+          ? { t: 'הסקיל ירוץ, אבל עם טעות שתחזור בכל פעם', c: 'warn' }
+          : { t: 'הסקיל הזה יעשה נזק שקט', c: 'bad' };
+
+    out.innerHTML = `
+      <div class="sr__verdict sr__verdict--${verdict.c}">
+        <strong>${verdict.t}</strong>
+        <span>${right} מתוך ${MOMENTS.length} הכרעות נכונות</span>
+      </div>
+
+      <p class="sr__blockLabel">הסקיל שיצא</p>
+      <pre class="sr__skill">${esc(skill)}</pre>
+
+      <p class="sr__blockLabel">ההרצה הבאה: נקלט ${esc(bakedName ? 'יונתן ברק' : nextName)}, ${esc(bakedDate ? '15 באוקטובר' : nextDate)}</p>
+      <div class="sr__letter">
+        <p>שלום <span class="${nameBad ? 'sr__wrong' : ''}">${esc(nextName)}</span>,</p>
+        <p>נשמח לראותך אצלנו החל מ־<span class="${dateBad ? 'sr__wrong' : ''}">${esc(nextDate)}</span>.</p>
+        ${nameBad || dateBad
+          ? '<p class="sr__letterNote">המסומן באדום הוא הפרט של דנה, שנצרב לתוך הנוהל. הסקיל לא שגה — הוא עשה בדיוק את מה שהוקלט.</p>'
+          : '<p class="sr__letterNote">שני הפרטים התמלאו מהמקרה הנוכחי, כי הם הוגדרו כמקום ריק ולא כטקסט.</p>'}
+      </div>
+
+      ${flags.length
+        ? `<p class="sr__blockLabel">מה נכנס ולא היה צריך, ומה נשאר בחוץ</p>
+           <ul class="sr__flags">${flags.map((f) => `<li class="sr__flag sr__flag--${f.lvl}">${f.t}</li>`).join('')}</ul>`
+        : '<p class="sr__clean">שום דבר מיותר לא נכנס, ושום שלב לא נשאר בחוץ. זה המצב שאליו מגיעים אחרי סבב ניקיון, לא מההקלטה הראשונה.</p>'}
+
+      <p class="sr__blockLabel">למה זה מסתדר</p>
+      <ul class="sr__why">
+        ${MOMENTS.map((m) => `
+          <li class="sr__whyRow ${ok(m) ? '' : 'sr__whyRow--miss'}">
+            <span class="sr__at">${m.at}</span>
+            <span>${esc(m.why)}</span>
+          </li>`).join('')}
+      </ul>
+    `;
+    out.hidden = false;
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  go.addEventListener('click', build);
+
+  root.querySelector('[data-reset]').addEventListener('click', () => {
+    Object.keys(pick).forEach((k) => delete pick[k]);
+    root.querySelectorAll('[data-m]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    out.hidden = true;
+    out.innerHTML = '';
+    refresh();
+  });
+
+  refresh();
+})();
+</script>
+
+<style>
+  .sr {
+    border: 1px solid var(--rule); border-radius: var(--r-card);
+    background: var(--surface); overflow: hidden; margin-block: 2rem;
+  }
+  .sr__bar {
+    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    padding: 0.75rem 1.1rem; background: var(--surface-sunk);
+    border-block-end: 1px solid var(--rule); font-size: var(--t-xs); color: var(--ink-muted);
+  }
+  .sr__dot { inline-size: 8px; block-size: 8px; border-radius: 50%; background: #C4462F; flex: none; }
+  .sr__barText { flex: 1 1 auto; }
+  .sr__reset {
+    border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-muted);
+    border-radius: var(--r-control); padding: 0.25rem 0.7rem; font: inherit; cursor: pointer;
+  }
+  .sr__reset:hover { color: var(--ink-strong); border-color: var(--ink-muted); }
+
+  .sr__body { padding: 1.25rem 1.1rem 1.4rem; }
+  .sr__label { margin: 0 0 0.4rem; font-size: var(--t-base); color: var(--ink-strong); }
+  .sr__hint { margin: 0 0 1.1rem; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.7; }
+
+  .sr__list { list-style: none; margin: 0 0 1.1rem; padding: 0; display: grid; gap: 0.5rem; }
+  .sr :global(.sr__row) {
+    border: 1px solid var(--rule); border-radius: var(--r-control);
+    padding: 0.7rem 0.85rem; display: grid; gap: 0.6rem;
+  }
+  .sr :global(.sr__rowHead) { display: flex; gap: 0.7rem; align-items: baseline; }
+  .sr :global(.sr__at) {
+    flex: none; font-size: var(--t-xs); color: var(--ink-faint);
+    font-variant-numeric: tabular-nums; min-inline-size: 3rem;
+  }
+  .sr :global(.sr__text) { font-size: var(--t-sm); color: var(--ink); line-height: 1.6; }
+  .sr :global(.sr__picks) { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .sr :global(.sr__pick) {
+    border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-muted);
+    border-radius: var(--r-control); padding: 0.32rem 0.8rem; font: inherit;
+    font-size: var(--t-xs); cursor: pointer;
+    transition: background var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+  }
+  .sr :global(.sr__pick:hover) { color: var(--ink-strong); border-color: var(--ink-muted); }
+  .sr :global(.sr__pick[aria-pressed='true']) {
+    background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
+  }
+
+  .sr__actions { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; }
+  .sr__go {
+    background: var(--deep); color: var(--ink-on-deep); border: 0;
+    border-radius: var(--r-control); padding: 0.55rem 1.35rem; font: inherit; cursor: pointer;
+  }
+  .sr__go:disabled { opacity: 0.45; cursor: not-allowed; }
+  .sr__count { font-size: var(--t-xs); color: var(--ink-faint); }
+  :root[data-theme='dark'] .sr__go { background: var(--accent); color: var(--accent-ink); }
+
+  .sr__out { margin-block-start: 1.4rem; display: grid; gap: 0.5rem; }
+  .sr__out[hidden] { display: none; }
+
+  .sr :global(.sr__verdict) {
+    display: flex; justify-content: space-between; gap: 0.8rem; flex-wrap: wrap;
+    padding: 0.8rem 1rem; border-radius: var(--r-control);
+    border-inline-start: 3px solid var(--rule-strong); background: var(--surface-sunk);
+    font-size: var(--t-sm); color: var(--ink-strong);
+  }
+  .sr :global(.sr__verdict span) { color: var(--ink-muted); font-size: var(--t-xs); }
+  .sr :global(.sr__verdict--good) { border-inline-start-color: var(--accent-deep); }
+  .sr :global(.sr__verdict--warn) { border-inline-start-color: #B8792A; }
+  .sr :global(.sr__verdict--bad) { border-inline-start-color: #C4462F; }
+
+  .sr :global(.sr__blockLabel) { margin: 0.9rem 0 0.15rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .sr :global(.sr__skill) {
+    margin: 0; padding: 0.9rem 1rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border: 1px solid var(--rule);
+    font-size: var(--t-xs); line-height: 1.85; color: var(--ink);
+    white-space: pre-wrap; overflow-x: auto; direction: rtl; text-align: start;
+  }
+
+  .sr :global(.sr__letter) {
+    padding: 0.9rem 1rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: var(--paper);
+  }
+  .sr :global(.sr__letter p) { margin: 0 0 0.45rem; font-size: var(--t-sm); color: var(--ink); line-height: 1.7; }
+  .sr :global(.sr__wrong) { color: #C4462F; font-weight: 500; border-block-end: 2px solid #C4462F; }
+  :root[data-theme='dark'] .sr :global(.sr__wrong) { color: #E8836B; border-block-end-color: #E8836B; }
+  .sr :global(.sr__letterNote) {
+    margin: 0.6rem 0 0; padding-block-start: 0.6rem;
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--t-xs); color: var(--ink-muted);
+  }
+
+  .sr :global(.sr__flags) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+  .sr :global(.sr__flag) {
+    padding: 0.7rem 0.9rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+    font-size: var(--t-sm); line-height: 1.7; color: var(--ink);
+  }
+  .sr :global(.sr__flag--warn) { border-inline-start-color: #B8792A; }
+  .sr :global(.sr__flag--bad) { border-inline-start-color: #C4462F; }
+  .sr :global(.sr__clean) {
+    margin: 0; padding: 0.7rem 0.9rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--accent-deep);
+    font-size: var(--t-sm); line-height: 1.7; color: var(--ink);
+  }
+
+  .sr :global(.sr__why) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+  .sr :global(.sr__whyRow) {
+    display: flex; gap: 0.7rem; align-items: baseline;
+    font-size: var(--t-xs); color: var(--ink-muted); line-height: 1.7;
+  }
+  .sr :global(.sr__whyRow--miss) { color: var(--ink-strong); }
+  .sr :global(.sr__whyRow--miss .sr__at) { color: #C4462F; }
+  :root[data-theme='dark'] .sr :global(.sr__whyRow--miss .sr__at) { color: #E8836B; }
+
+  .sr__foot {
+    margin: 0; padding: 0.85rem 1.1rem; background: var(--surface-sunk);
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.7;
+  }
+
+  @media (max-width: 520px) {
+    .sr :global(.sr__rowHead) { flex-direction: column; gap: 0.2rem; }
+    .sr :global(.sr__picks) { gap: 0.3rem; }
+    .sr :global(.sr__pick) { padding: 0.32rem 0.6rem; }
+  }
+</style>
