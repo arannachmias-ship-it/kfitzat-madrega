@@ -1,0 +1,360 @@
+---
+/**
+ * ההדגמה החיה של "נוהל שמריץ את עצמו".
+ *
+ * שואלים שאלה בשפה חופשית ומקבלים תשובה מתוך מאגר נהלים של חברה בדיונית,
+ * עם שם המסמך והתאריך שלו. שלוש ההתנהגויות שהרכיב נועד להראות:
+ *   1. תשובה רגילה — עם מקור.
+ *   2. סתירה בין שתי גרסאות של אותו נוהל — המערכת לא בוחרת, היא מציפה.
+ *   3. אין תשובה — "לא מצאתי", ולא המצאה.
+ *
+ * הכול מקומי: מאגר קבוע בדף, התאמת מילות מפתח, אפס קריאות רשת ואפס מודל.
+ * זה מכוון — ככה אפשר להראות בדיוק את ההתנהגות שחשובה, כולל הכישלון.
+ */
+---
+<div class="pd" data-pd>
+  <div class="pd__bar">
+    <span class="pd__dot" aria-hidden="true"></span>
+    <span class="pd__barText">נהלי חברת "מעלה" — 6 מסמכים</span>
+    <button type="button" class="pd__peek" data-peek aria-expanded="false">מה יש בתיקייה?</button>
+  </div>
+  <ul class="pd__docs" data-docs hidden></ul>
+
+  <div class="pd__body">
+    <p class="pd__label">שאלו משהו, כמו שעובדת הייתה שואלת</p>
+
+    <div class="pd__chips" data-chips></div>
+
+    <form class="pd__form" data-form>
+      <input
+        type="text"
+        class="pd__input"
+        data-input
+        placeholder="למשל: כמה ימי חופשה מגיעים לי?"
+        aria-label="שאלה על הנהלים"
+        autocomplete="off"
+      />
+      <button type="submit" class="pd__go">שאלו</button>
+    </form>
+
+    <div class="pd__out" data-out hidden></div>
+  </div>
+
+  <p class="pd__foot">
+    ההדגמה רצה על מאגר קטן וקבוע בתוך הדף הזה, בלי שום קריאה למודל.
+    בחרנו ככה בכוונה: זה מה שמאפשר להראות בדיוק את שלוש ההתנהגויות שקובעות אם כזאת מערכת שווה משהו בארגון —
+    כולל זו שרוב ההדגמות מסתירות, כשאין תשובה.
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-pd]');
+  if (!root) return;
+
+  // מאגר של חברה בדיונית. המספרים הם מדיניות של החברה, לא ציטוט של החוק.
+  const DOCS = [
+    {
+      id: 'vac21', topic: 'vacation', stale: true,
+      name: 'נוהל חופשה שנתית', date: 'ינואר 2021',
+      keys: ['חופש', 'חופשה', 'ימי חופש', 'לצאת לחופש', 'ניצול ימים', 'צבירה'],
+      answer: '12 ימי חופשה בשנה לעובד במשרה מלאה. ימים שלא נוצלו עד 31 בדצמבר יורדים, ואין העברה לשנה הבאה.',
+    },
+    {
+      id: 'vac24', topic: 'vacation',
+      name: 'נוהל חופשה שנתית', date: 'מרץ 2024',
+      keys: ['חופש', 'חופשה', 'ימי חופש', 'לצאת לחופש', 'ניצול ימים', 'צבירה'],
+      answer: '14 ימי חופשה בשנה לעובד במשרה מלאה, ו־16 מהשנה השלישית. אפשר להעביר עד 5 ימים לשנה העוקבת, באישור מנהל ישיר.',
+    },
+    {
+      id: 'sick', topic: 'sick',
+      name: 'נוהל היעדרות מחלה', date: 'ספטמבר 2024',
+      keys: ['מחל', 'חול', 'אישור רפואי', 'רופא', 'הילד חולה', 'מחלת ילד'],
+      answer: 'דיווח למנהל הישיר באותו בוקר, ואישור רפואי מהיום השני ואילך. היעדרות לטיפול בילד חולה נספרת ממכסת המחלה של העובד.',
+    },
+    {
+      id: 'wfh', topic: 'wfh',
+      name: 'נוהל עבודה מהבית', date: 'יוני 2025',
+      keys: ['מהבית', 'עבודה מרחוק', 'רימוט', 'היברידי', 'לא להגיע למשרד', 'יום בבית'],
+      answer: 'עד יומיים בשבוע, בתיאום מראש עם המנהל הישיר. ימי שני וחמישי הם ימי נוכחות מלאה לכל הצוותים.',
+    },
+    {
+      id: 'travel', topic: 'travel',
+      name: 'נוהל החזר נסיעות', date: 'פברואר 2024',
+      keys: ['נסיע', 'החזר', 'דלק', 'רכבת', 'אוטובוס', 'חניה', 'קילומטר'],
+      answer: 'החזר לפי עלות תחבורה ציבורית באזור המגורים, או 2.5 ש"ח לק"מ ברכב פרטי. הגשה עד ה־5 בחודש העוקב.',
+    },
+    {
+      id: 'car', topic: 'car',
+      name: 'נוהל רכב חברה', date: 'נובמבר 2023',
+      keys: ['רכב', 'ליסינג', 'אוטו', 'חניה', 'תאונה'],
+      answer: 'זכאות מדרגת ניהול ומעלה. דוחות תנועה וחניה על חשבון העובד. תאונה מדווחת לחברת הליסינג ולמשאבי אנוש באותו יום.',
+    },
+  ];
+
+  const SUGGEST = [
+    { q: 'כמה ימי חופשה מגיעים לי?', tag: 'סתירה' },
+    { q: 'אפשר לעבוד מהבית ביום חמישי?' },
+    { q: 'מתי צריך אישור רופא?' },
+    { q: 'כמה שעות נוספות מותר לי לעשות?', tag: 'אין תשובה' },
+  ];
+
+  const peekEl = root.querySelector('[data-peek]');
+  const docsEl = root.querySelector('[data-docs]');
+  docsEl.innerHTML = DOCS.map((d) =>
+    '<li><span class="pd__docName">' + d.name + '</span><span class="pd__docDate">' + d.date + '</span></li>'
+  ).join('');
+  peekEl.addEventListener('click', () => {
+    const open = docsEl.hidden;
+    docsEl.hidden = !open;
+    peekEl.setAttribute('aria-expanded', open ? 'true' : 'false');
+    peekEl.textContent = open ? 'להסתיר' : 'מה יש בתיקייה?';
+  });
+
+  const chipsEl = root.querySelector('[data-chips]');
+  const formEl = root.querySelector('[data-form]');
+  const inputEl = root.querySelector('[data-input]');
+  const outEl = root.querySelector('[data-out]');
+
+  SUGGEST.forEach((s) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pd__chip';
+    b.innerHTML = s.tag
+      ? s.q + '<span class="pd__chipTag">' + s.tag + '</span>'
+      : s.q;
+    b.addEventListener('click', () => { inputEl.value = s.q; ask(s.q); });
+    chipsEl.appendChild(b);
+  });
+
+  formEl.addEventListener('submit', (e) => {
+    e.preventDefault();
+    ask(inputEl.value);
+  });
+
+  // אותיות סופיות מנורמלות, כדי ש"חופש" יתפוס גם "חופשים".
+  function norm(s) {
+    return (s || '')
+      .replace(/[ך]/g, 'כ').replace(/[ם]/g, 'מ')
+      .replace(/[ן]/g, 'נ').replace(/[ף]/g, 'פ')
+      .replace(/[ץ]/g, 'צ')
+      .replace(/["'׳״.,?!:;()\-־]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function find(q) {
+    const n = norm(q);
+    if (!n) return [];
+    return DOCS.filter((d) => d.keys.some((k) => n.includes(norm(k))));
+  }
+
+  function ask(q) {
+    const question = (q || '').trim();
+    if (!question) return;
+
+    outEl.hidden = false;
+    outEl.innerHTML =
+      '<p class="pd__q">' + esc(question) + '</p>' +
+      '<p class="pd__searching"><span class="pd__spin" aria-hidden="true"></span>מחפש בין 6 המסמכים…</p>';
+
+    setTimeout(() => render(question, find(question)), 620);
+  }
+
+  function sourceTag(d) {
+    return '<span class="pd__src' + (d.stale ? ' pd__src--stale' : '') + '">' +
+      '<span class="pd__srcName">' + d.name + '</span>' +
+      '<span class="pd__srcDate">' + d.date + '</span></span>';
+  }
+
+  function render(question, hits) {
+    let html = '<p class="pd__q">' + esc(question) + '</p>';
+
+    if (!hits.length) {
+      // ההתנהגות שאף הדגמה לא מראה, והיא זו שקובעת אם אפשר לסמוך על זה.
+      html += '<div class="pdc pdc--none">' +
+        '<p class="pdc__t">לא מצאתי את זה בנהלים — צריך לשאול את משאבי אנוש.</p>' +
+        '<p class="pdc__b">חיפשתי בכל ששת המסמכים ואין בהם התייחסות לזה. ' +
+        'לא ניחשתי ולא השלמתי ממה שנשמע הגיוני, וזו כל ההתנהגות שמפרידה בין מערכת שאפשר לפתוח לכל הארגון לבין כזאת שאי אפשר.</p>' +
+        '</div>';
+      outEl.innerHTML = html;
+      return;
+    }
+
+    const topics = {};
+    hits.forEach((d) => { (topics[d.topic] = topics[d.topic] || []).push(d); });
+    const clash = Object.values(topics).find((g) => g.length > 1);
+
+    if (clash) {
+      const sorted = clash.slice().sort((a, b) => (a.stale ? 1 : 0) - (b.stale ? 1 : 0));
+      html += '<div class="pdc pdc--clash">' +
+        '<p class="pdc__t">יש כאן סתירה — שני מסמכים עונים אחרת, ולא אבחר ביניהם.</p>' +
+        '<p class="pdc__b">שניהם נמצאים בתיקייה ושניהם רלוונטיים לשאלה. ' +
+        'הצגת שניהם היא התשובה הנכונה: הבחירה בין גרסאות היא החלטה של אדם, לא של מערכת.</p>' +
+        '</div>';
+      sorted.forEach((d) => {
+        html += '<div class="pda' + (d.stale ? ' pda--stale' : '') + '">' +
+          (d.stale ? '<p class="pda__flag">הגרסה הישנה</p>' : '<p class="pda__flag pda__flag--live">העדכנית מבין השתיים</p>') +
+          '<p class="pda__a">' + d.answer + '</p>' + sourceTag(d) + '</div>';
+      });
+      html += '<p class="pd__after">שימו לב מה קרה כאן בפועל: <strong>המערכת גילתה לכם שיש בארגון שני נהלים סותרים.</strong> ' +
+        'זה לא כשל של ההדגמה — זו התועלת. כל סתירה שהיא מציפה היא ניקיון שהיה צריך לקרות ממילא.</p>';
+      outEl.innerHTML = html;
+      return;
+    }
+
+    hits.forEach((d) => {
+      html += '<div class="pda"><p class="pda__a">' + d.answer + '</p>' + sourceTag(d) + '</div>';
+    });
+    html += '<p class="pd__after">התשובה מגיעה עם <strong>שם המסמך והתאריך שלו</strong>. ' +
+      'זה מה שמאפשר לעובדת לבדוק, ולכם לדעת איזה נוהל צריך עדכון.</p>';
+    outEl.innerHTML = html;
+  }
+})();
+</script>
+
+<style>
+  .pd {
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    background: var(--surface);
+    overflow: hidden;
+    margin-block: 2rem;
+  }
+
+  .pd__bar {
+    display: flex; align-items: center; gap: 0.55rem;
+    padding: 0.7rem 1.1rem;
+    background: var(--surface-sunk);
+    border-block-end: 1px solid var(--rule);
+  }
+  .pd__dot {
+    inline-size: 8px; block-size: 8px; border-radius: 50%;
+    background: var(--accent); flex: none;
+  }
+  .pd__barText { font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .pd__peek {
+    margin-inline-start: auto; flex: none;
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: none; border: 1px solid var(--rule-strong); border-radius: 999px;
+    padding: 0.25rem 0.7rem; cursor: pointer; min-block-size: 28px;
+  }
+  .pd__peek:hover { color: var(--ink-strong); border-color: var(--ink-faint); }
+  .pd__docs {
+    list-style: none; margin: 0; padding: 0.85rem 1.1rem;
+    background: var(--surface-sunk); border-block-end: 1px solid var(--rule);
+    display: flex; flex-direction: column; gap: 0.4rem;
+  }
+  .pd__docs[hidden] { display: none; }
+  .pd :global(.pd__docs li) { display: flex; gap: 0.6rem; align-items: baseline; flex-wrap: wrap; }
+  .pd :global(.pd__docName) { font-size: var(--t-xs); color: var(--ink-muted); }
+  .pd :global(.pd__docDate) { font-size: 0.6875rem; color: var(--ink-faint); }
+
+  .pd__body { padding: 1.5rem 1.6rem; }
+  .pd__label { margin: 0 0 0.9rem; font-size: var(--t-sm); color: var(--ink-strong); }
+
+  .pd__chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-block-end: 1rem; }
+  .pd :global(.pd__chip) {
+    font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: 999px; padding: 0.4rem 0.85rem;
+    cursor: pointer; min-block-size: 34px; text-align: start;
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .pd :global(.pd__chip:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
+  .pd :global(.pd__chipTag) {
+    font-size: 0.6875rem; color: var(--accent-deep);
+    border-inline-start: 1px solid var(--rule-strong); padding-inline-start: 0.45rem;
+  }
+
+  .pd__form { display: flex; gap: 0.5rem; }
+  .pd__input {
+    flex: 1 1 auto; min-inline-size: 0;
+    font-family: var(--font-body); font-size: var(--t-sm); color: var(--ink-strong);
+    background: var(--surface-sunk); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.6rem 0.85rem; min-block-size: 44px;
+  }
+  .pd__input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .pd__go {
+    flex: none; font-family: var(--font-body); font-size: var(--t-sm); font-weight: 500;
+    background: var(--accent); color: var(--accent-ink);
+    border: 1px solid var(--accent); border-radius: var(--r-control);
+    padding: 0.6rem 1.3rem; cursor: pointer; min-block-size: 44px;
+  }
+
+  .pd__out { margin-block-start: 1.5rem; padding-block-start: 1.35rem; border-block-start: 1px solid var(--rule); }
+  .pd__out[hidden] { display: none; }
+
+  .pd :global(.pd__q) {
+    margin: 0 0 0.9rem; font-size: var(--t-base); color: var(--ink-strong);
+    border-inline-start: 3px solid var(--accent); padding-inline-start: 0.85rem;
+  }
+
+  .pd :global(.pd__searching) {
+    margin: 0; font-size: var(--t-xs); color: var(--ink-faint);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .pd :global(.pd__spin) {
+    inline-size: 12px; block-size: 12px; flex: none;
+    border: 2px solid var(--rule-strong); border-block-start-color: var(--accent);
+    border-radius: 50%; animation: pdspin 0.7s linear infinite;
+  }
+  @keyframes pdspin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .pd :global(.pd__spin) { animation: none; }
+  }
+
+  .pd :global(.pda) {
+    padding: 0.95rem 1.1rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); margin-block-end: 0.6rem;
+    border-inline-start: 3px solid var(--accent);
+  }
+  .pd :global(.pda--stale) { border-inline-start-color: var(--rule-strong); opacity: 0.9; }
+  .pd :global(.pda__a) { margin: 0 0 0.6rem; font-size: var(--t-sm); color: var(--ink); line-height: 1.75; }
+  .pd :global(.pda__flag) {
+    margin: 0 0 0.4rem; font-size: 0.6875rem; letter-spacing: 0; color: var(--ink-faint);
+  }
+  .pd :global(.pda__flag--live) { color: var(--accent-deep); font-weight: 500; }
+
+  .pd :global(.pd__src) { display: inline-flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+  .pd :global(.pd__srcName) { font-size: var(--t-xs); color: var(--ink-muted); }
+  .pd :global(.pd__srcDate) {
+    font-size: 0.6875rem; color: var(--ink-faint);
+    border: 1px solid var(--rule-strong); border-radius: 999px; padding: 0.1rem 0.5rem;
+  }
+  .pd :global(.pd__src--stale .pd__srcDate) { color: #B4622F; border-color: #D9A98D; }
+
+  .pd :global(.pdc) {
+    padding: 0.95rem 1.1rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); margin-block-end: 0.75rem;
+    border-inline-start: 3px solid var(--rule-strong);
+  }
+  .pd :global(.pdc--clash) { border-inline-start-color: #C08A2E; }
+  .pd :global(.pdc--none) { border-inline-start-color: var(--ink-faint); }
+  .pd :global(.pdc__t) { margin: 0 0 0.35rem; font-size: var(--t-sm); color: var(--ink-strong); font-weight: 500; }
+  .pd :global(.pdc__b) { margin: 0; font-size: var(--t-xs); color: var(--ink-muted); line-height: 1.75; }
+
+  .pd :global(.pd__after) {
+    margin: 1rem 0 0; font-size: var(--t-xs); color: var(--ink-muted); line-height: 1.75;
+  }
+  .pd :global(.pd__after strong) { color: var(--ink-strong); }
+
+  .pd__foot {
+    margin: 0; padding: 0.95rem 1.6rem 1.2rem;
+    font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.75;
+    border-block-start: 1px solid var(--rule);
+  }
+
+  @media (max-width: 620px) {
+    .pd__body { padding: 1.2rem 1.1rem; }
+    .pd__foot { padding-inline: 1.1rem; }
+    .pd__form { flex-direction: column; }
+    .pd__go { inline-size: 100%; }
+  }
+</style>
