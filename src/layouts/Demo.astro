@@ -1,0 +1,111 @@
+---
+import Base from './Base.astro';
+import SignupBand from '../components/SignupBand.astro';
+
+interface Props {
+  title: string; kicker: string;
+  before: string; after: string; built: string; needs: string;
+  checked: Date;
+}
+const p = Astro.props;
+const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<Base title={`${p.title} · מה כבר אפשר · קפיצת מדרגה`} description={p.kicker}>
+  <article class="dm">
+    <header class="wrap dm__head">
+      <nav class="dm__crumb" aria-label="מיקום">
+        <a href="/efshar">מה כבר אפשר</a>
+        <span aria-hidden="true">/</span>
+        <span>הדגמה</span>
+      </nav>
+      <h1 class="dm__title">{p.title}</h1>
+      <p class="dm__kicker">{p.kicker}</p>
+      <div class="dm__meta">
+        <span>נבנה ב{p.built}</span>
+        <span>נבדק: {checked}</span>
+      </div>
+    </header>
+
+    <div class="wrap dm__ba reveal">
+      <div class="dm__col dm__col--before">
+        <p class="dm__colLabel">מה קיים היום</p>
+        <p class="dm__colText">{p.before}</p>
+      </div>
+      <div class="dm__arrow" aria-hidden="true">
+        <svg viewBox="0 0 40 24" width="40" height="24" focusable="false">
+          <path d="M38 12H4M12 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="dm__col dm__col--after">
+        <p class="dm__colLabel">מה בנינו במקום</p>
+        <p class="dm__colText">{p.after}</p>
+      </div>
+    </div>
+
+    <div class="wrap prose dm__body">
+      <slot />
+    </div>
+
+    <section class="wrap dm__cta reveal" aria-labelledby="dm-cta">
+      <h2 id="dm-cta" class="dm__ctaTitle">רוצים לראות את זה על הנהלים שלכם?</h2>
+      <p class="dm__ctaText">
+        שלחו לנו <strong>נוהל אחד</strong> — כזה שהשאלות עליו חוזרות אליכם כל שבוע — ונחזיר לכם אותו ככה, בלי תשלום ובלי התחייבות.
+        אם זה ייראה לכם שווה משהו, נדבר על השאר.
+      </p>
+      <p class="dm__ctaNeeds"><span>מה צריך כדי לעשות את זה אצלכם:</span> {p.needs}</p>
+      <a class="btn btn--primary" href="/irgunim">ככה זה עובד אצלנו</a>
+    </section>
+
+    <SignupBand />
+  </article>
+</Base>
+
+<style>
+  .dm__head { padding-block: clamp(2.5rem, 6vw, 4rem) 1.5rem; max-inline-size: 46rem; }
+  .dm__crumb { display: flex; gap: 0.5rem; font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 1.1rem; }
+  .dm__crumb a { color: var(--ink-muted); text-decoration: none; }
+  .dm__crumb a:hover { color: var(--ink-strong); }
+  .dm__title {
+    font-family: var(--font-display); font-weight: 400; line-height: 1.1;
+    font-size: clamp(2rem, 5.5vw, 3.1rem); color: var(--ink-strong); margin: 0 0 0.9rem;
+  }
+  .dm__kicker { font-size: var(--t-lg); color: var(--ink-muted); line-height: 1.7; margin: 0 0 1.1rem; }
+  .dm__meta { display: flex; flex-wrap: wrap; gap: 1.1rem; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .dm__ba {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.1rem; align-items: stretch;
+    margin-block-end: clamp(2rem, 5vw, 3rem);
+  }
+  .dm__col { padding: 1.25rem 1.35rem; border-radius: var(--r-card); border: 1px solid var(--rule); }
+  .dm__col--before { background: var(--surface-sunk); }
+  .dm__col--after { background: var(--surface); border-inline-start: 3px solid var(--accent); }
+  .dm__colLabel { margin: 0 0 0.5rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .dm__colText { margin: 0; font-size: var(--t-sm); color: var(--ink); line-height: 1.75; }
+  .dm__arrow { display: grid; place-items: center; color: var(--ink-faint); }
+
+  .dm__body { padding-block-end: clamp(2rem, 5vw, 3rem); }
+
+  .dm__cta {
+    max-inline-size: 46rem; padding: 1.75rem 1.85rem;
+    border-radius: var(--r-card); background: var(--deep); color: var(--ink-on-deep);
+    margin-block-end: clamp(2.5rem, 6vw, 4rem);
+  }
+  .dm__ctaTitle {
+    font-family: var(--font-display); font-weight: 400; line-height: 1.15;
+    font-size: clamp(1.4rem, 3.5vw, 1.9rem); margin: 0 0 0.85rem; color: var(--ink-on-deep);
+  }
+  .dm__ctaText { margin: 0 0 1.1rem; font-size: var(--t-sm); line-height: 1.8; color: var(--ink-on-deep-mute); }
+  .dm__ctaText strong { color: var(--ink-on-deep); }
+  .dm__ctaNeeds {
+    margin: 0 0 1.35rem; padding-block-start: 1rem;
+    border-block-start: 1px solid var(--rule-on-deep);
+    font-size: var(--t-xs); color: var(--ink-on-deep-mute); line-height: 1.7;
+  }
+  .dm__ctaNeeds span { color: var(--ink-on-deep); }
+
+  @media (max-width: 720px) {
+    .dm__ba { grid-template-columns: 1fr; }
+    .dm__arrow { transform: rotate(-90deg); }
+    .dm__cta { padding: 1.35rem 1.2rem; }
+  }
+</style>
