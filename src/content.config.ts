@@ -44,4 +44,25 @@ const kelim = defineCollection({
   }),
 });
 
-export const collections = { maslul, kelim };
+/**
+ * "מה כבר אפשר" — המדור שתפקידו להראות, לא להסביר.
+ * המסלול מלמד עקרונות; מדריך הכלים עונה במה להשתמש;
+ * המדור הזה מראה מה נהיה אפשרי, ולכן הוא זה שמתיישן הכי מהר.
+ * כל פריט נושא `checked` גלוי, ואומר במפורש כמה זמן לקח לבנות אותו.
+ */
+const efshar = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/efshar' }),
+  schema: z.object({
+    order: z.number(),
+    title: z.string(),
+    kicker: z.string(),        // הכאב, בשורה
+    before: z.string(),        // מה קיים היום בארגון
+    after: z.string(),         // מה בנינו במקום
+    built: z.string(),         // כמה זמן זה לקח, בשפה אנושית
+    needs: z.string(),         // מה צריך כדי לעשות את זה אצלכם
+    checked: z.date(),
+    published: z.boolean().default(true),
+  }),
+});
+
+export const collections = { maslul, kelim, efshar };
