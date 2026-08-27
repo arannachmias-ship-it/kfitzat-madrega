@@ -1,0 +1,281 @@
+---
+/**
+ * 1.5 — "לפני ואחרי, על המשימה שלכם".
+ *
+ * הקוראת כותבת בשורה אחת מה חוזר אצלה כל שבוע, בוחרת שלוש בחירות,
+ * ומקבלת שתי גרסאות זו מול זו: מה שהיא כותבת היום, ומה שנשמר לצוות.
+ * כל בלוק בגרסה השנייה מסומן בשיעור שממנו הוא בא — כך שהשיעור הזה
+ * סוגר את שלב 1 בכך שהוא מרכיב אותו.
+ *
+ * הבלוק היחיד שהרכיב לא יכול למלא הוא הדוגמה, והוא נשאר במפורש כמקום ריק.
+ *
+ * הכול מקומי בדף. אין קריאה למודל.
+ */
+---
+<div class="tp" data-tp>
+  <div class="tp__bar">
+    <span class="tp__barText">מפרומפט חד־פעמי לפרומפט של הצוות</span>
+  </div>
+
+  <div class="tp__body">
+    <div class="tp__q">
+      <p class="tp__label">1 · המשימה שחוזרת אצלכם כל שבוע, בשורה אחת</p>
+      <input
+        type="text"
+        class="tp__input"
+        data-task
+        placeholder="למשל: לכתוב סיכום לישיבת הצוות"
+        aria-label="המשימה החוזרת"
+        maxlength="120"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="tp__q">
+      <p class="tp__label">2 · לאן הפלט הולך</p>
+      <div class="tp__opts" data-g="who"></div>
+    </div>
+
+    <div class="tp__q">
+      <p class="tp__label">3 · באיזו צורה</p>
+      <div class="tp__opts" data-g="shape"></div>
+    </div>
+
+    <div class="tp__q">
+      <p class="tp__label">4 · מה עושים כשחסר מידע</p>
+      <div class="tp__opts" data-g="gap"></div>
+    </div>
+
+    <div class="tp__actions">
+      <button type="button" class="tp__go" data-go disabled>לבנות את הפרומפט הקבוע</button>
+      <span class="tp__count" data-tally>0 מתוך 4</span>
+    </div>
+
+    <div class="tp__out" data-out hidden></div>
+  </div>
+
+  <p class="tp__foot">
+    ההדגמה רצה בדף הזה, בלי קריאה למודל. מה שתכתבו נשאר בדפדפן שלכם ולא נשלח לשום מקום.
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-tp]');
+  if (!root) return;
+
+  const WHO = [
+    { k: 'team', label: 'לצוות שלי', ctx: 'הקוראים הם חברי הצוות שלי, שמכירים את ההקשר ורוצים את השורה התחתונה.' },
+    { k: 'mgmt', label: 'להנהלה', ctx: 'הקורא הוא מנהל שלא היה בפגישה, קורא בטלפון, ומחליט על סמך זה.' },
+    { k: 'out', label: 'החוצה — למועמדים או לעובדים', ctx: 'הקוראים הם אנשים מחוץ לצוות, וכל מה שנכתב כאן מייצג את הארגון.' },
+  ];
+  const SHAPE = [
+    { k: 'para', label: 'פסקה', line: 'פסקה אחת, עד חמש שורות.' },
+    { k: 'list', label: 'רשימה', line: 'רשימה של שורות קצרות, שורה לכל פריט.' },
+    { k: 'table', label: 'טבלה', line: 'טבלה עם שדות קבועים: נושא · מה הוחלט · מי אחראי · עד מתי.' },
+  ];
+  const GAP = [
+    { k: 'mark', label: 'לכתוב "לא נמצא"', line: 'אם פרט לא מופיע במקור, כתוב "לא נמצא". אל תשלים אותו.' },
+    { k: 'ask', label: 'לשאול אותי', line: 'אם חסר לך פרט כדי להשלים, עצור ושאל אותי במקום לנחש.' },
+    { k: 'guess', label: 'להשלים לפי ההיגיון', line: 'אם חסר פרט, השלם אותו לפי ההיגיון.' },
+  ];
+
+  const pick = {};
+  const out = root.querySelector('[data-out]');
+  const go = root.querySelector('[data-go]');
+  const count = root.querySelector('[data-tally]');
+  const taskEl = root.querySelector('[data-task]');
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function fill(group, items) {
+    root.querySelector(`[data-g="${group}"]`).innerHTML = items.map((i) => `
+      <button type="button" class="tp__opt" data-g2="${group}" data-k="${i.k}" aria-pressed="false">${esc(i.label)}</button>
+    `).join('');
+  }
+
+  fill('who', WHO);
+  fill('shape', SHAPE);
+  fill('gap', GAP);
+
+  function refresh() {
+    const n = ['who', 'shape', 'gap'].filter((k) => pick[k]).length + (taskEl.value.trim() ? 1 : 0);
+    count.textContent = `${n} מתוך 4`;
+    go.disabled = n < 4;
+  }
+
+  root.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-g2]');
+    if (!btn) return;
+    const g = btn.dataset.g2;
+    pick[g] = btn.dataset.k;
+    root.querySelectorAll(`[data-g2="${g}"]`).forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.k === btn.dataset.k));
+    });
+    refresh();
+  });
+  taskEl.addEventListener('input', refresh);
+
+  go.addEventListener('click', () => {
+    const task = taskEl.value.trim();
+    const who = WHO.find((w) => w.k === pick.who);
+    const shape = SHAPE.find((s) => s.k === pick.shape);
+    const gap = GAP.find((g) => g.k === pick.gap);
+
+    const blocks = [
+      { tag: 'בעלות', from: '1.5', lines: ['# בעלים: [שם] · עודכן: [תאריך]'] },
+      { tag: 'הקשר', from: '1.2', lines: ['אני [תפקיד] ב[ארגון].', who.ctx] },
+      { tag: 'הבקשה', from: '1.1', lines: [task] },
+      { tag: 'דוגמה', from: '1.3', lines: ['ככה נראה פלט טוב, מפעם שעברה:', '[הדביקו כאן פלט אחד אמיתי שיצא לכם טוב]'] },
+      { tag: 'מבנה', from: '1.4', lines: [shape.line] },
+      { tag: 'כלל חוסר', from: '0.2', lines: [gap.line] },
+    ];
+
+    const plain = blocks.map((b) => b.lines.join('\n')).join('\n');
+
+    const flags = [];
+
+    if (pick.gap === 'guess') {
+      flags.push({
+        lvl: 'bad',
+        t: '<strong>השורה הזאת היא בדיוק המנגנון שמייצר המצאות.</strong> "השלם לפי ההיגיון" נשמע סביר, והוא מבקש מהמודל לכתוב בביטחון גם כשאין לו על מה. אין דרך לראות אחר כך איזה פרט הושלם ואיזה נמסר — ולכן זו השורה היחידה כאן שכדאי להחליף.',
+      });
+    }
+    if (pick.who === 'out') {
+      flags.push({
+        lvl: 'warn',
+        t: '<strong>הפלט הזה יוצא מהארגון, ולכן הוא לא נשלח לבד.</strong> פרומפט קבוע חוסך את הכתיבה, לא את הקריאה. שווה להוסיף לנוהל שורה אחת: מי עובר על זה לפני שליחה.',
+      });
+    }
+    flags.push({
+      lvl: 'good',
+      t: '<strong>הבלוק היחיד שאי אפשר לייצר כאן הוא הדוגמה.</strong> היא חייבת להיות פלט אמיתי שלכם מהעבר, כי בזה בדיוק כוחה. בלעדיה זה פרומפט טוב; איתה זה פרומפט של הצוות.',
+    });
+    flags.push({
+      lvl: 'warn',
+      t: '<strong>שתי השורות המשעממות בראש הן אלה שיקבעו אם הוא ישרוד.</strong> פרומפט משותף בלי שם של בעלים ובלי תאריך מתיישן בשקט, ותוך חודשיים כל אחד מריץ גרסה פרטית משלו — וזו בדיוק הגנריות שהתחלנו ממנה.',
+    });
+
+    out.innerHTML = `
+      <div class="tp__cols">
+        <div class="tp__col">
+          <p class="tp__colLabel">מה שכותבים היום</p>
+          <pre class="tp__before">${esc(task)}</pre>
+          <p class="tp__colNote">עובד. פעם אחת, אצל מי שכתב אותו.</p>
+        </div>
+        <div class="tp__col">
+          <p class="tp__colLabel">מה שנשמר לצוות</p>
+          <div class="tp__after">
+            ${blocks.map((b) => `
+              <div class="tp__block">
+                <span class="tp__blockTag">${esc(b.tag)} · ${esc(b.from)}</span>
+                <pre class="tp__blockT">${esc(b.lines.join('\n'))}</pre>
+              </div>`).join('')}
+          </div>
+          <p class="tp__colNote">אותה משימה, אחרי ארבעה שיעורים.</p>
+        </div>
+      </div>
+
+      <p class="tp__blockLabel">להעתקה</p>
+      <pre class="tp__plain">${esc(plain)}</pre>
+
+      <ul class="tp__flags">${flags.map((f) => `<li class="tp__flag tp__flag--${f.lvl}">${f.t}</li>`).join('')}</ul>
+    `;
+    out.hidden = false;
+  });
+
+  refresh();
+})();
+</script>
+
+<style>
+  .tp {
+    border: 1px solid var(--rule); border-radius: var(--r-card);
+    background: var(--surface); overflow: hidden; margin-block: 2rem;
+  }
+  .tp__bar {
+    padding: 0.75rem 1.1rem; background: var(--surface-sunk);
+    border-block-end: 1px solid var(--rule); font-size: var(--t-xs); color: var(--ink-muted);
+  }
+  .tp__body { padding: 1.25rem 1.1rem 1.4rem; }
+  .tp__q { margin-block-end: 1.1rem; }
+  .tp__label { margin: 0 0 0.5rem; font-size: var(--t-sm); color: var(--ink-strong); }
+  .tp__input {
+    inline-size: 100%; padding: 0.6rem 0.85rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule-strong); background: var(--paper); color: var(--ink);
+    font: inherit; font-size: var(--t-sm);
+  }
+  .tp__input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .tp__opts { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tp :global(.tp__opt) {
+    border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-muted);
+    border-radius: var(--r-control); padding: 0.4rem 0.9rem; font: inherit;
+    font-size: var(--t-xs); cursor: pointer; text-align: start;
+    transition: background var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+  }
+  .tp :global(.tp__opt:hover) { color: var(--ink-strong); border-color: var(--ink-muted); }
+  .tp :global(.tp__opt[aria-pressed='true']) { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .tp__actions { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; }
+  .tp__go {
+    background: var(--deep); color: var(--ink-on-deep); border: 0;
+    border-radius: var(--r-control); padding: 0.55rem 1.35rem; font: inherit; cursor: pointer;
+  }
+  .tp__go:disabled { opacity: 0.45; cursor: not-allowed; }
+  .tp__count { font-size: var(--t-xs); color: var(--ink-faint); }
+  :root[data-theme='dark'] .tp__go { background: var(--accent); color: var(--accent-ink); }
+
+  .tp__out { margin-block-start: 1.4rem; display: grid; gap: 0.5rem; }
+  .tp__out[hidden] { display: none; }
+
+  .tp :global(.tp__cols) { display: grid; grid-template-columns: 1fr 1.4fr; gap: 0.7rem; align-items: start; }
+  .tp :global(.tp__colLabel) { margin: 0 0 0.35rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .tp :global(.tp__colNote) { margin: 0.45rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.6; }
+  .tp :global(.tp__before) {
+    margin: 0; padding: 0.85rem 0.95rem; border-radius: var(--r-control);
+    border: 1px dashed var(--rule-strong); background: transparent;
+    font: inherit; font-size: var(--t-sm); color: var(--ink-muted);
+    white-space: pre-wrap; direction: rtl; text-align: start;
+  }
+  .tp :global(.tp__after) { display: grid; gap: 0.35rem; }
+  .tp :global(.tp__block) {
+    padding: 0.6rem 0.8rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: var(--paper);
+    border-inline-start: 3px solid var(--accent);
+  }
+  .tp :global(.tp__blockTag) { display: block; font-size: 0.6875rem; color: var(--ink-faint); margin-block-end: 0.25rem; }
+  .tp :global(.tp__blockT) {
+    margin: 0; font: inherit; font-size: var(--t-sm); color: var(--ink);
+    line-height: 1.7; white-space: pre-wrap; direction: rtl; text-align: start;
+  }
+
+  .tp :global(.tp__blockLabel) { margin: 0.9rem 0 0.15rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .tp :global(.tp__plain) {
+    margin: 0; padding: 0.9rem 1rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border: 1px solid var(--rule);
+    font-size: var(--t-xs); line-height: 1.9; color: var(--ink);
+    white-space: pre-wrap; overflow-x: auto; direction: rtl; text-align: start;
+  }
+
+  .tp :global(.tp__flags) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+  .tp :global(.tp__flag) {
+    padding: 0.75rem 0.95rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+    font-size: var(--t-sm); line-height: 1.75; color: var(--ink);
+  }
+  .tp :global(.tp__flag--warn) { border-inline-start-color: #B8792A; }
+  .tp :global(.tp__flag--bad) { border-inline-start-color: #C4462F; }
+  .tp :global(.tp__flag--good) { border-inline-start-color: var(--accent-deep); }
+
+  .tp__foot {
+    margin: 0; padding: 0.85rem 1.1rem; background: var(--surface-sunk);
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.7;
+  }
+
+  @media (max-width: 700px) {
+    .tp :global(.tp__cols) { grid-template-columns: 1fr; }
+  }
+</style>
