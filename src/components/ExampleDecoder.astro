@@ -1,0 +1,261 @@
+---
+/**
+ * 1.3 — "כמה הנחיות דוגמה אחת מעבירה".
+ *
+ * מציג פלט לדוגמה, ומבקש מהקוראת לסמן אילו הנחיות היא הייתה צריכה לכתוב
+ * במילים כדי לקבל אותו. אחר כך נחשף מה הדוגמה באמת מעבירה — כולל
+ * שתי תכונות שאיש לא התכוון אליהן, ושעוברות בדיוק כמו כל השאר.
+ *
+ * הפואנטה היא לא חיסכון במילים — ההפרש שם קטן, והרכיב אומר את זה במפורש.
+ * הפואנטה היא שאי אפשר לנסח הנחיה על משהו שלא ידעתם שאתם עושים.
+ *
+ * הכול מקומי בדף. אין קריאה למודל.
+ */
+---
+<div class="xd" data-xd>
+  <div class="xd__bar">
+    <span class="xd__barText">דוגמה אחת: עדכון למועמדת אחרי ראיון</span>
+  </div>
+
+  <div class="xd__body">
+    <p class="xd__label">זה הפלט שאתם רוצים לקבל, שוב ושוב</p>
+    <blockquote class="xd__sample">
+      <p>נועה שלום,</p>
+      <p>סיימנו את סבב הראיונות לתפקיד. בחרנו מועמד אחר, שהניסיון שלו בתחום הספציפי הזה רחב יותר.</p>
+      <p>שמרנו את הפרטים שלך, ואם ייפתח תפקיד שמתאים לרקע שלך נפנה אלייך.</p>
+      <p>בהצלחה,<br />דנה</p>
+    </blockquote>
+
+    <p class="xd__label">מה הייתם צריכים לכתוב בהנחיות כדי לקבל בדיוק את זה?</p>
+    <p class="xd__hint">סמנו כל מה שנראה לכם הכרחי. אין כאן ציון — יש כאן מספר שכדאי לראות.</p>
+
+    <ul class="xd__list" data-list></ul>
+
+    <div class="xd__actions">
+      <button type="button" class="xd__go" data-go>לראות מה הדוגמה באמת מעבירה</button>
+      <span class="xd__count" data-tally>0 מסומנות</span>
+    </div>
+
+    <div class="xd__out" data-out hidden></div>
+  </div>
+
+  <p class="xd__foot">
+    ההדגמה רצה בדף הזה, בלי קריאה למודל. ספירת המילים היא של הטקסטים שמופיעים כאן בפועל.
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-xd]');
+  if (!root) return;
+
+  // wanted:false = תכונה שעוברת בדוגמה בלי שאיש התכוון אליה
+  const RULES = [
+    { id: 'r1', wanted: true, t: 'לכתוב קצר — עד ארבע שורות', why: 'האורך נמדד מהדוגמה, לא מהנחיה.' },
+    { id: 'r2', wanted: true, t: 'לפנות בשם פרטי', why: 'הפנייה בשם פרטי נלמדת מהשורה הראשונה.' },
+    { id: 'r3', wanted: true, t: 'לומר במפורש שנבחר מועמד אחר', why: 'בלי זה יוצא מכתב מעורפל שלא אומר את הדבר עצמו.' },
+    { id: 'r4', wanted: true, t: 'לתת סיבה אחת, עניינית, בלי לפרט', why: 'סיבה אחת בלי הרחבה — זה בדיוק מה שהדוגמה עושה.' },
+    { id: 'r5', wanted: true, t: 'בלי שבחים ובלי "היה תענוג להכיר"', why: 'ההיעדר נלמד בדיוק כמו הנוכחות.' },
+    { id: 'r6', wanted: true, t: 'בלי התנצלות', why: 'גם זה היעדר שהדוגמה מעבירה בלי מילה אחת.' },
+    { id: 'r7', wanted: true, t: 'לסיים בברכה קצרה ובחתימה בשם פרטי', why: 'מבנה הסיום מועתק כמו שהוא.' },
+    { id: 'r8', wanted: false, t: 'להבטיח שנשמור את הפרטים ונפנה אם ייפתח תפקיד', why: 'זו הבטחה שברוב הארגונים לא מקוימת — והדוגמה תשכפל אותה בכל מכתב.' },
+    { id: 'r9', wanted: false, t: 'לחתום בשם פרטי בלבד, בלי תפקיד וארגון', why: 'נראה חם, ובמכתב דחייה זה משאיר את המועמדת בלי כתובת לחזור אליה.' },
+  ];
+
+  const SPEC_WORDS = 49;   // ספירת המילים של תשע ההנחיות ככתובות למעלה
+  const SAMPLE_WORDS = 31; // ספירת המילים של הדוגמה עצמה
+
+  const picked = {};
+  const list = root.querySelector('[data-list]');
+  const out = root.querySelector('[data-out]');
+  const count = root.querySelector('[data-tally]');
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function stat(n, one, many) {
+    return n === 1 ? `${n} ${one}` : `${n} ${many}`;
+  }
+
+  list.innerHTML = RULES.map((r) => `
+    <li>
+      <button type="button" class="xd__rule" data-r="${r.id}" aria-pressed="false">
+        <span class="xd__box" aria-hidden="true"></span>
+        <span class="xd__ruleT">${esc(r.t)}</span>
+      </button>
+    </li>
+  `).join('');
+
+  function refresh() {
+    const n = Object.values(picked).filter(Boolean).length;
+    count.textContent = stat(n, 'מסומנת', 'מסומנות');
+  }
+
+  list.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-r]');
+    if (!btn) return;
+    const id = btn.dataset.r;
+    picked[id] = !picked[id];
+    btn.setAttribute('aria-pressed', String(Boolean(picked[id])));
+    refresh();
+  });
+
+  root.querySelector('[data-go]').addEventListener('click', () => {
+    const marked = RULES.filter((r) => picked[r.id]);
+    const missed = RULES.filter((r) => !picked[r.id]);
+    const strays = RULES.filter((r) => !r.wanted);
+    const straysMarked = strays.filter((r) => picked[r.id]).length;
+
+    const verdict = missed.length === 0
+      ? 'סימנתם את כל התשע. עכשיו השאלה האמיתית: הייתם מגיעים לתשע האלה בלי לראות את הדוגמה מולכם?'
+      : `סימנתם ${marked.length} מתוך 9. את השאר הדוגמה מעבירה בלי שכתבתם אף מילה.`;
+
+    out.innerHTML = `
+      <div class="xd__verdict"><strong>${esc(verdict)}</strong></div>
+
+      <div class="xd__nums">
+        <div class="xd__num">
+          <span class="xd__numV">${marked.length} <span class="xd__numOf">מתוך 9</span></span>
+          <span class="xd__numL">הנחיות שחשבתם עליהן</span>
+        </div>
+        <div class="xd__num xd__num--warn">
+          <span class="xd__numV">2</span>
+          <span class="xd__numL">מהתשע הן דברים שכנראה לא רציתם, ועוברים בכל זאת</span>
+        </div>
+      </div>
+
+      <div class="xd__flag">
+        <strong>ומה עם אורך?</strong> תשע ההנחיות למעלה הן ${SPEC_WORDS} מילים; הדוגמה היא ${SAMPLE_WORDS}.
+        פחות מפי שניים, ולכן <strong>החיסכון במילים הוא לא הטיעון.</strong>
+        הטיעון הוא שכדי לכתוב את ${SPEC_WORDS} המילים האלה הייתם צריכים קודם לדעת שהן קיימות —
+        ורובן נראות מובנות מאליהן רק אחרי שרואים אותן ברשימה.
+      </div>
+
+      <p class="xd__blockLabel">תשע ההנחיות שהדוגמה מעבירה</p>
+      <ul class="xd__reveal">
+        ${RULES.map((r) => `
+          <li class="xd__rev ${r.wanted ? '' : 'xd__rev--stray'} ${picked[r.id] ? 'xd__rev--hit' : ''}">
+            <span class="xd__revMark">${picked[r.id] ? 'סימנתם' : 'פספסתם'}</span>
+            <span class="xd__revT">${esc(r.t)}<span class="xd__revWhy">${esc(r.why)}</span></span>
+          </li>`).join('')}
+      </ul>
+
+      <div class="xd__flag xd__flag--bad">
+        <strong>ושתיים מהתשע כנראה לא רציתם.</strong> ההבטחה לשמור פרטים ולחזור, והחתימה בשם פרטי בלבד, נכנסו לדוגמה כי ככה יצא — לא כי החלטתם. <strong>דוגמה לא מבחינה בין מה שהתכוונתם אליו לבין מה שקרה להיות שם</strong>, והיא תשכפל את שניהם בכל מכתב מכאן והלאה.
+        ${straysMarked ? `<br /><span class="xd__note">סימנתם ${stat(straysMarked, 'אחת מהן', 'את שתיהן')} כהכרחית — שווה לבדוק אם באמת.</span>` : ''}
+      </div>
+
+      <div class="xd__flag xd__flag--good">
+        <strong>התיקון הוא שורה אחת.</strong> מוסיפים מתחת לדוגמה: "התעלם מההבטחה לחזור ומהחתימה — הם לא חלק מהתבנית". שנייה אחת של כתיבה, והיא מוציאה מהדוגמה בדיוק את מה שלא רציתם בלי לוותר על כל השאר.
+      </div>
+    `;
+    out.hidden = false;
+  });
+
+  refresh();
+})();
+</script>
+
+<style>
+  .xd {
+    border: 1px solid var(--rule); border-radius: var(--r-card);
+    background: var(--surface); overflow: hidden; margin-block: 2rem;
+  }
+  .xd__bar {
+    padding: 0.75rem 1.1rem; background: var(--surface-sunk);
+    border-block-end: 1px solid var(--rule); font-size: var(--t-xs); color: var(--ink-muted);
+  }
+  .xd__body { padding: 1.25rem 1.1rem 1.4rem; }
+  .xd__label { margin: 0 0 0.4rem; font-size: var(--t-sm); color: var(--ink-strong); }
+  .xd__hint { margin: 0 0 0.9rem; font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.7; }
+
+  .xd__sample {
+    margin: 0 0 1.4rem; padding: 1rem 1.1rem; border-radius: var(--r-control);
+    background: var(--paper); border: 1px solid var(--rule);
+    border-inline-start: 3px solid var(--accent);
+  }
+  .xd__sample p { margin: 0 0 0.6rem; font-size: var(--t-sm); color: var(--ink); line-height: 1.75; }
+  .xd__sample p:last-child { margin-block-end: 0; }
+
+  .xd__list { list-style: none; margin: 0 0 1.1rem; padding: 0; display: grid; gap: 0.35rem; }
+  .xd :global(.xd__rule) {
+    inline-size: 100%; display: flex; align-items: baseline; gap: 0.6rem;
+    padding: 0.6rem 0.85rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: transparent; color: var(--ink);
+    font: inherit; font-size: var(--t-sm); text-align: start; cursor: pointer; line-height: 1.6;
+    transition: border-color var(--dur-fast) ease, background var(--dur-fast) ease;
+  }
+  .xd :global(.xd__rule:hover) { border-color: var(--ink-faint); }
+  .xd :global(.xd__box) {
+    flex: none; inline-size: 0.95rem; block-size: 0.95rem; border-radius: 3px;
+    border: 1px solid var(--rule-strong); translate: 0 0.15rem;
+  }
+  .xd :global(.xd__rule[aria-pressed='true']) { border-color: var(--accent-deep); background: var(--surface-sunk); }
+  .xd :global(.xd__rule[aria-pressed='true'] .xd__box) { background: var(--accent); border-color: var(--accent); }
+
+  .xd__actions { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; }
+  .xd__go {
+    background: var(--deep); color: var(--ink-on-deep); border: 0;
+    border-radius: var(--r-control); padding: 0.55rem 1.35rem; font: inherit; cursor: pointer;
+  }
+  .xd__count { font-size: var(--t-xs); color: var(--ink-faint); }
+  :root[data-theme='dark'] .xd__go { background: var(--accent); color: var(--accent-ink); }
+
+  .xd__out { margin-block-start: 1.4rem; display: grid; gap: 0.5rem; }
+  .xd__out[hidden] { display: none; }
+
+  .xd :global(.xd__verdict) {
+    padding: 0.8rem 1rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+    font-size: var(--t-sm); color: var(--ink-strong); line-height: 1.7;
+  }
+  .xd :global(.xd__nums) { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .xd :global(.xd__num) {
+    padding: 0.85rem 0.95rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+  }
+  .xd :global(.xd__num--good) { border-inline-start-color: var(--accent-deep); }
+  .xd :global(.xd__num--warn) { border-inline-start-color: #B8792A; }
+  .xd :global(.xd__numOf) { font-family: var(--font-sans, inherit); font-size: var(--t-sm); color: var(--ink-faint); }
+  .xd :global(.xd__numV) {
+    display: block; font-family: var(--font-display); font-size: 1.9rem;
+    line-height: 1.1; color: var(--ink-strong);
+  }
+  .xd :global(.xd__numL) { display: block; margin-block-start: 0.3rem; font-size: var(--t-xs); color: var(--ink-muted); line-height: 1.6; }
+
+  .xd :global(.xd__blockLabel) { margin: 0.9rem 0 0.15rem; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .xd :global(.xd__reveal) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+  .xd :global(.xd__rev) {
+    display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap;
+    padding: 0.6rem 0.85rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: var(--paper);
+  }
+  .xd :global(.xd__rev--stray) { border-inline-start: 3px solid #C4462F; }
+  .xd :global(.xd__revMark) {
+    flex: none; min-inline-size: 4.2rem; font-size: var(--t-xs); color: #B8792A;
+  }
+  .xd :global(.xd__rev--hit .xd__revMark) { color: var(--accent-deep); }
+  .xd :global(.xd__revT) { flex: 1 1 12rem; font-size: var(--t-sm); color: var(--ink); line-height: 1.6; }
+  .xd :global(.xd__revWhy) { display: block; margin-block-start: 0.2rem; font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.6; }
+
+  .xd :global(.xd__flag) {
+    padding: 0.75rem 0.95rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+    font-size: var(--t-sm); line-height: 1.75; color: var(--ink);
+  }
+  .xd :global(.xd__flag--bad) { border-inline-start-color: #C4462F; }
+  .xd :global(.xd__flag--good) { border-inline-start-color: var(--accent-deep); }
+  .xd :global(.xd__note) { font-size: var(--t-xs); color: var(--ink-muted); }
+
+  .xd__foot {
+    margin: 0; padding: 0.85rem 1.1rem; background: var(--surface-sunk);
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.7;
+  }
+
+  @media (max-width: 560px) {
+    .xd :global(.xd__nums) { grid-template-columns: 1fr; }
+  }
+</style>
