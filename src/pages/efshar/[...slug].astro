@@ -1,0 +1,20 @@
+---
+import { getCollection, render } from 'astro:content';
+import Demo from '../../layouts/Demo.astro';
+
+export async function getStaticPaths() {
+  const all = await getCollection('efshar', (e) => e.data.published);
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+<Demo
+  title={d.title} kicker={d.kicker}
+  before={d.before} after={d.after} built={d.built} needs={d.needs}
+  checked={d.checked}
+>
+  <Content />
+</Demo>
