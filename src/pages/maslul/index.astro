@@ -6,11 +6,11 @@ import TrackNav from '../../components/TrackNav.astro';
 import { STAGES, TOTAL_LESSONS } from '../../data/track';
 
 // שכבה שנייה ושלישית של המסלול: הכלים וההדגמות שמשויכים לכל שלב
-const tools = (await getCollection('kelim', (e) => e.data.published && e.data.stage !== undefined))
+const tools = (await getCollection('kelim', (e) => e.data.published && e.data.stages.length > 0))
   .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.order - b.data.order);
 const demos = (await getCollection('efshar', (e) => e.data.published && e.data.stage !== undefined))
   .sort((a, b) => a.data.order - b.data.order);
-const toolsFor = (n: number) => tools.filter((t) => t.data.stage === n);
+const toolsFor = (n: number) => tools.filter((t) => t.data.stages.includes(n));
 const demosFor = (n: number) => demos.filter((d) => d.data.stage === n);
 const toolCount = tools.length;
 
