@@ -1,0 +1,319 @@
+---
+/**
+ * ההדגמה של 0.3 — "מי מחזיק את הלולאה".
+ *
+ * בוחרים משימה, ואז בוחרים באיזו צורה עושים אותה: צ'אט, כלי או סוכן.
+ * אותם שלבים בדיוק בכל שלוש הצורות — מה שמשתנה הוא מי עושה כל שלב,
+ * ובאילו שלבים אתם עדיין רואים מה קרה.
+ *
+ * שני המספרים שהרכיב מחשב הם כל השיעור:
+ *   נגיעות — כמה שלבים עדיין דורשים אתכם
+ *   נקודות עיוורות — כמה שלבים שבהם טעות לא תתגלה בזמן אמת
+ * הם נעים בכיוונים הפוכים, ואין צורה שמנצחת בשתיהן.
+ *
+ * הכול מקומי בדף. אין קריאה למודל.
+ */
+---
+<div class="lc" data-lc>
+  <div class="lc__bar">
+    <span class="lc__barText">אותה משימה, שלוש צורות עבודה</span>
+  </div>
+
+  <div class="lc__body">
+    <div class="lc__q">
+      <p class="lc__label">1 · מה המשימה</p>
+      <div class="lc__opts" data-g="task"></div>
+    </div>
+
+    <div class="lc__q">
+      <p class="lc__label">2 · באיזו צורה</p>
+      <div class="lc__opts" data-g="mode"></div>
+      <p class="lc__note" data-modeNote>שלוש הצורות עושות את אותם שלבים. ההבדל הוא מי מחזיק אותם.</p>
+    </div>
+
+    <div class="lc__out" data-out hidden></div>
+  </div>
+
+  <p class="lc__foot">
+    ההדגמה רצה בדף הזה, בלי קריאה למודל. חלוקת השלבים היא מודל פשוט ומכוון —
+    בעולם האמיתי הגבולות מטושטשים יותר, אבל שני המספרים שלמטה מתנהגים בדיוק ככה.
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-lc]');
+  if (!root) return;
+
+  // kind קובע מי מחזיק את השלב בכל צורה, ולכן הוא מה שבאמת מוגדר כאן
+  const TASKS = [
+    {
+      k: 'dchiya', label: 'מכתב דחייה למועמדת אחרי ראיון',
+      person: true, volume: 'low', rule: false,
+      steps: [
+        { t: 'לאסוף את מה שנאמר בראיון', kind: 'gather' },
+        { t: 'להחליט מה הסיבה שנאמרת לה', kind: 'decide' },
+        { t: 'לנסח את המכתב', kind: 'produce' },
+        { t: 'לוודא שאין בו משפט שמסבך אתכם', kind: 'check' },
+        { t: 'לשלוח', kind: 'act' },
+      ],
+    },
+    {
+      k: 'sikum', label: 'סיכום שבועי מתוך שנים־עשר מיילים',
+      person: false, volume: 'mid', rule: false,
+      steps: [
+        { t: 'לאסוף את שנים־עשר המיילים', kind: 'gather' },
+        { t: 'להוציא מכל אחד את מה שרלוונטי', kind: 'produce' },
+        { t: 'להחליט מה נכנס לסיכום ומה לא', kind: 'decide' },
+        { t: 'לכתוב את הסיכום', kind: 'produce' },
+        { t: 'לבדוק שלא נפל נושא', kind: 'check' },
+        { t: 'לשלוח', kind: 'act' },
+      ],
+    },
+    {
+      k: 'hadracha', label: 'לבדוק שארבעים עובדים סיימו הדרכת חובה',
+      person: false, volume: 'high', rule: true,
+      steps: [
+        { t: 'למשוך את הרשימה מהמערכת', kind: 'gather' },
+        { t: 'להצליב מול רשימת העובדים', kind: 'produce' },
+        { t: 'לסמן מי לא סיים', kind: 'decide' },
+        { t: 'לכתוב תזכורת אישית לכל אחד', kind: 'produce' },
+        { t: 'לשלוח', kind: 'act' },
+        { t: 'לחזור על זה בשבוע הבא', kind: 'repeat' },
+      ],
+    },
+  ];
+
+  const MODES = [
+    {
+      k: 'chat', label: "צ'אט",
+      short: 'אתם מדביקים, הוא עונה, אתם לוקחים.',
+      // מי מחזיק כל סוג שלב, ומה אתם רואים
+      by: { gather: 'me', decide: 'me', produce: 'ai', check: 'me', act: 'me', repeat: 'me' },
+      sees: ['produce'],
+      when: 'מיד, בכל תשובה',
+    },
+    {
+      k: 'tool', label: 'כלי',
+      short: 'בנוי למשימה אחת, מחובר לחומר שלכם.',
+      by: { gather: 'ai', decide: 'me', produce: 'ai', check: 'me', act: 'me', repeat: 'me' },
+      sees: ['produce'],
+      when: 'בסוף השלב, כשמסתכלים על הפלט',
+    },
+    {
+      k: 'agent', label: 'סוכן',
+      short: 'מקבל מטרה ומחליט לבד את השלבים באמצע.',
+      by: { gather: 'ai', decide: 'ai', produce: 'ai', check: 'ai', act: 'ai', repeat: 'ai' },
+      sees: ['act'],
+      when: 'רק בתוצאה, אחרי שהכול כבר קרה',
+    },
+  ];
+
+  const pick = {};
+  const out = root.querySelector('[data-out]');
+  const modeNote = root.querySelector('[data-modeNote]');
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function fill(group, items) {
+    root.querySelector(`[data-g="${group}"]`).innerHTML = items.map((i) => `
+      <button type="button" class="lc__opt" data-g2="${group}" data-k="${i.k}" aria-pressed="false">${esc(i.label)}</button>
+    `).join('');
+  }
+
+  fill('task', TASKS);
+  fill('mode', MODES);
+
+  root.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-g2]');
+    if (!btn) return;
+    const g = btn.dataset.g2;
+    pick[g] = btn.dataset.k;
+    root.querySelectorAll(`[data-g2="${g}"]`).forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.k === btn.dataset.k));
+    });
+    render();
+  });
+
+  function stat(n, one, many) {
+    return n === 1 ? `${n} ${one}` : `${n} ${many}`;
+  }
+
+  function render() {
+    const task = TASKS.find((t) => t.k === pick.task);
+    const mode = MODES.find((m) => m.k === pick.mode);
+
+    if (mode) modeNote.textContent = mode.short;
+    if (!task || !mode) { out.hidden = true; return; }
+
+    const rows = task.steps.map((s) => {
+      const by = mode.by[s.kind];
+      const seen = by === 'me' || mode.sees.includes(s.kind);
+      return { t: s.t, kind: s.kind, by, seen };
+    });
+
+    const touches = rows.filter((r) => r.by === 'me').length;
+    const blind = rows.filter((r) => !r.seen).length;
+    const flags = [];
+
+    if (task.person && mode.by.decide === 'ai') {
+      flags.push({
+        lvl: 'bad',
+        t: '<strong>יש כאן החלטה על אדם.</strong> הסיבה שנאמרת למועמדת היא לא ניסוח — היא הכרעה, והיא נשארת אצלכם גם כשכל השאר נמסר. זה הכלל היחיד שגובר על כל שיקול של יעילות, והוא מה שמפריד בין "המכונה מכינה" לבין "המכונה מחליטה".',
+      });
+    }
+    if (task.rule && mode.k === 'chat') {
+      flags.push({
+        lvl: 'warn',
+        t: '<strong>זה בזבוז של הצורה הזאת.</strong> ארבעים שורות שנבדקות לפי כלל אחד, כל שבוע מחדש, לא צריכות שיחה — הן צריכות משהו שרץ. בצד׳אט תעשו את זה מצוין פעם אחת, וזה מה שיהפוך את זה למשימה שבועית קבועה שלכם.',
+      });
+    }
+    if (task.volume === 'high' && mode.k === 'agent') {
+      flags.push({
+        lvl: 'good',
+        t: '<strong>כאן הצורה הזאת מרוויחה את מקומה.</strong> נפח גבוה, כלל ברור, וחזרה שבועית — זה בדיוק המצב שבו מסירת הלולאה חוסכת משהו אמיתי ולא רק מרשימה.',
+      });
+    }
+    if (mode.k === 'agent') {
+      flags.push({
+        lvl: 'warn',
+        t: `<strong>${stat(blind, 'שלב אחד', 'שלבים')} שלא תראו.</strong> טעות בהם לא נעצרת — היא ממשיכה הלאה ומגיעה אליכם בסוף כתוצאה, בלי שתדעו איפה היא נכנסה. זה המחיר, והוא לא באג: זה מה שהצורה הזאת היא.`,
+      });
+    }
+    if (mode.k === 'chat') {
+      flags.push({
+        lvl: 'good',
+        t: '<strong>שום דבר לא זז בלי שראיתם אותו.</strong> זה היתרון היחיד ששתי הצורות האחרות לא נותנות, והוא לא קטן: כל טעות עומדת מולכם ברגע שהיא נוצרת, לפני שהיא נכנסה לאיזה מסמך שיוצא החוצה.',
+      });
+    }
+    if (mode.k === 'chat' && task.volume !== 'low') {
+      flags.push({
+        lvl: 'warn',
+        t: `<strong>${stat(touches, 'נגיעה', 'נגיעות')} בכל הרצה.</strong> זה עובד מצוין, וזה גם לא משתפר בפעם העשירית. אם המשימה חוזרת — הצורה הזאת היא זו שתגרום לכם להפסיק.`,
+      });
+    }
+    if (mode.k === 'tool') {
+      flags.push({
+        lvl: 'good',
+        t: '<strong>הפשרה שרוב העבודה המשרדית נופלת עליה.</strong> האיסוף והניסוח נמסרים, ההחלטה והבדיקה נשארות. אתם לא רואים איך הוא אסף — ולכן הבדיקה בסוף היא לא פורמליות.',
+      });
+    }
+
+    out.innerHTML = `
+      <div class="lc__nums">
+        <div class="lc__num">
+          <span class="lc__numV">${touches}</span>
+          <span class="lc__numL">שלבים שדורשים אתכם</span>
+        </div>
+        <div class="lc__num ${blind ? 'lc__num--warn' : ''}">
+          <span class="lc__numV">${blind}</span>
+          <span class="lc__numL">שלבים שטעות בהם לא תתגלה</span>
+        </div>
+        <div class="lc__num lc__num--wide">
+          <span class="lc__numV lc__numV--txt">${esc(mode.when)}</span>
+          <span class="lc__numL">מתי תגלו שמשהו השתבש</span>
+        </div>
+      </div>
+
+      <p class="lc__blockLabel">אותם שלבים, בעלות אחרת</p>
+      <ol class="lc__chain">
+        ${rows.map((r) => `
+          <li class="lc__step ${r.by === 'ai' ? 'lc__step--ai' : ''} ${r.seen ? '' : 'lc__step--blind'}">
+            <span class="lc__who">${r.by === 'me' ? 'אתם' : 'המכונה'}</span>
+            <span class="lc__what">${esc(r.t)}</span>
+            ${r.seen ? '' : '<span class="lc__blindTag">לא רואים</span>'}
+          </li>`).join('')}
+      </ol>
+
+      <p class="lc__blockLabel">מה זה אומר בפועל</p>
+      <ul class="lc__flags">${flags.map((f) => `<li class="lc__flag lc__flag--${f.lvl}">${f.t}</li>`).join('')}</ul>
+    `;
+    out.hidden = false;
+  }
+})();
+</script>
+
+<style>
+  .lc {
+    border: 1px solid var(--rule); border-radius: var(--r-card);
+    background: var(--surface); overflow: hidden; margin-block: 2rem;
+  }
+  .lc__bar {
+    padding: 0.75rem 1.1rem; background: var(--surface-sunk);
+    border-block-end: 1px solid var(--rule); font-size: var(--t-xs); color: var(--ink-muted);
+  }
+  .lc__body { padding: 1.25rem 1.1rem 1.4rem; }
+  .lc__q { margin-block-end: 1.1rem; }
+  .lc__label { margin: 0 0 0.5rem; font-size: var(--t-sm); color: var(--ink-strong); }
+  .lc__note { margin: 0.5rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+  .lc__opts { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .lc :global(.lc__opt) {
+    border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-muted);
+    border-radius: var(--r-control); padding: 0.4rem 0.9rem; font: inherit;
+    font-size: var(--t-xs); cursor: pointer; text-align: start;
+    transition: background var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+  }
+  .lc :global(.lc__opt:hover) { color: var(--ink-strong); border-color: var(--ink-muted); }
+  .lc :global(.lc__opt[aria-pressed='true']) { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .lc__out { margin-block-start: 1.4rem; display: grid; gap: 0.5rem; }
+  .lc__out[hidden] { display: none; }
+
+  .lc :global(.lc__nums) { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+  .lc :global(.lc__num) {
+    padding: 0.85rem 0.95rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+  }
+  .lc :global(.lc__num--warn) { border-inline-start-color: #B8792A; }
+  .lc :global(.lc__num--wide) { grid-column: 1 / -1; }
+  .lc :global(.lc__numV) {
+    display: block; font-family: var(--font-display); font-size: 1.9rem;
+    line-height: 1.1; color: var(--ink-strong);
+  }
+  .lc :global(.lc__numV--txt) { font-size: var(--t-base); line-height: 1.5; }
+  .lc :global(.lc__numL) { display: block; margin-block-start: 0.3rem; font-size: var(--t-xs); color: var(--ink-muted); }
+
+  .lc :global(.lc__blockLabel) { margin: 0.9rem 0 0.15rem; font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .lc :global(.lc__chain) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; counter-reset: lcstep; }
+  .lc :global(.lc__step) {
+    display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap;
+    padding: 0.6rem 0.85rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: var(--paper);
+  }
+  .lc :global(.lc__step--ai) { background: var(--surface-sunk); }
+  .lc :global(.lc__step--blind) { border-inline-start: 3px solid #B8792A; }
+  .lc :global(.lc__who) {
+    flex: none; min-inline-size: 4.2rem; font-size: var(--t-xs);
+    color: var(--ink-faint);
+  }
+  .lc :global(.lc__step--ai .lc__who) { color: var(--accent-deep); }
+  .lc :global(.lc__what) { flex: 1 1 12rem; font-size: var(--t-sm); color: var(--ink); line-height: 1.6; }
+  .lc :global(.lc__blindTag) {
+    flex: none; font-size: 0.6875rem; color: #B8792A;
+    border: 1px solid currentColor; border-radius: var(--r-control); padding: 0.1rem 0.45rem;
+  }
+
+  .lc :global(.lc__flags) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+  .lc :global(.lc__flag) {
+    padding: 0.75rem 0.95rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+    font-size: var(--t-sm); line-height: 1.75; color: var(--ink);
+  }
+  .lc :global(.lc__flag--warn) { border-inline-start-color: #B8792A; }
+  .lc :global(.lc__flag--bad) { border-inline-start-color: #C4462F; }
+  .lc :global(.lc__flag--good) { border-inline-start-color: var(--accent-deep); }
+
+  .lc__foot {
+    margin: 0; padding: 0.85rem 1.1rem; background: var(--surface-sunk);
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.7;
+  }
+
+  @media (max-width: 560px) {
+    .lc :global(.lc__nums) { grid-template-columns: 1fr; }
+    .lc :global(.lc__num--wide) { grid-column: auto; }
+  }
+</style>
