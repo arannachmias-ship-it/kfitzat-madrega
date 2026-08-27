@@ -1,0 +1,345 @@
+---
+/**
+ * ההדגמה של "העבודה שקורית בלי שביקשו".
+ *
+ * מגדירים משימה חוזרת: מה בודקים, מה נחשב חריג, כל כמה זמן, ולמי זה מגיע.
+ * הפלט הוא ההנחיה שנשלחת למשימה — ושתי הרצות: אחת שיש בה ממצא, ואחת שאין.
+ * ההרצה השנייה היא הלב של ההדגמה: משימה ששותקת כשאין ממצא לא מבדילה
+ * בין "הכול תקין" לבין "נפלתי לפני חודש".
+ *
+ * הכול מקומי בדף. אין קריאה למודל.
+ */
+---
+<div class="sw" data-sw>
+  <div class="sw__bar">
+    <span class="sw__barText">משימה חוזרת · הגדרה בארבע בחירות</span>
+  </div>
+
+  <div class="sw__body">
+    <div class="sw__q">
+      <p class="sw__label">1 · מה נבדק בכל הרצה</p>
+      <div class="sw__opts" data-g="job"></div>
+    </div>
+
+    <div class="sw__q">
+      <p class="sw__label">2 · מה נחשב חריג</p>
+      <div class="sw__opts" data-g="thr"></div>
+      <p class="sw__note" data-thrNote></p>
+    </div>
+
+    <div class="sw__q">
+      <p class="sw__label">3 · כל כמה זמן</p>
+      <div class="sw__opts" data-g="freq"></div>
+    </div>
+
+    <div class="sw__q">
+      <p class="sw__label">4 · מה נשלח, ולמי</p>
+      <div class="sw__opts" data-g="rep"></div>
+    </div>
+
+    <div class="sw__actions">
+      <button type="button" class="sw__go" data-go disabled>להריץ שבועיים</button>
+      <span class="sw__count" data-count>0 מתוך 4</span>
+    </div>
+
+    <div class="sw__out" data-out hidden></div>
+  </div>
+
+  <p class="sw__foot">
+    ההדגמה רצה בדף הזה, בלי קריאה למודל. המספרים בהרצות הם נתוני דוגמה של ארגון בדיוני בן 180 עובדים.
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+(() => {
+  const root = document.querySelector('[data-sw]');
+  if (!root) return;
+
+  const JOBS = {
+    pniyot: {
+      label: 'פניות עובדים בתיבת משאבי אנוש',
+      unit: 'ימים בלי מענה',
+      volume: 42, volumeWord: 'פניות',
+      subject: 'פניות שממתינות',
+      item: (d) => `פנייה בנושא החזר נסיעות · ${d} ימים בלי מענה`,
+      none: (t) => `אף פנייה לא עברה ${t} ימים בלי מענה.`,
+    },
+    giyus: {
+      label: 'מועמדים שתקועים בשלב אחד בגיוס',
+      unit: 'ימים באותו שלב',
+      volume: 27, volumeWord: 'מועמדים פעילים',
+      subject: 'מועמדים תקועים',
+      item: (d) => `מועמדת לתפקיד רכזת שיווק · ${d} ימים אחרי הראיון, בלי החלטה`,
+      none: (t) => `אף מועמד לא נשאר ${t} ימים באותו שלב.`,
+    },
+    hadracha: {
+      label: 'הדרכות חובה שהוקצו ולא הושלמו',
+      unit: 'ימים בלי השלמה',
+      volume: 180, volumeWord: 'עובדים',
+      subject: 'הדרכות שלא הושלמו',
+      item: (d) => `הדרכת בטיחות · הוקצתה לפני ${d} ימים, לא הושלמה`,
+      none: (t) => `לאף עובד אין הדרכה פתוחה מעל ${t} ימים.`,
+    },
+  };
+
+  const THR = [
+    { k: '2', label: '2', tone: 'tight' },
+    { k: '5', label: '5', tone: 'ok' },
+    { k: '10', label: '10', tone: 'ok' },
+    { k: '21', label: '21', tone: 'loose' },
+  ];
+
+  const FREQ = [
+    { k: 'hour', label: 'כל שעה' },
+    { k: 'day', label: 'כל יום' },
+    { k: 'week', label: 'פעם בשבוע' },
+  ];
+
+  const REP = [
+    { k: 'always', label: 'תמיד אליי, גם כשאין ממצא' },
+    { k: 'silent', label: 'רק כשיש ממצא' },
+    { k: 'folder', label: 'לתיקייה משותפת' },
+  ];
+
+  const pick = {};
+  const out = root.querySelector('[data-out]');
+  const go = root.querySelector('[data-go]');
+  const count = root.querySelector('[data-count]');
+  const thrNote = root.querySelector('[data-thrNote]');
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function fill(group, items) {
+    const box = root.querySelector(`[data-g="${group}"]`);
+    box.innerHTML = items.map((i) => `
+      <button type="button" class="sw__opt" data-g2="${group}" data-k="${i.k}" aria-pressed="false">${esc(i.label)}</button>
+    `).join('');
+  }
+
+  fill('job', Object.keys(JOBS).map((k) => ({ k, label: JOBS[k].label })));
+  fill('thr', THR);
+  fill('freq', FREQ);
+  fill('rep', REP);
+
+  function unitNote() {
+    if (!pick.job) { thrNote.textContent = 'קודם בוחרים מה נבדק — היחידה תלויה בזה.'; return; }
+    const u = JOBS[pick.job].unit;
+    thrNote.textContent = pick.thr ? `חריג = מעל ${pick.thr} ${u}.` : `היחידה כאן היא ${u}.`;
+  }
+
+  function refresh() {
+    const n = ['job', 'thr', 'freq', 'rep'].filter((k) => pick[k]).length;
+    count.textContent = `${n} מתוך 4`;
+    go.disabled = n < 4;
+    unitNote();
+  }
+
+  root.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-g2]');
+    if (!btn) return;
+    const g = btn.dataset.g2;
+    pick[g] = btn.dataset.k;
+    root.querySelectorAll(`[data-g2="${g}"]`).forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.k === btn.dataset.k));
+    });
+    refresh();
+  });
+
+  function freqWord(k) {
+    return k === 'hour' ? 'כל שעה' : k === 'day' ? 'כל בוקר ב־8:00' : 'כל יום ראשון ב־8:00';
+  }
+
+  function run() {
+    const job = JOBS[pick.job];
+    const thr = Number(pick.thr);
+    const tone = THR.find((t) => t.k === pick.thr).tone;
+    const flags = [];
+
+    // כמה ממצאים יעלו בשבוע רגיל, לפי כמה הסף הדוק
+    const hits = tone === 'tight' ? 14 : tone === 'loose' ? 1 : 4;
+
+    const brief = [
+      `${freqWord(pick.freq)}:`,
+      `עברי על ${job.label}.`,
+      `סמני כחריג כל מה שעבר ${thr} ${job.unit}.`,
+      'לכל ממצא כתבי שורה אחת: מה זה, כמה זמן, ומה הצעד הבא.',
+      pick.rep === 'silent'
+        ? 'אם אין ממצאים — אל תשלחי כלום.'
+        : 'אם אין ממצאים — כתבי את זה במפורש, וציינה כמה נבדקו.',
+      pick.rep === 'folder'
+        ? 'שמרי את התוצאה בתיקייה המשותפת של הצוות.'
+        : 'שלחי אליי במייל.',
+      'אל תסיקי מסקנות שלא ביקשתי, ואל תפני לאף אחד בשמי.',
+    ].join('\n');
+
+    const items = [];
+    for (let i = 0; i < Math.min(hits, 3); i += 1) items.push(job.item(thr + 3 + i * 4));
+
+    const quietBox = pick.rep === 'silent'
+      ? '<div class="sw__empty">לא הגיע כלום.</div>'
+      : `<div class="sw__mail">
+           <p class="sw__mailSub">${esc(job.subject)} — אין חריגות</p>
+           <p class="sw__mailLine">נבדקו ${job.volume} ${esc(job.volumeWord)}. ${esc(job.none(thr))}</p>
+         </div>`;
+
+    if (pick.rep === 'silent') {
+      flags.push({
+        lvl: 'bad',
+        t: '<strong>שקט אינו מידע.</strong> משימה ששולחת רק כשיש ממצא לא מאפשרת להבדיל בין שבוע תקין לבין משימה שנפלה לפני חודש. זו הדרך הנפוצה ביותר שבה משימות מתוזמנות מתות בלי שאף אחד שם לב — ואז מגלים את זה דרך הבעיה שהן היו אמורות לתפוס.',
+      });
+    }
+    if (pick.rep === 'folder') {
+      flags.push({
+        lvl: 'warn',
+        t: '<strong>תיקייה היא לא נמען.</strong> דוח שנשמר ולא נשלח נקרא בשבועיים הראשונים ואז מפסיק להיקרא. אם התוצאה אמורה להוביל לפעולה, היא צריכה להגיע לאדם — ואם היא לא אמורה להוביל לפעולה, שווה לשאול למה מריצים אותה.',
+      });
+    }
+    if (tone === 'tight') {
+      flags.push({
+        lvl: 'warn',
+        t: `<strong>הסף צר מדי.</strong> ב־${thr} ${esc(job.unit)} כמעט הכול נכנס — ${hits} ממצאים בשבוע רגיל. רשימה בגודל כזה מפסיקים לפתוח אחרי שבועיים, והמשימה נהיית רעש שקשה להצדיק.`,
+      });
+    }
+    if (tone === 'loose') {
+      flags.push({
+        lvl: 'warn',
+        t: `<strong>הסף רחב מדי.</strong> ב־${thr} ${esc(job.unit)} הדבר כבר לא ניתן להצלה כשהוא מגיע אליכם. משימה מתוזמנת שווה משהו רק אם היא תופסת בזמן שעוד אפשר לעשות משהו.`,
+      });
+    }
+    if (pick.freq === 'hour') {
+      flags.push({
+        lvl: 'warn',
+        t: '<strong>התדירות לא תואמת לנתון.</strong> הדבר שנבדק כאן לא משתנה כל שעה. תדירות גבוהה מהקצב של המציאות לא מגלה מוקדם יותר — היא רק מייצרת הודעות זהות, ומאמנת אתכם להתעלם מהן.',
+      });
+    }
+    if (pick.freq === 'week' && tone === 'tight') {
+      flags.push({
+        lvl: 'warn',
+        t: '<strong>שבועי עם סף צר זה צירוף קשה:</strong> עד שהרשימה מגיעה, חלק מהממצאים כבר בני שבוע. או שמרחיבים את הסף, או שעוברים ליומי.',
+      });
+    }
+    if (!flags.length) {
+      flags.push({
+        lvl: 'good',
+        t: '<strong>ההגדרה הזאת עומדת.</strong> יש סף שאפשר להצדיק, תדירות שתואמת לקצב של הנתון, ודיווח שמגיע גם כשאין מה לדווח. זה המינימום שהופך משימה מתוזמנת למשהו שממשיכים להפעיל אחרי החודש הראשון.',
+      });
+    }
+
+    out.innerHTML = `
+      <p class="sw__blockLabel">ההנחיה שהמשימה מקבלת</p>
+      <pre class="sw__brief">${esc(brief)}</pre>
+
+      <div class="sw__runs">
+        <div class="sw__run">
+          <p class="sw__runLabel">שבוע רגיל</p>
+          <div class="sw__mail">
+            <p class="sw__mailSub">${esc(job.subject)} — ${hits} ${hits === 1 ? 'ממצא' : 'ממצאים'}</p>
+            <ul class="sw__items">${items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+            ${hits > items.length ? `<p class="sw__more">ועוד ${hits - items.length}</p>` : ''}
+          </div>
+        </div>
+        <div class="sw__run">
+          <p class="sw__runLabel">שבוע שאין בו כלום</p>
+          ${quietBox}
+        </div>
+      </div>
+
+      <p class="sw__blockLabel">מה יקרה עם זה בפועל</p>
+      <ul class="sw__flags">${flags.map((f) => `<li class="sw__flag sw__flag--${f.lvl}">${f.t}</li>`).join('')}</ul>
+    `;
+    out.hidden = false;
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  go.addEventListener('click', run);
+  refresh();
+})();
+</script>
+
+<style>
+  .sw {
+    border: 1px solid var(--rule); border-radius: var(--r-card);
+    background: var(--surface); overflow: hidden; margin-block: 2rem;
+  }
+  .sw__bar {
+    padding: 0.75rem 1.1rem; background: var(--surface-sunk);
+    border-block-end: 1px solid var(--rule); font-size: var(--t-xs); color: var(--ink-muted);
+  }
+  .sw__body { padding: 1.25rem 1.1rem 1.4rem; }
+  .sw__q { margin-block-end: 1.1rem; }
+  .sw__label { margin: 0 0 0.5rem; font-size: var(--t-sm); color: var(--ink-strong); }
+  .sw__note { margin: 0.45rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+  .sw__opts { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .sw :global(.sw__opt) {
+    border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-muted);
+    border-radius: var(--r-control); padding: 0.4rem 0.9rem; font: inherit;
+    font-size: var(--t-xs); cursor: pointer; text-align: start;
+    transition: background var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+  }
+  .sw :global(.sw__opt:hover) { color: var(--ink-strong); border-color: var(--ink-muted); }
+  .sw :global(.sw__opt[aria-pressed='true']) { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .sw__actions { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; }
+  .sw__go {
+    background: var(--deep); color: var(--ink-on-deep); border: 0;
+    border-radius: var(--r-control); padding: 0.55rem 1.35rem; font: inherit; cursor: pointer;
+  }
+  .sw__go:disabled { opacity: 0.45; cursor: not-allowed; }
+  .sw__count { font-size: var(--t-xs); color: var(--ink-faint); }
+  :root[data-theme='dark'] .sw__go { background: var(--accent); color: var(--accent-ink); }
+
+  .sw__out { margin-block-start: 1.4rem; display: grid; gap: 0.5rem; }
+  .sw__out[hidden] { display: none; }
+
+  .sw :global(.sw__blockLabel) { margin: 0.9rem 0 0.15rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .sw :global(.sw__brief) {
+    margin: 0; padding: 0.9rem 1rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border: 1px solid var(--rule);
+    font-size: var(--t-xs); line-height: 1.9; color: var(--ink);
+    white-space: pre-wrap; overflow-x: auto; direction: rtl; text-align: start;
+  }
+
+  .sw :global(.sw__runs) { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+  .sw :global(.sw__runLabel) { margin: 0 0 0.35rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .sw :global(.sw__mail) {
+    padding: 0.85rem 0.95rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: var(--paper);
+  }
+  .sw :global(.sw__mailSub) { margin: 0 0 0.5rem; font-size: var(--t-sm); color: var(--ink-strong); }
+  .sw :global(.sw__mailLine) { margin: 0; font-size: var(--t-xs); color: var(--ink-muted); line-height: 1.7; }
+  .sw :global(.sw__items) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+  .sw :global(.sw__items li) {
+    font-size: var(--t-xs); color: var(--ink); line-height: 1.6;
+    padding-inline-start: 0.7rem; border-inline-start: 2px solid var(--rule-strong);
+  }
+  .sw :global(.sw__more) { margin: 0.5rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
+  .sw :global(.sw__empty) {
+    padding: 1.5rem 0.95rem; border-radius: var(--r-control);
+    border: 1px dashed var(--rule-strong); background: transparent;
+    font-size: var(--t-sm); color: var(--ink-faint); text-align: center;
+    display: grid; place-items: center; min-block-size: 5.5rem;
+  }
+
+  .sw :global(.sw__flags) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+  .sw :global(.sw__flag) {
+    padding: 0.75rem 0.95rem; border-radius: var(--r-control);
+    background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
+    font-size: var(--t-sm); line-height: 1.75; color: var(--ink);
+  }
+  .sw :global(.sw__flag--warn) { border-inline-start-color: #B8792A; }
+  .sw :global(.sw__flag--bad) { border-inline-start-color: #C4462F; }
+  .sw :global(.sw__flag--good) { border-inline-start-color: var(--accent-deep); }
+
+  .sw__foot {
+    margin: 0; padding: 0.85rem 1.1rem; background: var(--surface-sunk);
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.7;
+  }
+
+  @media (max-width: 620px) {
+    .sw :global(.sw__runs) { grid-template-columns: 1fr; }
+    .sw :global(.sw__empty) { padding: 1.1rem 0.95rem; min-block-size: 0; }
+  }
+</style>
