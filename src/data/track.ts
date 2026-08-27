@@ -29,7 +29,7 @@ export const STAGES: Stage[] = [
     items: [
       { slug: 'ma-model-safa-ose', n: '0.1', title: 'מה מודל שפה בעצם עושה', note: 'בלי מתמטיקה, ובלי המילה "חושב".' },
       { slug: 'lama-ai-mamtzi', n: '0.2', title: 'למה AI ממציא דברים', note: 'ולמה זה משנה לגמרי איך משתמשים בו בעבודה.' },
-      { slug: 'chat-kli-sochen', n: '0.3', title: "צ'אט, כלי וסוכן: מה ההבדל", note: 'שלוש מילים שמתבלבלות, ומה מתאים למה.' },
+      { slug: 'chat-kli-sochen', n: '0.3', title: "צ'אט, כלי וסוכן: מה ההבדל", note: 'שלוש מילים שמתבלבלות, ומה מתאים למה.', interactive: true },
     ],
   },
   {
