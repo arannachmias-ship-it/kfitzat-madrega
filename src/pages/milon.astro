@@ -1,0 +1,218 @@
+---
+import Base from '../layouts/Base.astro';
+import SignupBand from '../components/SignupBand.astro';
+import TrackNav from '../components/TrackNav.astro';
+import { TERMS, CATS, TERM_COUNT } from '../data/milon';
+
+// ממוין לפי אלף־בית עברי, כדי שסריקה בעין תעבוד גם בלי חיפוש
+const sorted = [...TERMS].sort((a, b) => a.he.localeCompare(b.he, 'he'));
+const officialCount = TERMS.filter((t) => t.official).length;
+const CHECKED = '31.8.2026';
+---
+<Base
+  title="מילון המונחים · קפיצת מדרגה"
+  description={`${TERM_COUNT} מונחי בינה מלאכותית בעברית ובאנגלית, בהסבר פשוט — ומה כדאי לחשוד בו כשספק משתמש בהם.`}
+>
+  <TrackNav />
+
+  <section class="wrap head">
+    <h1 class="head__title">מילון המונחים</h1>
+    <p class="head__sub">
+      {TERM_COUNT} מונחים שחוזרים בפגישות ספקים, בחוזים ובמאמרים — בעברית ובאנגלית,
+      בהסבר של שתי שורות. לכל מונח שיש בו מלכודת רשמנו גם <strong>מה כדאי לחשוד בו</strong>
+      כשמישהו משתמש במילה הזאת כדי למכור לכם משהו.
+    </p>
+  </section>
+
+  <section class="wrap tools">
+    <label class="srch">
+      <span class="srch__lbl">חיפוש במילון</span>
+      <input
+        type="search" id="q" autocomplete="off"
+        placeholder="הקלידו מונח בעברית או באנגלית — למשל טוקן, hallucination, RAG"
+      />
+    </label>
+
+    <div class="chips" role="group" aria-label="סינון לפי נושא">
+      <button type="button" class="chip" data-cat="all" aria-pressed="true">הכול</button>
+      {CATS.map((c) => (
+        <button type="button" class="chip" data-cat={c.key} aria-pressed="false">{c.label}</button>
+      ))}
+    </div>
+
+    <p class="count" aria-live="polite" data-count-line>מציג {TERM_COUNT} מונחים</p>
+  </section>
+
+  <section class="wrap list">
+    {sorted.map((t) => (
+      <article
+        class="term"
+        data-cat={t.cat}
+        data-hay={[t.he, t.en, ...(t.alt ?? []), t.what, t.where ?? '', t.careful ?? ''].join(' ').toLowerCase()}
+      >
+        <header class="term__top">
+          <h2 class="term__he">{t.he}</h2>
+          <p class="term__en" dir="ltr">{t.en}</p>
+        </header>
+
+        {t.alt && t.alt.length > 0 && (
+          <p class="term__alt">נקרא גם: {t.alt.join(' · ')}</p>
+        )}
+
+        <p class="term__what">{t.what}</p>
+
+        {t.where && (
+          <p class="term__line"><span class="term__k">איפה תיתקלו בזה</span>{t.where}</p>
+        )}
+        {t.careful && (
+          <p class="term__line term__line--careful"><span class="term__k">מה לשים לב</span>{t.careful}</p>
+        )}
+
+        <footer class="term__foot">
+          {t.official && <span class="badge badge--official">מונח מאושר · האקדמיה ללשון</span>}
+          {t.lesson && (
+            <a class="badge badge--lesson" href={`/maslul/${t.lesson.slug}`}>
+              נלמד בשיעור {t.lesson.n}
+            </a>
+          )}
+        </footer>
+      </article>
+    ))}
+
+    <p class="empty" data-empty hidden>
+      לא מצאנו מונח כזה. אם זה מונח שאתם שומעים בפגישות — כתבו לנו והוא ייכנס.
+    </p>
+  </section>
+
+  <section class="wrap note">
+    <h2 class="note__t">על העברית שבמילון</h2>
+    <p>
+      למונחים הותיקים יש מונח עברי רשמי, ממילון <strong>"בינה מלאכותית"</strong> של
+      האקדמיה ללשון העברית — {officialCount} מהם מסומנים כאן. אבל אותו מילון הוא משנת
+      תשס״ד, והוא קדם למודלי השפה: <strong>לרוב אוצר המילים של השנים האחרונות פשוט אין
+      מונח עברי רשמי.</strong>
+    </p>
+    <p>
+      במקרים האלה לא המצאנו מילה. כתבנו את הצורה שבאמת בשימוש, ולידה את האנגלית —
+      כי בפגישה תשמעו את האנגלית, ובמסמך תראו לפעמים את העברית, וכדאי שתזהו את שתיהן.
+    </p>
+    <p class="note__checked">נבדק: {CHECKED} · המילון מתעדכן כשמונח חדש מתחיל לחזור בפגישות.</p>
+  </section>
+
+  <SignupBand />
+</Base>
+
+<style>
+  .head { padding-block: 2rem 1.25rem; }
+  .head__title { font-family: var(--font-display); font-size: var(--t-4xl); margin: 0 0 0.6rem; }
+  .head__sub { font-size: var(--t-lg); color: var(--ink-muted); max-width: 62ch; margin: 0; line-height: var(--lh-normal); }
+  .head__sub strong { color: var(--ink); font-weight: 500; }
+
+  .tools { display: flex; flex-direction: column; gap: 0.9rem; padding-block: 0.5rem 1.5rem; }
+  .srch { display: block; }
+  .srch__lbl {
+    display: block; font-size: var(--t-sm); color: var(--ink-muted); margin-bottom: 0.35rem;
+  }
+  #q {
+    width: 100%; font: inherit; font-size: var(--t-base); color: var(--ink);
+    background: var(--surface); border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control); padding: 0.7rem 0.9rem;
+  }
+  #q:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  #q::placeholder { color: var(--ink-faint); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .chip {
+    font: inherit; font-size: var(--t-sm); cursor: pointer;
+    padding: 0.4rem 0.85rem; border-radius: 100px;
+    border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+  .chip:hover { color: var(--ink); }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .chip[aria-pressed='true'] {
+    background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500;
+  }
+
+  .count { font-size: var(--t-sm); color: var(--ink-muted); margin: 0; }
+
+  .list { display: grid; gap: 0.9rem; padding-bottom: 3rem; }
+  .term {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.25rem 1.4rem; box-shadow: var(--shadow-1);
+  }
+  .term[hidden] { display: none; }
+
+  .term__top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.7rem; }
+  .term__he { font-family: var(--font-display); font-size: var(--t-xl); margin: 0; }
+  .term__en { font-size: var(--t-sm); color: var(--ink-faint); margin: 0; letter-spacing: 0.01em; }
+  .term__alt { font-size: var(--t-sm); color: var(--ink-faint); margin: 0.3rem 0 0; }
+  .term__what { margin: 0.6rem 0 0; line-height: var(--lh-normal); max-width: 68ch; }
+
+  .term__line { margin: 0.55rem 0 0; font-size: var(--t-sm); color: var(--ink-muted); max-width: 68ch; line-height: 1.6; }
+  .term__k {
+    display: block; font-size: var(--t-xs); font-weight: 700;
+    color: var(--ink-faint); margin-bottom: 0.1rem;
+  }
+  .term__line--careful { color: var(--ink); }
+  .term__line--careful .term__k { color: var(--accent-deep); }
+
+  .term__foot { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.85rem; }
+  .term__foot:empty { display: none; }
+  .badge {
+    font-size: var(--t-xs); border-radius: 100px; padding: 0.2rem 0.7rem;
+    border: 1px solid var(--rule-strong); color: var(--ink-muted); text-decoration: none;
+  }
+  .badge--official { background: var(--surface-sunk); }
+  .badge--lesson { border-color: var(--accent); color: var(--ink); }
+  .badge--lesson:hover { background: var(--accent-soft); }
+
+  .empty { padding: 2rem 0; color: var(--ink-muted); font-size: var(--t-lg); }
+  .empty[hidden] { display: none; }
+
+  .note {
+    border-top: 1px solid var(--rule); padding-block: 2rem 3rem;
+  }
+  .note__t { font-family: var(--font-display); font-size: var(--t-xl); margin: 0 0 0.7rem; }
+  .note p { max-width: 66ch; color: var(--ink-muted); margin: 0 0 0.7rem; line-height: var(--lh-normal); }
+  .note strong { color: var(--ink); font-weight: 500; }
+  .note__checked { font-size: var(--t-sm); color: var(--ink-faint); }
+</style>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    var q = document.getElementById('q');
+    if (!q) return;
+    var terms = Array.prototype.slice.call(document.querySelectorAll('.term'));
+    var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+    var line = document.querySelector('[data-count-line]');
+    var empty = document.querySelector('[data-empty]');
+    var cat = 'all';
+
+    function apply() {
+      var needle = q.value.trim().toLowerCase();
+      var shown = 0;
+      terms.forEach(function (el) {
+        var okCat = cat === 'all' || el.getAttribute('data-cat') === cat;
+        var okText = needle === '' || el.getAttribute('data-hay').indexOf(needle) !== -1;
+        var on = okCat && okText;
+        el.hidden = !on;
+        if (on) shown++;
+      });
+      empty.hidden = shown !== 0;
+      // באפס, הודעת "לא נמצא" אומרת את זה טוב יותר משורת מונה
+      line.textContent = shown === 0 ? '' : shown === 1 ? 'מציג מונח אחד' : 'מציג ' + shown + ' מונחים';
+    }
+
+    q.addEventListener('input', apply);
+    chips.forEach(function (b) {
+      b.addEventListener('click', function () {
+        cat = b.getAttribute('data-cat');
+        chips.forEach(function (x) {
+          x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+        });
+        apply();
+      });
+    });
+  })();
+</script>
