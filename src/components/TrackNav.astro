@@ -1,13 +1,15 @@
 ---
 /**
- * ניווט-משנה של המסלול: שלוש שכבות של אותה למידה.
- * שיעורים (מה לומדים) · הכלים (במה) · מה כבר אפשר (מה יוצא מזה).
- * הכתובות לא השתנו: /maslul, /kelim, /efshar.
+ * ניווט-משנה של המסלול: ארבע שכבות של אותה למידה.
+ * שיעורים (מה לומדים) · הכלים (במה) · מה כבר אפשר (מה יוצא מזה) · המילון (מה המילים אומרות).
+ * הכתובות: /maslul, /kelim, /efshar, /milon.
+ * לשונית חמישית תדרוש חשיבה מחדש — ארבע כבר יורדות לשתי שורות בנייד.
  */
 const tabs = [
   { href: '/maslul', label: 'השיעורים', hint: '29 שיעורים' },
   { href: '/kelim', label: 'הכלים', hint: 'מדריך הכלים' },
   { href: '/efshar', label: 'מה כבר אפשר', hint: 'הדגמות חיות' },
+  { href: '/milon', label: 'המילון', hint: 'מונחים בעברית' },
 ];
 const path = Astro.url.pathname;
 ---
@@ -31,7 +33,7 @@ const path = Astro.url.pathname;
   .tnav { padding-block: 0.75rem 0; }
   .tnav__list {
     list-style: none; margin: 0; padding: 0.3rem;
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.3rem;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.3rem;
     border: 1px solid var(--rule); border-radius: var(--r-card);
     background: var(--glass); backdrop-filter: blur(8px);
   }
@@ -44,6 +46,10 @@ const path = Astro.url.pathname;
   .tnav__tab[aria-current="page"] { background: var(--deep); color: var(--ink-on-deep); }
   .tnav__label { font-weight: 600; font-size: var(--t-base); }
   .tnav__hint { font-size: var(--t-xs); opacity: 0.8; }
+  /* ארבע לשוניות לא נכנסות בשורה אחת בנייד: שתיים על שתיים. */
+  @media (max-width: 620px) {
+    .tnav__list { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width: 480px) {
     .tnav__hint { display: none; }
     .tnav__tab { padding: 0.5rem 0.3rem; }
