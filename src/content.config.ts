@@ -71,4 +71,23 @@ const efshar = defineCollection({
   }),
 });
 
-export const collections = { maslul, kelim, efshar };
+/**
+ * עדויות של משתתפים. התשתית קיימת, אבל האתר לא מציג דבר עד שיש עדות אמיתית.
+ * שני שערים לפני פרסום, ושניהם חייבים להיות true: `consent` — אישור בכתב של האדם
+ * לפרסום בשמו ובתפקידו; `published` — ההחלטה שלנו להעלות. ציטוט הוא גוף הקובץ,
+ * במילים של האדם עצמו, בלי עריכה שמשנה משמעות. אין עדויות דמה, גם לא כדוגמה.
+ */
+const edut = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/edut' }),
+  schema: z.object({
+    name: z.string(),                 // שם מלא, כפי שאושר לפרסום
+    role: z.string(),                 // תפקיד
+    org: z.string(),                  // הארגון
+    program: z.enum(['hartsaa', 'sadna', 'yom', 'sidra', 'livuy']), // איזו תוכנית
+    date: z.date(),                   // מתי התקיימה
+    consent: z.boolean().default(false),
+    published: z.boolean().default(false),
+  }),
+});
+
+export const collections = { maslul, kelim, efshar, edut };
