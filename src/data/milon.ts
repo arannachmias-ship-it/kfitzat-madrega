@@ -12,6 +12,7 @@
 export type CatKey = 'yesodot' | 'sicha' | 'irgun' | 'sikun' | 'sapak';
 
 export type Term = {
+  id: string;            // עוגן קבוע בעמוד המילון: /milon#id
   he: string;
   en: string;
   cat: CatKey;
@@ -20,8 +21,27 @@ export type Term = {
   what: string;
   where?: string;
   careful?: string;
-  lesson?: { n: string; slug: string };
+  lessons?: string[];    // מספרי שיעורים שבהם המונח נלמד; הראשון הוא העיקרי
 };
+
+/** מספר שיעור → slug. מקור אחד, כדי שהמונחים לא יחזיקו slugs. */
+export const LESSON_SLUG: Record<string, string> = {
+  '0.1': 'ma-model-safa-ose', '0.2': 'lama-ai-mamtzi', '0.3': 'chat-kli-sochen',
+  '1.1': 'prompt-garua-mul-tov', '1.2': 'heksher-lifnei-bakasha', '1.3': 'dugma-bimkom-hesber',
+  '1.4': 'levakesh-mivne', '1.5': 'prompt-kavua-latzevet',
+  '2.1': 'dochot-umatzagot', '2.2': 'sikum-yeshiva-lemesimot', '2.3': 'lechaletz-netunim',
+  '2.4': 'tikshoret-pnim-irgunit', '2.5': 'teur-misra', '2.6': 'miyun-korot-chaim', '2.7': 'yeda-pnimi',
+  '3.1': 'metrigger-lepeula', '3.2': 'lechaber-kelim-kayamim', '3.3': 'automatzia-rishona',
+  '3.4': 'matai-sochen', '3.5': 'kshe-ze-nishbar', '3.6': 'letachzek-bli-mefateach',
+  '4.1': 'ma-asur-lehachnis', '4.2': 'mediniyut-amud-echad', '4.3': 'pratiyut-ovdim',
+  '4.4': 'lama-hatzevet-lo-mishtamesh', '4.5': 'shloshet-alafim-be-30-yom',
+  '4.7': 'eich-modedim-imutz', '4.8': 'tochnit-90-yom',
+};
+
+/** המונחים שנוגעים לשיעור מסוים, לפי מספרו. משמש את עמוד השיעור. */
+export function termsForLesson(n: string): Term[] {
+  return TERMS.filter((t) => t.lessons && t.lessons.includes(n));
+}
 
 export const CATS: { key: CatKey; label: string; note: string }[] = [
   { key: 'yesodot', label: 'היסודות', note: 'מה הדבר הזה בכלל' },
@@ -34,251 +54,276 @@ export const CATS: { key: CatKey; label: string; note: string }[] = [
 export const TERMS: Term[] = [
   // ---------- היסודות ----------
   {
-    he: 'בינה מלאכותית', en: 'Artificial Intelligence · AI', cat: 'yesodot', official: true,
+    id: 'ai', he: 'בינה מלאכותית', en: 'Artificial Intelligence · AI', cat: 'yesodot', official: true,
     what: 'שם כולל לתוכנה שמבצעת משימות שנחשבו בעבר כדורשות שיפוט אנושי — להבין טקסט, לזהות תמונה, להמליץ על החלטה.',
     careful: 'המונח כל כך רחב שכמעט הכול נכנס בו. "מבוסס AI" במצגת של ספק אינו אומר דבר עד שמבררים מה בדיוק עושה מה.',
-    lesson: { n: '0.1', slug: 'ma-model-safa-ose' },
+    lessons: ['0.1'],
   },
   {
-    he: 'מודל שפה גדול', en: 'Large Language Model · LLM', cat: 'yesodot', alt: ['מודל שפה'],
+    id: 'llm', he: 'מודל שפה גדול', en: 'Large Language Model · LLM', cat: 'yesodot', alt: ['מודל שפה'],
     what: "התוכנה שמאחורי צ'אט כמו קלוד או ChatGPT. היא חוזה איזו מילה מתאימה לבוא אחר כך, שוב ושוב, עד שנוצר טקסט שלם.",
     careful: 'היא לא מחפשת תשובה במאגר ולא בודקת אם היא נכונה. זה מסביר גם את הכוח וגם את ההמצאות.',
-    lesson: { n: '0.1', slug: 'ma-model-safa-ose' },
+    lessons: ['0.1', '0.2'],
   },
   {
-    he: 'בינה מלאכותית יוצרת', en: 'Generative AI', cat: 'yesodot', alt: ['בינה מחוללת', 'בינה יצרנית'],
+    id: 'genai', he: 'בינה מלאכותית יוצרת', en: 'Generative AI', cat: 'yesodot', alt: ['בינה מחוללת', 'בינה יצרנית'],
     what: 'כל כלי שמייצר תוכן חדש — טקסט, תמונה, קוד, קול — במקום רק לסווג או לנתח מה שכבר קיים.',
     careful: 'אין עדיין מונח עברי אחד מקובל. שלוש הצורות בשימוש, וכולן מובנות.',
+    lessons: ['0.1'],
   },
   {
-    he: 'למידת מכונה', en: 'Machine Learning · ML', cat: 'yesodot', official: true, alt: ['למידה אוטומטית'],
+    id: 'ml', he: 'למידת מכונה', en: 'Machine Learning · ML', cat: 'yesodot', official: true, alt: ['למידה אוטומטית'],
     what: 'תוכנה שמשתפרת מדוגמאות במקום מכללים שמישהו כתב ידנית. זה התחום הרחב שמודלי שפה הם ענף שלו.',
+    lessons: ['0.1'],
   },
   {
-    he: 'רשת עצבית', en: 'Neural Network', cat: 'yesodot', official: true,
+    id: 'neural-network', he: 'רשת עצבית', en: 'Neural Network', cat: 'yesodot', official: true,
     what: 'המבנה החישובי שעליו בנויים המודלים: שכבות של חישובים פשוטים שמצטרפים לתוצאה מורכבת.',
     careful: 'הדמיון למוח הוא מטפורה שנתנה את השם, לא תיאור של איך המוח עובד.',
+    lessons: ['0.1'],
   },
   {
-    he: 'טוקן', en: 'Token', cat: 'yesodot', alt: ['אסימון'],
+    id: 'token', he: 'טוקן', en: 'Token', cat: 'yesodot', alt: ['אסימון'],
     what: 'פיסת הטקסט הקטנה שהמודל סופר בה. באנגלית טוקן הוא בערך שלושה רבעי מילה.',
     where: 'בתמחור לפי שימוש, ובמגבלות אורך של כלים.',
     careful: 'מילה בעברית מתפרקת בדרך כלל ליותר טוקנים ממילה באנגלית, ולכן אותו טקסט בעברית עולה יותר ותופס יותר מקום.',
+    lessons: ['0.1', '1.2', '2.3'],
   },
   {
-    he: 'חלון הקשר', en: 'Context Window', cat: 'yesodot',
+    id: 'context-window', he: 'חלון הקשר', en: 'Context Window', cat: 'yesodot',
     what: 'כמה טקסט המודל יכול להחזיק מול העיניים בבת אחת — השיחה, המסמכים שהעליתם, וההוראות.',
     careful: 'חלון גדול אינו מבטיח שהמודל ישתמש היטב בכל מה שבתוכו. פרטים באמצע מסמך ארוך נוטים להישמט.',
+    lessons: ['1.2', '2.7'],
   },
   {
-    he: 'הזיה', en: 'Hallucination', cat: 'yesodot', alt: ['המצאה'],
+    id: 'hallucination', he: 'הזיה', en: 'Hallucination', cat: 'yesodot', alt: ['המצאה'],
     what: 'המודל מייצר מידע שנשמע נכון ואינו נכון — שם, תאריך, סעיף בחוק, מקור — בביטחון מלא.',
     careful: 'זו לא תקלה שמתקנים בעדכון תוכנה. היא נובעת מאיך שהמודל בנוי, ולכן העבודה היא לבנות בדיקה סביבו.',
-    lesson: { n: '0.2', slug: 'lama-ai-mamtzi' },
+    lessons: ['0.2', '1.4', '2.1', '2.2', '2.3'],
   },
   {
-    he: 'אימון', en: 'Training', cat: 'yesodot',
+    id: 'training', he: 'אימון', en: 'Training', cat: 'yesodot',
     what: 'השלב שבו המודל נבנה, מכמות עצומה של טקסט. הוא קורה פעם אחת ומראש, לא תוך כדי השימוש שלכם.',
     where: 'בשאלה החשובה ביותר בחוזה: האם מאמנים על התוכן שלנו.',
     careful: 'שיחה שניהלתם אינה נכנסת אוטומטית לאימון — אבל זה תלוי במסלול ובהגדרות, ולכן זו שאלה לשאול ולא להניח.',
+    lessons: ['0.1', '2.7', '4.1'],
   },
   {
-    he: 'חיתוך ידע', en: 'Knowledge Cutoff', cat: 'yesodot',
+    id: 'knowledge-cutoff', he: 'חיתוך ידע', en: 'Knowledge Cutoff', cat: 'yesodot',
     what: 'התאריך שאחריו המודל לא ראה שום דבר. אירועים מאוחרים יותר פשוט אינם קיימים מבחינתו.',
     careful: 'הוא לא תמיד יודע להגיד שהוא לא יודע, ולכן דווקא כאן נופלות המצאות בטוחות במיוחד.',
+    lessons: ['0.2'],
   },
   {
-    he: 'פרמטרים', en: 'Parameters', cat: 'yesodot',
+    id: 'parameters', he: 'פרמטרים', en: 'Parameters', cat: 'yesodot',
     what: 'המספרים הפנימיים שנקבעו במהלך האימון. הם מה ש"יודע" במודל, ומספרם משמש כמדד גודל.',
     careful: 'יותר פרמטרים אינו שווה טוב יותר למשימה שלכם. מודל קטן ומהיר עדיף לרוב המשימות היומיומיות.',
+    lessons: ['0.1'],
   },
   {
-    he: 'מולטימודלי', en: 'Multimodal', cat: 'yesodot', alt: ['רב־אופני'],
+    id: 'multimodal', he: 'מולטימודלי', en: 'Multimodal', cat: 'yesodot', alt: ['רב־אופני'],
     what: 'מודל שמקבל לא רק טקסט אלא גם תמונה, מסמך סרוק, קול או וידאו.',
     where: 'כשרוצים להעלות צילום מסך, חוזה סרוק או הקלטה של ישיבה.',
+    lessons: ['2.2', '2.3'],
   },
 
   // ---------- לדבר עם המודל ----------
   {
-    he: 'פרומפט', en: 'Prompt', cat: 'sicha', alt: ['הנחיה', 'בקשה'],
+    id: 'prompt', he: 'פרומפט', en: 'Prompt', cat: 'sicha', alt: ['הנחיה', 'בקשה'],
     what: 'מה שאתם כותבים למודל: הבקשה, ההקשר וההוראות, הכול ביחד.',
-    lesson: { n: '1.1', slug: 'prompt-garua-mul-tov' },
+    lessons: ['1.1', '1.2', '1.5', '2.1', '2.4', '2.5'],
   },
   {
-    he: 'הנדסת פרומפטים', en: 'Prompt Engineering', cat: 'sicha',
+    id: 'prompt-engineering', he: 'הנדסת פרומפטים', en: 'Prompt Engineering', cat: 'sicha',
     what: 'הניסוח של הבקשה כך שתחזור תוצאה שימושית: הקשר, דוגמה, מבנה רצוי.',
     careful: 'השם מנפח את זה. ברוב המקרים הארגוניים מדובר בכתיבה ברורה של מה שרוצים, לא במקצוע נפרד.',
-    lesson: { n: '1.1', slug: 'prompt-garua-mul-tov' },
+    lessons: ['1.1'],
   },
   {
-    he: 'הנחיית מערכת', en: 'System Prompt', cat: 'sicha',
+    id: 'system-prompt', he: 'הנחיית מערכת', en: 'System Prompt', cat: 'sicha',
     what: 'הוראות קבועות שיושבות מעל כל שיחה ומגדירות תפקיד, סגנון וגבולות — בלי שצריך לחזור עליהן.',
     where: 'כשבונים עוזר קבוע לצוות במקום לכתוב הכול מחדש בכל פעם.',
-    lesson: { n: '1.5', slug: 'prompt-kavua-latzevet' },
+    lessons: ['1.5'],
   },
   {
-    he: 'למידה מדוגמאות', en: 'Few-shot · One-shot', cat: 'sicha',
+    id: 'few-shot', he: 'למידה מדוגמאות', en: 'Few-shot · One-shot', cat: 'sicha',
     what: 'לצרף לבקשה דוגמה אחת או שתיים לפלט שאתם רוצים, במקום לתאר אותו במילים.',
-    lesson: { n: '1.3', slug: 'dugma-bimkom-hesber' },
+    lessons: ['1.3', '2.5'],
   },
   {
-    he: 'שרשרת מחשבה', en: 'Chain of Thought', cat: 'sicha',
+    id: 'chain-of-thought', he: 'שרשרת מחשבה', en: 'Chain of Thought', cat: 'sicha',
     what: 'לבקש מהמודל לפרט שלבים לפני שהוא נותן תשובה. עוזר בעיקר במשימות עם חישוב או היגיון רב־שלבי.',
     careful: 'ההסבר שהוא מציג אינו בהכרח מה שבאמת קרה בפנים. הוא טקסט שנוצר כמו כל טקסט אחר.',
+    lessons: ['1.2'],
   },
   {
-    he: 'טמפרטורה', en: 'Temperature', cat: 'sicha',
+    id: 'temperature', he: 'טמפרטורה', en: 'Temperature', cat: 'sicha',
     what: 'כמה המודל מגוון בבחירת המילים. נמוך מייצר תשובות צפויות וחוזרות, גבוה מייצר תשובות מגוונות.',
     careful: 'טמפרטורה נמוכה אינה אומרת נכון יותר — רק עקבי יותר. אפשר לקבל את אותה שגיאה בדיוק כל פעם.',
+    lessons: ['1.4'],
   },
   {
-    he: "צ'אט", en: 'Chat', cat: 'sicha',
+    id: 'chat', he: "צ'אט", en: 'Chat', cat: 'sicha',
     what: 'הצורה שבה רוב האנשים פוגשים את הכלי: אתם כותבים, הוא עונה, ואתם מחליטים מה הלאה.',
     careful: "בצ'אט אתם הלולאה. כל צעד עובר דרככם, וזה גם הבטיחות שלו וגם המחיר שלו.",
-    lesson: { n: '0.3', slug: 'chat-kli-sochen' },
+    lessons: ['0.3'],
   },
   {
-    he: 'סוכן', en: 'Agent', cat: 'sicha',
+    id: 'agent', he: 'סוכן', en: 'Agent', cat: 'sicha',
     what: 'מערכת שמבצעת רצף צעדים לבד — מחליטה מה הצעד הבא, משתמשת בכלים, ופועלת בעולם.',
     careful: 'רוב מה שנמכר כ"סוכן" הוא רצף קבוע מראש. השאלה שמפרידה: מי מחליט מה הצעד הבא, ומה הוא עושה בלי לשאול.',
-    lesson: { n: '3.4', slug: 'matai-sochen' },
+    lessons: ['0.3', '3.4'],
   },
 
   // ---------- לחבר לארגון ----------
   {
-    he: 'יצירה מבוססת אחזור', en: 'Retrieval-Augmented Generation · RAG', cat: 'irgun',
+    id: 'rag', he: 'יצירה מבוססת אחזור', en: 'Retrieval-Augmented Generation · RAG', cat: 'irgun',
     what: 'המודל מחפש קודם בתוך המסמכים שלכם, ואז מנסח תשובה ממה שמצא — עם הפניה למקור.',
     where: 'בכל פתרון של "שאלו את הנהלים שלנו".',
     careful: 'זה לא מלמד את המודל את המסמכים. הוא קורא אותם מחדש בכל שאלה, ולכן איכות התשובה תלויה קודם כול באיכות החיפוש ובסדר בתיקייה.',
-    lesson: { n: '2.7', slug: 'yeda-pnimi' },
+    lessons: ['2.7'],
   },
   {
-    he: 'הטמעה', en: 'Embedding', cat: 'irgun', alt: ['אמבדינג', 'שיכון'],
+    id: 'embedding', he: 'הטמעה', en: 'Embedding', cat: 'irgun', alt: ['אמבדינג', 'שיכון'],
     what: 'ייצוג של טקסט כרשימת מספרים, כך שאפשר למצוא קטעים קרובים במשמעות ולא רק כאלה שחולקים מילים.',
     where: 'מתחת למכסה המנוע של כל חיפוש חכם במסמכים.',
+    lessons: ['2.7'],
   },
   {
-    he: 'מסד וקטורי', en: 'Vector Database', cat: 'irgun',
+    id: 'vector-db', he: 'מסד וקטורי', en: 'Vector Database', cat: 'irgun',
     what: 'המקום שבו ההטמעות נשמרות, כדי שאפשר יהיה לחפש בהן מהר.',
+    lessons: ['2.7'],
   },
   {
-    he: 'כוונון עדין', en: 'Fine-tuning', cat: 'irgun',
+    id: 'fine-tuning', he: 'כוונון עדין', en: 'Fine-tuning', cat: 'irgun',
     what: 'להמשיך לאמן מודל קיים על דוגמאות משלכם, כדי שיאמץ סגנון או פורמט מסוים.',
     careful: 'מבקשים אותו לרוב כשבעצם צריך אחזור מסמכים. הוא יקר ואיטי יותר, ומתאים לסגנון — לא לעובדות שמשתנות.',
+    lessons: ['2.7'],
   },
   {
-    he: 'ממשק תכנות', en: 'API', cat: 'irgun',
+    id: 'api', he: 'ממשק תכנות', en: 'API', cat: 'irgun',
     what: 'הדרך שבה תוכנה אחת מדברת עם אחרת בלי מסך ובלי אדם באמצע.',
     where: 'כשמישהו אומר "נחבר את זה למערכת שלכם".',
-    lesson: { n: '3.2', slug: 'lechaber-kelim-kayamim' },
+    lessons: ['3.2'],
   },
   {
-    he: 'טריגר', en: 'Trigger', cat: 'irgun', alt: ['מפעיל'],
+    id: 'trigger', he: 'טריגר', en: 'Trigger', cat: 'irgun', alt: ['מפעיל'],
     what: 'האירוע שמתחיל אוטומציה: מייל שנכנס, שורה שנוספה, שעה שהגיעה.',
-    lesson: { n: '3.1', slug: 'metrigger-lepeula' },
+    lessons: ['3.1', '3.3', '3.6'],
   },
   {
-    he: 'אוטומציה', en: 'Automation', cat: 'irgun',
+    id: 'automation', he: 'אוטומציה', en: 'Automation', cat: 'irgun',
     what: 'רצף קבוע: אם קורה X, תעשה Y. אין בה שיקול דעת, וזה בדיוק היתרון שלה.',
     careful: 'לא כל דבר צריך AI. אם אפשר לנסח את זה כ"אם ככה אז ככה" — אוטומציה רגילה יציבה וזולה יותר.',
-    lesson: { n: '3.1', slug: 'metrigger-lepeula' },
+    lessons: ['3.1', '3.3', '3.4', '3.6'],
   },
   {
-    he: 'משימה מתוזמנת', en: 'Scheduled Task', cat: 'irgun',
+    id: 'scheduled-task', he: 'משימה מתוזמנת', en: 'Scheduled Task', cat: 'irgun',
     what: 'הרצה קבועה בזמן ידוע, שמפעילה שיקול דעת ולא רק רצף: "עברי על הדוח ותגידי לי מה חריג".',
     careful: 'אם הוגדר שתדווח רק כשיש ממצא, שקט אינו מידע — אי אפשר להבדיל בין שבוע תקין למשימה שנפלה.',
+    lessons: ['3.4', '3.5'],
   },
   {
-    he: 'אדם בלולאה', en: 'Human in the Loop', cat: 'irgun',
+    id: 'human-in-the-loop', he: 'אדם בלולאה', en: 'Human in the Loop', cat: 'irgun',
     what: 'נקודה מוגדרת שבה אדם מאשר לפני שהתהליך ממשיך.',
     where: 'בכל תהליך שנוגע בהחלטה על אדם — גיוס, שכר, משמעת.',
-    lesson: { n: '3.4', slug: 'matai-sochen' },
+    lessons: ['3.4', '2.6', '4.1'],
   },
   {
-    he: 'סקיל', en: 'Skill', cat: 'irgun', alt: ['מיומנות'],
+    id: 'skill', he: 'סקיל', en: 'Skill', cat: 'irgun', alt: ['מיומנות'],
     what: 'נוהל חוזר שנשמר בתוך הכלי, כדי שלא יצטרכו להסביר אותו מחדש בכל פעם.',
+    lessons: ['1.5'],
   },
   {
-    he: 'מקומי מול ענן', en: 'On-premise vs Cloud', cat: 'irgun',
+    id: 'on-prem-vs-cloud', he: 'מקומי מול ענן', en: 'On-premise vs Cloud', cat: 'irgun',
     what: 'האם המודל רץ על שרתים שלכם, או אצל הספק ואתם שולחים אליו את המידע.',
     where: 'בכל דיון עם אבטחת מידע.',
     careful: 'מקומי נשמע בטוח יותר אוטומטית, אבל הוא גם יקר, איטי לעדכון, ודורש מי שיתחזק אותו אצלכם.',
+    lessons: ['4.1', '2.7'],
   },
   {
-    he: 'פרוטוקול הקשר למודל', en: 'Model Context Protocol · MCP', cat: 'irgun',
+    id: 'mcp', he: 'פרוטוקול הקשר למודל', en: 'Model Context Protocol · MCP', cat: 'irgun',
     what: 'תקן פתוח לחיבור מודל למקורות מידע ולכלים בצורה אחידה, במקום חיבור מיוחד לכל מערכת.',
     where: 'בשיחות טכניות על חיבור הכלי למערכות הארגון.',
+    lessons: ['3.2'],
   },
 
   // ---------- מידע, סיכון ורגולציה ----------
   {
-    he: 'מידע אישי', en: 'Personal Data', cat: 'sikun',
+    id: 'personal-data', he: 'מידע אישי', en: 'Personal Data', cat: 'sikun',
     what: 'כל מידע שאפשר לזהות ממנו אדם, ישירות או בצירוף פרטים אחרים.',
     where: 'בחוק הגנת הפרטיות ובתיקון 13.',
     careful: 'קורות חיים, הערכת ביצועים והקלטת ישיבה הם מידע אישי גם כשלא חושבים עליהם ככה.',
-    lesson: { n: '4.1', slug: 'ma-asur-lehachnis' },
+    lessons: ['4.1', '4.3'],
   },
   {
-    he: 'הסרת זיהוי', en: 'Anonymisation', cat: 'sikun', alt: ['אנונימיזציה'],
+    id: 'anonymisation', he: 'הסרת זיהוי', en: 'Anonymisation', cat: 'sikun', alt: ['אנונימיזציה'],
     what: 'הסרת פרטים מזהים ממידע לפני שמשתמשים בו.',
     careful: 'הסרת השם לרוב לא מספיקה. תפקיד, ותק ומחלקה יחד מזהים אדם אחד בארגון בינוני.',
+    lessons: ['4.1', '4.3'],
   },
   {
-    he: 'הטיה', en: 'Bias', cat: 'sikun',
+    id: 'bias', he: 'הטיה', en: 'Bias', cat: 'sikun',
     what: 'המודל משכפל דפוסים מהנתונים שאומן עליהם, כולל דפוסים מפלים שהיו בהם.',
     careful: 'הטיה לא נראית בפלט בודד. היא נראית רק כשמסתכלים על מאה החלטות ביחד.',
-    lesson: { n: '2.6', slug: 'miyun-korot-chaim' },
+    lessons: ['2.6'],
   },
   {
-    he: 'פרוקסי', en: 'Proxy', cat: 'sikun', alt: ['מדד עקיף'],
+    id: 'proxy', he: 'פרוקסי', en: 'Proxy', cat: 'sikun', alt: ['מדד עקיף'],
     what: 'קריטריון תמים לכאורה שמשמש בפועל תחליף לעילה אסורה — מקום מגורים במקום מוצא, שנות ותק במקום גיל.',
     careful: 'בישראל מקום מגורים ושירות מילואים הם עילות מוגנות בעצמם, ולא רק פרוקסי.',
-    lesson: { n: '2.6', slug: 'miyun-korot-chaim' },
+    lessons: ['2.6'],
   },
   {
-    he: 'הסברתיות', en: 'Explainability', cat: 'sikun', alt: ['יכולת הסבר'],
+    id: 'explainability', he: 'הסברתיות', en: 'Explainability', cat: 'sikun', alt: ['יכולת הסבר'],
     what: 'היכולת להסביר למה יצאה תשובה או החלטה מסוימת.',
     careful: 'במודלי שפה אין הסבר אמיתי. כשמבקשים "תסביר למה" מקבלים עוד טקסט שנוצר, לא תיעוד של מה שקרה בפנים.',
+    lessons: ['2.6', '4.7'],
   },
   {
-    he: 'מעקות בטיחות', en: 'Guardrails', cat: 'sikun',
+    id: 'guardrails', he: 'מעקות בטיחות', en: 'Guardrails', cat: 'sikun',
     what: 'מגבלות שנבנות סביב המערכת ומונעות ממנה לענות או לפעול בתחומים מסוימים.',
     careful: 'הן נבנות סביב המודל, לא בתוכו, ולכן אפשר לעקוף אותן. הן מפחיתות סיכון ולא מבטלות אותו.',
+    lessons: ['4.1', '3.5', '4.8'],
   },
   {
-    he: 'משקולות פתוחות', en: 'Open Weights', cat: 'sikun',
+    id: 'open-weights', he: 'משקולות פתוחות', en: 'Open Weights', cat: 'sikun',
     what: 'מודל שהמספרים הפנימיים שלו פורסמו, כך שאפשר להוריד ולהריץ אותו על שרת משלכם.',
     careful: 'לרוב קוראים לזה "קוד פתוח" בטעות. המשקולות פורסמו, נתוני האימון בדרך כלל לא — ולכן אי אפשר לבדוק על מה הוא אומן.',
+    lessons: ['4.1'],
   },
   {
-    he: 'דיפ־פייק', en: 'Deepfake', cat: 'sikun', alt: ['דיפפייק'],
+    id: 'deepfake', he: 'דיפ־פייק', en: 'Deepfake', cat: 'sikun', alt: ['דיפפייק'],
     what: 'וידאו, תמונה או קול שנוצרו במודל ומציגים אדם אמיתי אומר או עושה משהו שלא קרה.',
     where: 'באימות זהות ובראיונות מרחוק.',
+    lessons: ['4.3', '2.6'],
   },
 
   // ---------- מה שומעים מספקים ----------
   {
-    he: 'בינה מלאכותית כללית', en: 'Artificial General Intelligence · AGI', cat: 'sapak',
+    id: 'agi', he: 'בינה מלאכותית כללית', en: 'Artificial General Intelligence · AGI', cat: 'sapak',
     what: 'רעיון של מערכת שמסוגלת לכל משימה קוגניטיבית שאדם מסוגל לה.',
     careful: 'אין הגדרה מוסכמת מתי זה קורה ואיך בודקים. בפגישת מכירה זה מונח שיווקי הרבה יותר מטכני.',
+    lessons: ['4.4'],
   },
   {
-    he: 'עוזר', en: 'Copilot · Assistant', cat: 'sapak',
+    id: 'copilot', he: 'עוזר', en: 'Copilot · Assistant', cat: 'sapak',
     what: 'שם מסחרי למוצר שמשלב מודל שפה בתוך תוכנה קיימת.',
     careful: 'זה שם של מוצר, לא סוג של טכנולוגיה. שתי מערכות שנקראות "עוזר" יכולות להיות דברים שונים לגמרי.',
+    lessons: ['4.4'],
   },
   {
-    he: 'קרדיטים', en: 'Credits', cat: 'sapak',
+    id: 'credits', he: 'קרדיטים', en: 'Credits', cat: 'sapak',
     what: 'יחידת חיוב בכלי אוטומציה: כל הפעלה של שלב צורכת קרדיט אחד או יותר.',
     careful: 'החישוב מפתיע. בדיקה כל רבע שעה מצטברת לאלפי קרדיטים בחודש, גם כשלא קרה כלום.',
-    lesson: { n: '3.1', slug: 'metrigger-lepeula' },
+    lessons: ['3.1', '3.3'],
   },
   {
-    he: 'רישוי ארגוני', en: 'Enterprise', cat: 'sapak',
+    id: 'enterprise', he: 'רישוי ארגוני', en: 'Enterprise', cat: 'sapak',
     what: 'מסלול ארגוני עם הסכם נפרד, ניהול משתמשים ולרוב התחייבות מפורשת לגבי המידע.',
     where: 'זה המסלול שבו נמצאת התשובה לשאלה אם מאמנים על התוכן שלכם.',
     careful: 'חשבון פרטי בתשלום אינו חשבון ארגוני. ההבדל אינו במחיר אלא בהסכם שמאחוריו.',
-    lesson: { n: '4.1', slug: 'ma-asur-lehachnis' },
+    lessons: ['4.1', '4.2', '4.8'],
   },
 ];
 
