@@ -48,7 +48,7 @@ const CHECKED = '31.8.2026';
       <article
         class="term"
         data-cat={t.cat}
-        data-hay={[t.he, t.en, ...(t.alt ?? []), t.what, t.where ?? '', t.careful ?? ''].join(' ').toLowerCase()}
+        data-hay={[t.he, t.en, ...(t.alt ?? []), t.what, t.where ?? '', t.careful ?? ''].join(' ').toLowerCase().replace(/׳/g, "'")}
       >
         <header class="term__top">
           <h2 class="term__he">{t.he}</h2>
@@ -190,7 +190,8 @@ const CHECKED = '31.8.2026';
     var cat = 'all';
 
     function apply() {
-      var needle = q.value.trim().toLowerCase();
+      // גרש עברי וגרש ישר נחשבים אותו דבר בחיפוש
+      var needle = q.value.trim().toLowerCase().replace(/׳/g, "'");
       var shown = 0;
       terms.forEach(function (el) {
         var okCat = cat === 'all' || el.getAttribute('data-cat') === cat;
