@@ -6,8 +6,8 @@
 import { getCollection, render } from 'astro:content';
 
 const PROGRAM_NAME: Record<string, string> = {
-  hartsaa: 'הרצאת פתיחה', sadna: 'סדנת ידיים', yom: 'יום מרוכז',
-  sidra: 'סדרת הכשרה', livuy: 'ליווי הטמעה',
+  hartsaa: 'הרצאת התנעה', sadna: 'סדנה מעשית', yom: 'סדנת יום מלא',
+  sidra: 'תוכנית הכשרה', livuy: 'ליווי הטמעה',
 };
 
 const all = await getCollection('edut', (e) => e.data.published && e.data.consent);
