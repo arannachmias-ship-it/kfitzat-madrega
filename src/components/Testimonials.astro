@@ -1,0 +1,55 @@
+---
+/**
+ * עדויות משתתפים. מציג רק עדויות שיש להן גם אישור בכתב (consent) וגם החלטה לפרסם (published).
+ * בלי אף אחת כזאת הרכיב לא מייצר כלום — לא כותרת, לא רווח — ולכן אפשר להשאיר אותו בעמוד מראש.
+ */
+import { getCollection, render } from 'astro:content';
+
+const PROGRAM_NAME: Record<string, string> = {
+  hartsaa: 'הרצאת פתיחה', sadna: 'סדנת ידיים', yom: 'יום מרוכז',
+  sidra: 'סדרת הכשרה', livuy: 'ליווי הטמעה',
+};
+
+const all = await getCollection('edut', (e) => e.data.published && e.data.consent);
+const items = await Promise.all(
+  all
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    .map(async (e) => ({ e, Content: (await render(e)).Content })),
+);
+---
+{items.length > 0 && (
+  <section class="wrap edut" aria-labelledby="edut-h">
+    <h2 id="edut-h" class="edut__t">מה אומרים אחרי</h2>
+    <ul class="edut__list">
+      {items.map(({ e, Content }) => (
+        <li class="edut__item">
+          <blockquote class="edut__q"><Content /></blockquote>
+          <p class="edut__who">
+            <strong>{e.data.name}</strong>
+            <span>{e.data.role} · {e.data.org}</span>
+            <span class="edut__prog">{PROGRAM_NAME[e.data.program]}</span>
+          </p>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .edut { padding-block: 2.5rem 1rem; }
+  .edut__t { font-family: var(--font-display); font-size: var(--t-2xl); margin: 0 0 1.25rem; }
+  .edut__list {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;
+  }
+  .edut__item {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card);
+    padding: 1.4rem 1.5rem; box-shadow: var(--shadow-1);
+    border-inline-start: 3px solid var(--accent);
+  }
+  .edut__q { margin: 0 0 1rem; font-size: var(--t-lg); line-height: var(--lh-normal); color: var(--ink-strong); }
+  .edut__q :global(p) { margin: 0; }
+  .edut__who { margin: 0; display: flex; flex-direction: column; gap: 0.15rem; font-size: var(--t-sm); color: var(--ink-muted); }
+  .edut__who strong { color: var(--ink-strong); font-weight: 600; }
+  .edut__prog { font-size: var(--t-xs); color: var(--ink-faint); }
+</style>
