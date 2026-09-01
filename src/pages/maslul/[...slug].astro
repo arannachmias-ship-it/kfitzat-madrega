@@ -21,6 +21,7 @@ const { Content } = await render(entry);
 const d = entry.data;
 ---
 <Lesson
+  id={entry.id}
   title={d.title} kicker={d.kicker} goal={d.goal}
   stage={d.stage} order={d.order} readingTime={d.readingTime}
   tool={d.tool} demo={d.demo}
