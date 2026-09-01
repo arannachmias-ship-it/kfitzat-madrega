@@ -1,6 +1,51 @@
 ---
 import Base from '../layouts/Base.astro';
 import SignupBand from '../components/SignupBand.astro';
+
+// שאלות שחוזרות מארגונים לפני שמזמינים. התשובות כאן חופפות למה שכתוב בשאר האתר — לא מבטיחות יותר.
+const faq = [
+  {
+    q: 'המידע שלנו בטוח בסדנה?',
+    a: 'בסדנה כל משתתף עובד בחשבון שלו, על מסמכים שהוא בחר להביא. אנחנו לא מקבלים את החומרים שלכם, לא שומרים אותם ולא מעלים אותם לשום מקום. לפני הסדנה אנחנו אומרים מה מתאים להביא ומה לא, לפי אותו כלל שמלמדים במסלול: מה אסור להכניס.',
+    link: { href: '/maslul/ma-asur-lehachnis', text: 'השיעור על מה אסור להכניס' },
+  },
+  {
+    q: 'אנחנו לא ארגון טכנולוגי. זה בכלל בשבילנו?',
+    a: 'זה בדיוק למי שהאתר הזה נבנה. רוב הזמן בסדנה הוא עבודה על החומרים שלכם, לא על הכלי. ומי שבטוח שזה לא בשבילו הוא בדיוק מי שאנחנו טובים איתו. עשרים שנה בכיתה זה בעיקר זה.',
+  },
+  {
+    q: 'מה צריך להכין לפני?',
+    a: 'מחשב נייד לכל משתתף, חשבון חינמי באחד הכלים, ומסמך אחד או שניים מהעבודה האמיתית. אנחנו שולחים מראש מה בדיוק להביא, כדי שאף אחד לא יגיע עם משהו שאסור לו להעלות.',
+  },
+  {
+    q: 'מה ההבדל ביניכם למרצה טכנולוגי?',
+    a: 'הכיוון. רוב מרצי ה־AI הם טכנולוגים שלמדו להרצות; אנחנו מורים שגם ניהלו תפעול והטמעה. אנחנו באים שניים, כי בקבוצה גדולה מנחה אחד נותן הרצאה גם כשקוראים לזה סדנה. והמדד שלנו הוא לא כמה התלהבו בחדר, אלא מה קרה ביום שלישי בבוקר.',
+  },
+  {
+    q: 'אתם מוכרים כלי מסוים?',
+    a: 'לא. אנחנו לא מקבלים עמלה מאף ספק, ובמדריך הכלים כתוב גם למי כל כלי לא מתאים. ממליצים לפי המשימה, לא לפי המותג.',
+    link: { href: '/kelim', text: 'מדריך הכלים' },
+  },
+  {
+    q: 'מה קורה אחרי ההרצאה?',
+    a: 'הרצאה לבד לא משנה הרגלים, וזה כתוב אצלנו בדף הבית. לכן המסלול פתוח בחינם להמשך לבד, ויש תוכניות המשך למי שרוצה ליווי. ואם אנחנו חושבים שאתם לא צריכים אותנו עדיין, נגיד גם את זה.',
+    link: { href: '/maslul', text: 'המסלול, בחינם' },
+  },
+  {
+    q: 'כמה זה עולה?',
+    a: "תלוי בתוכנית, בגודל הקבוצה ובהיקף. האג'נדה המלאה של כל תוכנית פתוחה לקריאה בעמוד התוכניות, וכותבים לנו כדי לקבל הצעה.",
+    link: { href: '/irgunim', text: 'התוכניות לארגונים' },
+  },
+];
+
+const faqLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({
+    '@type': 'Question', name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+});
 ---
 <Base
   title="מי אנחנו · קפיצת מדרגה"
@@ -19,7 +64,7 @@ import SignupBand from '../components/SignupBand.astro';
       <div class="story__stat">
         <p class="story__num" data-count="88" data-suffix="%">88%</p>
         <p class="story__numLabel">מהם עברו</p>
-        <p class="story__sub">ושביעות רצון הלקוחות עלתה, מ־90% ל־94%</p>
+        <p class="story__sub">ושביעות רצון המשפחות עלתה, מ־90% ל־94%</p>
       </div>
       <div class="story__text">
         <h2 id="story-t" class="story__q">
@@ -86,6 +131,23 @@ import SignupBand from '../components/SignupBand.astro';
     </p>
   </section>
 
+  <section class="wrap faq" aria-labelledby="faq-t">
+    <h2 id="faq-t" class="faq__t">שאלות שמנהלות משאבי אנוש שואלות לפני שהן מזמינות</h2>
+    <div class="faq__list">
+      {faq.map((f) => (
+        <details class="faq__item">
+          <summary class="faq__q">{f.q}</summary>
+          <div class="faq__a">
+            <p>{f.a}</p>
+            {f.link && <p class="faq__link"><a href={f.link.href}>{f.link.text} <i aria-hidden="true">←</i></a></p>}
+          </div>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <script type="application/ld+json" set:html={faqLd} />
+
   <SignupBand />
 </Base>
 
@@ -127,4 +189,31 @@ import SignupBand from '../components/SignupBand.astro';
   .why { padding-block: 2.5rem 4rem; border-block-start: 1px solid var(--rule); }
   .why__t { font-size: var(--t-2xl); margin-block-end: 1rem; }
   .why p { color: var(--ink-muted); font-weight: 300; max-inline-size: 62ch; font-size: var(--t-lg); }
+
+  .faq { padding-block: 2.5rem 4rem; border-block-start: 1px solid var(--rule); }
+  .faq__t { font-size: var(--t-2xl); margin-block-end: 1.25rem; max-inline-size: 30ch; }
+  .faq__list { display: grid; gap: 0.6rem; max-inline-size: 72ch; }
+  .faq__item {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card);
+    box-shadow: var(--shadow-1);
+  }
+  .faq__item[open] { border-color: var(--rule-strong); }
+  .faq__q {
+    cursor: pointer; list-style: none; padding: 1rem 1.25rem;
+    font-weight: 600; color: var(--ink-strong); font-size: var(--t-base);
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  }
+  .faq__q::-webkit-details-marker { display: none; }
+  .faq__q::after {
+    content: '+'; font-family: var(--font-display); color: var(--accent-deep);
+    font-size: 1.4rem; line-height: 1; flex: none;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .faq__item[open] .faq__q::after { transform: rotate(45deg); }
+  .faq__q:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: var(--r-card); }
+  .faq__a { padding: 0 1.25rem 1.1rem; }
+  .faq__a p { margin: 0; color: var(--ink-muted); font-weight: 300; line-height: var(--lh-normal); font-size: var(--t-base); }
+  .faq__link { margin-block-start: 0.6rem !important; font-size: var(--t-sm) !important; }
+  .faq__link a { color: var(--ink); text-decoration: none; border-block-end: 1px solid var(--accent); }
+  .faq__link a:hover { color: var(--ink-strong); }
 </style>
