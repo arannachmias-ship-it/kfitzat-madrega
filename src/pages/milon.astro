@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import SignupBand from '../components/SignupBand.astro';
 import TrackNav from '../components/TrackNav.astro';
-import { TERMS, CATS, TERM_COUNT } from '../data/milon';
+import { TERMS, CATS, TERM_COUNT, LESSON_SLUG } from '../data/milon';
 
 // ממוין לפי אלף־בית עברי, כדי שסריקה בעין תעבוד גם בלי חיפוש
 const sorted = [...TERMS].sort((a, b) => a.he.localeCompare(b.he, 'he'));
@@ -47,6 +47,7 @@ const CHECKED = '31.8.2026';
     {sorted.map((t) => (
       <article
         class="term"
+        id={t.id}
         data-cat={t.cat}
         data-hay={[t.he, t.en, ...(t.alt ?? []), t.what, t.where ?? '', t.careful ?? ''].join(' ').toLowerCase().replace(/׳/g, "'")}
       >
@@ -70,9 +71,9 @@ const CHECKED = '31.8.2026';
 
         <footer class="term__foot">
           {t.official && <span class="badge badge--official">מונח מאושר · האקדמיה ללשון</span>}
-          {t.lesson && (
-            <a class="badge badge--lesson" href={`/maslul/${t.lesson.slug}`}>
-              נלמד בשיעור {t.lesson.n}
+          {t.lessons && t.lessons.length > 0 && (
+            <a class="badge badge--lesson" href={`/maslul/${LESSON_SLUG[t.lessons[0]]}`}>
+              נלמד בשיעור {t.lessons[0]}
             </a>
           )}
         </footer>
@@ -142,6 +143,9 @@ const CHECKED = '31.8.2026';
     border-radius: var(--r-card); padding: 1.25rem 1.4rem; box-shadow: var(--shadow-1);
   }
   .term[hidden] { display: none; }
+  /* הגעה מקישור בשיעור: העמוד גולל למונח, והוא מסומן לרגע */
+  .term { scroll-margin-block-start: 6rem; }
+  .term:target { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-1); }
 
   .term__top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.7rem; }
   .term__he { font-family: var(--font-display); font-size: var(--t-xl); margin: 0; }
