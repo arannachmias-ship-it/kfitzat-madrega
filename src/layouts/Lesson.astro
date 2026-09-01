@@ -2,9 +2,11 @@
 import Base from './Base.astro';
 import SignupBand from '../components/SignupBand.astro';
 import { STAGES } from '../data/track';
+import { termsForLesson } from '../data/milon';
 import { getEntry } from 'astro:content';
 
 interface Props {
+  id?: string;
   title: string; kicker: string; goal: string;
   stage: number; order: number; readingTime: number;
   author: string; interactive: boolean;
@@ -12,8 +14,11 @@ interface Props {
   prev?: { id: string; title: string } | null;
   next?: { id: string; title: string } | null;
 }
-const { title, kicker, goal, stage, order, readingTime, author, interactive, prev, next, tool, demo } = Astro.props;
+const { id, title, kicker, goal, stage, order, readingTime, author, interactive, prev, next, tool, demo } = Astro.props;
 const stageInfo = STAGES.find((s) => s.n === stage);
+// המילון הוא השכבה הרביעית: המונחים שהשיעור הזה נוגע בהם, מתוך src/data/milon.ts
+const lessonNumber = `${stage}.${order}`;
+const terms = termsForLesson(lessonNumber);
 // השכבה השנייה והשלישית של השיעור: הכלי שבו מתרגלים, וההדגמה שמראה לאן זה מוביל
 const toolEntry = tool ? await getEntry('kelim', tool) : undefined;
 const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
@@ -67,6 +72,23 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
             <span class="lsn__nextMore">להדגמה החיה <i aria-hidden="true">←</i></span>
           </a>
         )}
+      </aside>
+    )}
+
+    {terms.length > 0 && (
+      <aside class="wrap lsn__terms reveal" aria-labelledby="lsn-terms-h">
+        <h2 id="lsn-terms-h" class="lsn__termsH">מונחים מהשיעור הזה</h2>
+        <ul class="lsn__termsList">
+          {terms.map((t) => (
+            <li>
+              <a href={`/milon#${t.id}`} class="lsn__term">
+                <strong>{t.he}</strong>
+                <span dir="ltr">{t.en}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="lsn__termsMore"><a href="/milon">כל המילון, עם מה שכדאי לחשוד בו כשספק משתמש במילה</a></p>
       </aside>
     )}
 
@@ -222,6 +244,23 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
   }
   .lsn__body .note p { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
   .lsn__body .note p + p { margin-block-start: 0.55rem; }
+
+  /* מונחים מהשיעור — השכבה הרביעית */
+  .lsn__terms { padding-block: 1.5rem 0; }
+  .lsn__termsH { font-family: var(--font-display); font-size: var(--t-lg); margin: 0 0 0.75rem; color: var(--ink-strong); }
+  .lsn__termsList { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .lsn__term {
+    display: inline-flex; align-items: baseline; gap: 0.5rem;
+    padding: 0.45rem 0.85rem; border: 1px solid var(--rule-strong); border-radius: var(--r-control);
+    text-decoration: none; color: var(--ink); background: var(--surface);
+    transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+  }
+  .lsn__term:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .lsn__term strong { font-weight: 600; }
+  .lsn__term span { font-size: var(--t-xs); color: var(--ink-faint); }
+  .lsn__termsMore { margin: 0.9rem 0 0; font-size: var(--t-sm); }
+  .lsn__termsMore a { color: var(--ink-muted); }
+  .lsn__termsMore a:hover { color: var(--ink-strong); }
 </style>
 
 <style>
