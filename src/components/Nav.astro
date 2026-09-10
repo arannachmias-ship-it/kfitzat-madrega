@@ -7,10 +7,11 @@ const links = [
   { href: '/anachnu', label: 'מי אנחנו', match: ['/anachnu'] },
 ];
 const path = Astro.url.pathname;
+import Logo from './Logo.astro';
 ---
 <header class="nav" id="site-nav">
   <div class="wrap nav__inner">
-    <a href="/" class="nav__brand" transition:name="brand">קפיצת מדרגה</a>
+    <a href="/" class="nav__brand" transition:name="brand" aria-label="Nexadapt — לדף הבית"><Logo /></a>
     <nav aria-label="ניווט ראשי" class="nav__links">
       <div class="nav__strip">
         {links.map((l) => (
@@ -87,12 +88,14 @@ const path = Astro.url.pathname;
   }
   .nav--compact .nav__inner { min-block-size: 56px; padding-block: 0.4rem; }
   .nav__brand {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
+    --logo-h: 26px;
+    display: inline-flex;
+    align-items: center;
     color: var(--ink-strong);
     text-decoration: none;
     white-space: nowrap;
   }
+  .nav--compact .nav__brand { --logo-h: 23px; }
   .nav__links {
     display: flex;
     align-items: center;
@@ -139,7 +142,7 @@ const path = Astro.url.pathname;
   /* mobile: row 1 = brand + CTA + toggle, row 2 = the links as one horizontally scrolling strip */
   @media (max-width: 780px) {
     .nav__inner { display: grid; grid-template-columns: 1fr auto auto; grid-template-rows: auto auto; column-gap: 0.6rem; row-gap: 0.35rem; align-items: center; min-block-size: 0; padding-block: 0.6rem 0.45rem; }
-    .nav__brand { grid-column: 1; grid-row: 1; font-size: 1.25rem; }
+    .nav__brand { grid-column: 1; grid-row: 1; --logo-h: 22px; }
     .nav__links { display: contents; }
     .nav__links a:not(.nav__cta) { grid-row: 2; }
     .nav__cta { grid-column: 2; grid-row: 1; padding: 0.45rem 0.9rem; font-size: var(--t-xs); }
