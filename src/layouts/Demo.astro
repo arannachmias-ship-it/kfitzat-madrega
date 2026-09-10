@@ -19,7 +19,7 @@ const lessons = (await getCollection('maslul', (e) => e.data.published && e.data
 const stageInfo = p.stage !== undefined ? STAGES.find((s) => s.n === p.stage) : undefined;
 const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
-<Base title={`${p.title} · מה כבר אפשר · קפיצת מדרגה`} description={p.kicker}>
+<Base title={`${p.title} · מה כבר אפשר · Nexadapt`} description={p.kicker}>
   <TrackNav />
   <article class="dm">
     <header class="wrap dm__head">

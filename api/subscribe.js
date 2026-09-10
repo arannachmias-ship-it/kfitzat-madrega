@@ -107,7 +107,7 @@ function confirmEmail(link, site) {
 <html lang="he" dir="rtl"><head><meta charset="utf-8"></head>
 <body style="margin:0;background:#F1F4F4;font-family:'Segoe UI',Arial,sans-serif;color:#12313A;line-height:1.7">
   <div style="max-width:560px;margin:0 auto;padding:32px 24px">
-    <div style="font-size:20px;font-weight:700;color:#0C2831;margin-bottom:24px">קפיצת מדרגה</div>
+    <div style="font-size:20px;font-weight:700;color:#0C2831;margin-bottom:24px">Nexadapt</div>
     <div style="background:#FFFFFF;border-radius:10px;padding:28px">
       <p style="margin:0 0 16px">ביקשתם לקבל מאיתנו שיעור אחד בשבוע. נשאר רק לאשר שזו באמת הכתובת שלכם:</p>
       <p style="margin:0 0 20px">
