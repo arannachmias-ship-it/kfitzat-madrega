@@ -173,7 +173,7 @@
     font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
     background: var(--surface-sunk); border: 1px solid var(--rule-strong);
     border-radius: var(--r-control); padding: 0.45rem 0.85rem;
-    cursor: pointer; min-block-size: 36px;
+    cursor: pointer; min-block-size: 44px;
     transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
   }
   .ol :global(.olf__b:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
@@ -185,7 +185,7 @@
     inline-size: 100%; font-family: var(--font-body); font-size: var(--t-sm);
     color: var(--ink-strong); background: var(--surface-sunk);
     border: 1px solid var(--rule-strong); border-radius: var(--r-control);
-    padding: 0.6rem 0.8rem; min-block-size: 42px;
+    padding: 0.6rem 0.8rem; min-block-size: 44px;
   }
   .ol :global(.olf__i::placeholder) { color: var(--ink-faint); }
   .ol :global(.olf__i:focus-visible) { outline: 2px solid var(--accent); outline-offset: 1px; }
@@ -208,7 +208,7 @@
     font-family: var(--font-body); font-size: var(--t-xs); font-weight: 500;
     background: var(--accent); color: var(--accent-ink);
     border: 0; border-radius: var(--r-control);
-    padding: 0.35rem 0.8rem; cursor: pointer; min-block-size: 30px; white-space: nowrap;
+    padding: 0.35rem 0.8rem; cursor: pointer; min-block-size: 44px; white-space: nowrap;
   }
   .ol__subj {
     margin: 0 0 0.6rem; font-size: var(--t-sm); font-weight: 600;
@@ -222,12 +222,12 @@
   .ol__col--bad .ol__body { opacity: 0.7; }
 
   .ol__len { margin: 0.9rem 0 0; font-size: var(--t-xs); color: var(--ink-faint); }
-  .ol__len.is-warn { color: #8A5A16; }
+  .ol__len.is-warn { color: var(--state-warn); }
 
   .ol__flags { margin-block-start: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
   .ol :global(.ol__flag) {
     margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65;
-    border-inline-start: 2px solid #8A5A16; padding-inline-start: 0.85rem;
+    border-inline-start: 2px solid var(--state-warn); padding-inline-start: 0.85rem;
   }
   .ol :global(.ol__flag strong) { color: var(--ink-strong); }
 

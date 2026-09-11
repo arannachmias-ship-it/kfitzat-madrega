@@ -17,15 +17,21 @@
   --ink:          #12313A;
   --ink-strong:   #0C2831;
   --ink-muted:    #4A6670;
-  --ink-faint:    #7B9199;
+  --ink-faint:    #5A727A;
   --ink-on-deep:      #F1F4F4;
   --ink-on-deep-mute: #A8BCC0;
 
   /* --- accent: the only saturated colour on the page --- */
   --accent:       #C6D63F;
   --accent-ink:   #0C2831;   /* text ON accent */
-  --accent-deep:  #7E8B1F;   /* accent as text on light: contrast-safe */
+  --accent-deep:  #667118;   /* accent as text on light: AA on paper and on surface */
   --accent-soft:  rgba(198, 214, 63, 0.12);
+
+  /* --- state: good / warning / bad. every value AA as text on light surfaces.
+     never hard-code a status hex in a component again. --- */
+  --state-ok:     #5E6816;
+  --state-warn:   #8A5A16;
+  --state-bad:    #A0282F;
 
   /* --- lines --- */
   --rule:         #E1E7E7;
@@ -46,8 +52,8 @@
   --font-body:    'Heebo', 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
 
   /* Hebrew-adjusted scale. body never below 16px. */
-  --t-xs:   0.8125rem;
-  --t-sm:   0.9375rem;
+  --t-xs:   0.875rem;
+  --t-sm:   1rem;
   --t-base: 1.0625rem;
   --t-lg:   1.1875rem;
   --t-xl:   1.375rem;
@@ -64,7 +70,7 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --dur-fast: 0.18s;
   --dur-base: 0.35s;
-  --dur-slow: 0.8s;
+  --dur-slow: 0.45s;
 
   /* --- glass surfaces (nav, hero card) --- */
   --glass:        rgba(241, 244, 244, 0.72);
@@ -93,10 +99,14 @@
   --ink:          #DCE6E6;
   --ink-strong:   #F1F4F4;
   --ink-muted:    #A8BCC0;
-  --ink-faint:    #7B9199;
+  --ink-faint:    #8A9FA7;
 
   --accent-deep:  #C6D63F;
   --accent-soft:  rgba(198, 214, 63, 0.14);
+
+  --state-ok:     #B9C94A;
+  --state-warn:   #E0A94A;
+  --state-bad:    #F08A78;
 
   --rule:         rgba(255, 255, 255, 0.10);
   --rule-strong:  rgba(255, 255, 255, 0.22);
@@ -282,6 +292,7 @@ a:hover { color: var(--accent-deep); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     animation-delay: 0s !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;

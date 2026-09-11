@@ -266,7 +266,7 @@
     padding: 0.85rem 0.95rem; border-radius: var(--r-control);
     background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
   }
-  .lc :global(.lc__num--warn) { border-inline-start-color: #B8792A; }
+  .lc :global(.lc__num--warn) { border-inline-start-color: var(--state-warn); }
   .lc :global(.lc__num--wide) { grid-column: 1 / -1; }
   .lc :global(.lc__numV) {
     display: block; font-family: var(--font-display); font-size: 1.9rem;
@@ -284,7 +284,7 @@
     border: 1px solid var(--rule); background: var(--paper);
   }
   .lc :global(.lc__step--ai) { background: var(--surface-sunk); }
-  .lc :global(.lc__step--blind) { border-inline-start: 3px solid #B8792A; }
+  .lc :global(.lc__step--blind) { border-inline-start: 3px solid var(--state-warn); }
   .lc :global(.lc__who) {
     flex: none; min-inline-size: 4.2rem; font-size: var(--t-xs);
     color: var(--ink-faint);
@@ -292,7 +292,7 @@
   .lc :global(.lc__step--ai .lc__who) { color: var(--accent-deep); }
   .lc :global(.lc__what) { flex: 1 1 12rem; font-size: var(--t-sm); color: var(--ink); line-height: 1.6; }
   .lc :global(.lc__blindTag) {
-    flex: none; font-size: 0.6875rem; color: #B8792A;
+    flex: none; font-size: var(--t-xs); color: var(--state-warn);
     border: 1px solid currentColor; border-radius: var(--r-control); padding: 0.1rem 0.45rem;
   }
 
@@ -302,8 +302,8 @@
     background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
     font-size: var(--t-sm); line-height: 1.75; color: var(--ink);
   }
-  .lc :global(.lc__flag--warn) { border-inline-start-color: #B8792A; }
-  .lc :global(.lc__flag--bad) { border-inline-start-color: #C4462F; }
+  .lc :global(.lc__flag--warn) { border-inline-start-color: var(--state-warn); }
+  .lc :global(.lc__flag--bad) { border-inline-start-color: var(--state-bad); }
   .lc :global(.lc__flag--good) { border-inline-start-color: var(--accent-deep); }
 
   .lc__foot {

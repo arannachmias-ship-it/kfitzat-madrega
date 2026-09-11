@@ -245,7 +245,7 @@
     border: 1px solid var(--rule); background: var(--paper);
     border-inline-start: 3px solid var(--accent);
   }
-  .tp :global(.tp__blockTag) { display: block; font-size: 0.6875rem; color: var(--ink-faint); margin-block-end: 0.25rem; }
+  .tp :global(.tp__blockTag) { display: block; font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 0.25rem; }
   .tp :global(.tp__blockT) {
     margin: 0; font: inherit; font-size: var(--t-sm); color: var(--ink);
     line-height: 1.7; white-space: pre-wrap; direction: rtl; text-align: start;
@@ -265,8 +265,8 @@
     background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
     font-size: var(--t-sm); line-height: 1.75; color: var(--ink);
   }
-  .tp :global(.tp__flag--warn) { border-inline-start-color: #B8792A; }
-  .tp :global(.tp__flag--bad) { border-inline-start-color: #C4462F; }
+  .tp :global(.tp__flag--warn) { border-inline-start-color: var(--state-warn); }
+  .tp :global(.tp__flag--bad) { border-inline-start-color: var(--state-bad); }
   .tp :global(.tp__flag--good) { border-inline-start-color: var(--accent-deep); }
 
   .tp__foot {

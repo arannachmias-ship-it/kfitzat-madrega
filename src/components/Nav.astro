@@ -88,14 +88,14 @@ import Logo from './Logo.astro';
   }
   .nav--compact .nav__inner { min-block-size: 56px; padding-block: 0.4rem; }
   .nav__brand {
-    --logo-h: 26px;
+    --logo-h: 34px;
     display: inline-flex;
     align-items: center;
     color: var(--ink-strong);
     text-decoration: none;
     white-space: nowrap;
   }
-  .nav--compact .nav__brand { --logo-h: 23px; }
+  .nav--compact .nav__brand { --logo-h: 29px; }
   .nav__links {
     display: flex;
     align-items: center;
@@ -103,8 +103,8 @@ import Logo from './Logo.astro';
     font-size: var(--t-sm);
   }
   .nav__strip { display: flex; align-items: center; gap: 1.75rem; }
-  .nav__links a { color: var(--ink-muted); text-decoration: none; white-space: nowrap; position: relative; transition: color var(--dur-fast) ease; }
-  .nav__links a:not(.nav__cta)::after { content: ""; position: absolute; inset-inline: 0; bottom: -4px; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: right; transition: transform var(--dur-base) var(--ease-out); }
+  .nav__links a { color: var(--ink-muted); text-decoration: none; white-space: nowrap; position: relative; display: inline-flex; align-items: center; min-block-size: 44px; transition: color var(--dur-fast) ease; }
+  .nav__links a:not(.nav__cta)::after { content: ""; position: absolute; inset-inline: 0; bottom: 6px; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: right; transition: transform var(--dur-base) var(--ease-out); }
   .nav__links a:not(.nav__cta):hover::after, .nav__links a[aria-current='page']::after { transform: scaleX(1); }
   .nav__links a:hover { color: var(--ink-strong); }
   .nav__links a[aria-current='page'] { color: var(--ink-strong); font-weight: 500; }
@@ -122,7 +122,7 @@ import Logo from './Logo.astro';
   :root[data-theme="dark"] .nav__cta:hover { background: var(--surface-sunk); }
 
   .nav__theme {
-    inline-size: 2.25rem; block-size: 2.25rem; border-radius: 50%;
+    inline-size: 2.75rem; block-size: 2.75rem; border-radius: 50%;
     border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-muted);
     display: grid; place-items: center; cursor: pointer; padding: 0;
     transition: color var(--dur-fast) ease, border-color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
@@ -141,7 +141,7 @@ import Logo from './Logo.astro';
 
   /* mobile: row 1 = brand + CTA + toggle, row 2 = the links as one horizontally scrolling strip */
   @media (max-width: 780px) {
-    .nav__inner { display: grid; grid-template-columns: 1fr auto auto; grid-template-rows: auto auto; column-gap: 0.6rem; row-gap: 0.35rem; align-items: center; min-block-size: 0; padding-block: 0.6rem 0.45rem; }
+    .nav__inner { display: grid; grid-template-columns: 1fr auto auto; grid-template-rows: auto auto; column-gap: 0.6rem; row-gap: 0; align-items: center; min-block-size: 0; padding-block: 0.35rem 0.2rem; }
     .nav__brand { grid-column: 1; grid-row: 1; --logo-h: 22px; }
     .nav__links { display: contents; }
     .nav__links a:not(.nav__cta) { grid-row: 2; }

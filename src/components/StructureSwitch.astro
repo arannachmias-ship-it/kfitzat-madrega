@@ -206,14 +206,14 @@
     padding: 0.55rem 0.6rem; color: var(--ink); border-block-end: 1px solid var(--rule);
     white-space: nowrap;
   }
-  .ss :global(.ss__bad) { color: #C4462F; }
+  .ss :global(.ss__bad) { color: var(--state-bad); }
   .ss :global(.ss__ok) { color: var(--ink-faint); }
   .ss :global(.ss__tag) {
-    margin-inline-start: 0.4rem; font-size: 0.625rem; color: #C4462F;
+    margin-inline-start: 0.4rem; font-size: var(--t-xs); color: var(--state-bad);
     border: 1px solid currentColor; border-radius: var(--r-control); padding: 0.05rem 0.35rem;
   }
   :root[data-theme='dark'] .ss :global(.ss__bad),
-  :root[data-theme='dark'] .ss :global(.ss__tag) { color: #E8836B; }
+  :root[data-theme='dark'] .ss :global(.ss__tag) { color: var(--state-bad); }
 
   .ss :global(.ss__flags) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
   .ss :global(.ss__flag) {
@@ -221,8 +221,8 @@
     background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
     font-size: var(--t-sm); line-height: 1.75; color: var(--ink);
   }
-  .ss :global(.ss__flag--warn) { border-inline-start-color: #B8792A; }
-  .ss :global(.ss__flag--bad) { border-inline-start-color: #C4462F; }
+  .ss :global(.ss__flag--warn) { border-inline-start-color: var(--state-warn); }
+  .ss :global(.ss__flag--bad) { border-inline-start-color: var(--state-bad); }
   .ss :global(.ss__flag--good) { border-inline-start-color: var(--accent-deep); }
 
   .ss__foot {

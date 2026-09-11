@@ -157,7 +157,7 @@
     font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
     background: var(--surface); border: 1px solid var(--rule-strong);
     border-radius: var(--r-control); padding: 0.55rem 0.9rem;
-    cursor: pointer; min-block-size: 38px;
+    cursor: pointer; min-block-size: 44px;
     transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
   }
   .rlt :global(.rc__b:hover:not(:disabled)) { border-color: var(--ink-faint); color: var(--ink-strong); }
@@ -171,9 +171,9 @@
   .rlt :global(.rc__text) { margin: 0; display: inline; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
 
   /* צבע מופיע רק אחרי תשובה, ורק כדי לסמן את שלוש הקטגוריות */
-  .rlt :global(.rc.a-ok)  { border-inline-start-color: #7E8B1F; }
-  .rlt :global(.rc.a-org) { border-inline-start-color: #8A5A16; }
-  .rlt :global(.rc.a-no)  { border-inline-start-color: #A0282F; }
+  .rlt :global(.rc.a-ok)  { border-inline-start-color: var(--state-ok); }
+  .rlt :global(.rc.a-org) { border-inline-start-color: var(--state-warn); }
+  .rlt :global(.rc.a-no)  { border-inline-start-color: var(--state-bad); }
 
   .rlt__end {
     margin: 1.25rem 0 0; padding-block-start: 1rem;

@@ -282,7 +282,7 @@
     font-family: var(--font-body); font-size: var(--t-sm); color: var(--ink-muted);
     background: var(--surface-sunk); border: 1px solid var(--rule-strong);
     border-radius: var(--r-control); padding: 0.6rem 0.9rem;
-    cursor: pointer; min-block-size: 40px; inline-size: 100%; text-align: start;
+    cursor: pointer; min-block-size: 44px; inline-size: 100%; text-align: start;
     transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
   }
   .rp :global(.rpc__t:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
@@ -306,7 +306,7 @@
     font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
     background: var(--surface); border: 1px solid var(--rule-strong);
     border-radius: var(--r-control); padding: 0.4rem 0.7rem;
-    cursor: pointer; min-block-size: 34px;
+    cursor: pointer; min-block-size: 44px;
     transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
   }
   .rp :global(.rpc__k:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
@@ -339,8 +339,8 @@
     padding: 0.85rem 1rem; border-radius: var(--r-control);
     background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
   }
-  .rp :global(.rpf--high) { border-inline-start-color: #C25A3E; }
-  .rp :global(.rpf--mid) { border-inline-start-color: #C08A2E; }
+  .rp :global(.rpf--high) { border-inline-start-color: var(--state-bad); }
+  .rp :global(.rpf--mid) { border-inline-start-color: var(--state-warn); }
   .rp :global(.rpf--ok) { border-inline-start-color: var(--accent); }
   .rp :global(.rpf__t) { margin: 0 0 0.3rem; font-size: var(--t-sm); color: var(--ink-strong); font-weight: 500; }
   .rp :global(.rpf__b) { margin: 0; font-size: var(--t-xs); color: var(--ink-muted); line-height: 1.7; }
@@ -359,7 +359,7 @@
     font-family: var(--font-body); font-size: var(--t-xs);
     background: var(--accent); color: var(--accent-ink);
     border: 1px solid var(--accent); border-radius: var(--r-control);
-    padding: 0.5rem 1rem; cursor: pointer; min-block-size: 38px; font-weight: 500;
+    padding: 0.5rem 1rem; cursor: pointer; min-block-size: 44px; font-weight: 500;
   }
 
   .rp__first { margin-block-start: 1.5rem; padding-block-start: 1.2rem; border-block-start: 1px solid var(--rule); }

@@ -133,12 +133,12 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
 <style is:global>
   /* ---- lesson body typography: MDX content lands here ---- */
   .lsn__body { font-size: var(--t-lg); line-height: 1.85; }
-  .lsn__body > * { max-inline-size: 68ch; }
+  .lsn__body > * { max-inline-size: 56ch; }
   /* the interactive block and the boundary use the full reading column */
   .lsn__body > .lab, .lsn__body > div { max-inline-size: 100%; }
   .lsn__body h2 { font-size: var(--t-2xl); margin-block: 2.6rem 0.9rem; }
   .lsn__body h3 { font-size: var(--t-xl); font-family: var(--font-body); font-weight: 700; margin-block: 1.9rem 0.6rem; }
-  .lsn__body p { margin-block-end: 1.15rem; color: var(--ink); }
+  .lsn__body p { margin-block-end: 1.15rem; color: var(--ink); text-wrap: pretty; }
   .lsn__body ul, .lsn__body ol { padding-inline-start: 1.4rem; margin-block-end: 1.3rem; }
   .lsn__body li { margin-block-end: 0.55rem; }
   .lsn__body li::marker { color: var(--accent-deep); }
@@ -153,7 +153,7 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
     border-radius: var(--r-card);
     padding: 1.4rem 1.6rem;
     margin-block: 1.75rem;
-    max-inline-size: 68ch;
+    max-inline-size: 56ch;
   }
   .lsn__body .demo__label {
     font-size: var(--t-xs); color: var(--ink-faint); margin-block-end: 0.5rem;
@@ -164,13 +164,15 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
     background: var(--deep); color: var(--ink-on-deep);
     padding: 1.15rem 1.3rem; border-radius: var(--r-card);
     overflow-x: auto; direction: rtl; text-align: start;
-    font-size: var(--t-sm); line-height: 1.7; max-inline-size: 68ch;
+    font-size: var(--t-sm); line-height: 1.7; max-inline-size: 56ch;
     white-space: pre-wrap; word-spacing: normal;
   }
   .lsn__body [dir="ltr"] pre { direction: ltr; text-align: left; white-space: pre; }
   .lsn__body code { font-size: 0.92em; }
   .lsn__body :not(pre) > code {
     background: var(--surface-sunk); padding: 0.1rem 0.35rem; border-radius: 4px;
+    /* latin inside hebrew prose reorders without this */
+    unicode-bidi: isolate;
   }
 
   /* the honest boundary at the end of every lesson */
@@ -180,7 +182,7 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
     border-radius: var(--r-card);
     padding: 1.75rem 1.9rem;
     margin-block-start: 2.75rem;
-    max-inline-size: 68ch;
+    max-inline-size: 56ch;
     position: relative; overflow: hidden; isolation: isolate;
     box-shadow: 0 24px 48px -28px rgba(12, 40, 49, 0.6);
   }
@@ -203,7 +205,7 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
     border-radius: var(--r-card);
     padding: 1.4rem 1.6rem;
     margin-block: 1.75rem;
-    max-inline-size: 68ch;
+    max-inline-size: 56ch;
   }
   .lsn__body .task h3 { margin-block-start: 0; }
 
@@ -212,7 +214,7 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
     margin: 1.75rem 0;
     padding-inline-start: 1.3rem;
     border-inline-start: 3px solid var(--ink-strong);
-    max-inline-size: 62ch;
+    max-inline-size: 52ch;
   }
   .lsn__body blockquote p {
     margin: 0;
@@ -240,9 +242,9 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
     padding: 0.95rem 1.15rem;
     border: 1px solid var(--rule);
     border-radius: var(--r-card);
-    max-inline-size: 68ch;
+    max-inline-size: 56ch;
   }
-  .lsn__body .note p { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }
+  .lsn__body .note p { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; max-inline-size: 58ch; }
   .lsn__body .note p + p { margin-block-start: 0.55rem; }
 
   /* מונחים מהשיעור — השכבה הרביעית */

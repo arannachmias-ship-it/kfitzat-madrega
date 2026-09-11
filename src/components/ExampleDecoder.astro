@@ -216,7 +216,7 @@
     background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
   }
   .xd :global(.xd__num--good) { border-inline-start-color: var(--accent-deep); }
-  .xd :global(.xd__num--warn) { border-inline-start-color: #B8792A; }
+  .xd :global(.xd__num--warn) { border-inline-start-color: var(--state-warn); }
   .xd :global(.xd__numOf) { font-family: var(--font-sans, inherit); font-size: var(--t-sm); color: var(--ink-faint); }
   .xd :global(.xd__numV) {
     display: block; font-family: var(--font-display); font-size: 1.9rem;
@@ -232,9 +232,9 @@
     padding: 0.6rem 0.85rem; border-radius: var(--r-control);
     border: 1px solid var(--rule); background: var(--paper);
   }
-  .xd :global(.xd__rev--stray) { border-inline-start: 3px solid #C4462F; }
+  .xd :global(.xd__rev--stray) { border-inline-start: 3px solid var(--state-bad); }
   .xd :global(.xd__revMark) {
-    flex: none; min-inline-size: 4.2rem; font-size: var(--t-xs); color: #B8792A;
+    flex: none; min-inline-size: 4.2rem; font-size: var(--t-xs); color: var(--state-warn);
   }
   .xd :global(.xd__rev--hit .xd__revMark) { color: var(--accent-deep); }
   .xd :global(.xd__revT) { flex: 1 1 12rem; font-size: var(--t-sm); color: var(--ink); line-height: 1.6; }
@@ -245,7 +245,7 @@
     background: var(--surface-sunk); border-inline-start: 3px solid var(--rule-strong);
     font-size: var(--t-sm); line-height: 1.75; color: var(--ink);
   }
-  .xd :global(.xd__flag--bad) { border-inline-start-color: #C4462F; }
+  .xd :global(.xd__flag--bad) { border-inline-start-color: var(--state-bad); }
   .xd :global(.xd__flag--good) { border-inline-start-color: var(--accent-deep); }
   .xd :global(.xd__note) { font-size: var(--t-xs); color: var(--ink-muted); }
 

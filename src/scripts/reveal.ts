@@ -6,11 +6,12 @@ function countUp(el: HTMLElement) {
   const to = Number(el.dataset.count);
   const suffix = el.dataset.suffix ?? '';
   if (reduce()) { el.textContent = to + suffix; return; }
-  const ms = 1100;
+  const ms = 900;
+  const from = 0.8;   // never show a number that is far from the real one
   const t0 = performance.now();
   const frame = (t: number) => {
     const p = Math.min(1, (t - t0) / ms);
-    el.textContent = Math.round(easeOut(p) * to) + suffix;
+    el.textContent = Math.round((from + (1 - from) * easeOut(p)) * to) + suffix;
     if (p < 1) requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
@@ -36,6 +37,6 @@ export function initReveal() {
       }
       io.unobserve(el);
     }
-  }, { threshold: 0.25, rootMargin: '0px 0px -8% 0px' });
+  }, { threshold: 0, rootMargin: '0px 0px -12% 0px' });
   targets.forEach((t) => io.observe(t));
 }

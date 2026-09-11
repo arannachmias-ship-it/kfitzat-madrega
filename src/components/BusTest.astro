@@ -152,14 +152,14 @@
   }
   .bt__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1.35rem; }
 
-  .bt__qs { display: flex; flex-direction: column; gap: 1.05rem; }
+  .bt__qs { display: flex; flex-direction: column; gap: 1.75rem; }
   .bt :global(.btq__q) { margin: 0 0 0.5rem; font-size: var(--t-sm); color: var(--ink-strong); }
   .bt :global(.btq__row) { display: flex; gap: 0.4rem; }
   .bt :global(.btq__b) {
     font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-muted);
     background: var(--surface-sunk); border: 1px solid var(--rule-strong);
     border-radius: var(--r-control); padding: 0.5rem 1.1rem;
-    cursor: pointer; min-block-size: 38px;
+    cursor: pointer; min-block-size: 44px;
     transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
   }
   .bt :global(.btq__b:hover) { border-color: var(--ink-faint); color: var(--ink-strong); }
@@ -187,9 +187,9 @@
   }
   .bt__of { font-size: 0.45em; color: var(--ink-faint); }
   .bt__band { margin: 0.4rem 0 0; font-size: var(--t-xs); max-inline-size: 18ch; }
-  .bt__band.is-good { color: #7E8B1F; }
-  .bt__band.is-mid  { color: #8A5A16; }
-  .bt__band.is-low  { color: #A0282F; }
+  .bt__band.is-good { color: var(--state-ok); }
+  .bt__band.is-mid  { color: var(--state-warn); }
+  .bt__band.is-low  { color: var(--state-bad); }
   .bt__verdict { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.7; }
 
   .bt__gaps { margin-block-start: 1.35rem; padding-block-start: 1.1rem; border-block-start: 1px solid var(--rule); }
@@ -204,7 +204,7 @@
     display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
   }
   .bt :global(.btg__m) {
-    font-size: 0.75em; font-weight: 400; color: var(--ink-faint); flex: none;
+    font-size: var(--t-xs); font-weight: 400; color: var(--ink-faint); flex: none;
     border: 1px solid var(--rule-strong); border-radius: var(--r-control); padding: 0.05rem 0.4rem;
   }
   .bt :global(.btg__f) { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; }

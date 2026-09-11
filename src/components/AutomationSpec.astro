@@ -166,7 +166,7 @@
     inline-size: 100%; font-family: var(--font-body); font-size: var(--t-sm);
     color: var(--ink-strong); background: var(--surface-sunk);
     border: 1px solid var(--rule-strong); border-radius: var(--r-control);
-    padding: 0.6rem 0.8rem; min-block-size: 42px;
+    padding: 0.6rem 0.8rem; min-block-size: 44px;
     line-height: 1.6; resize: vertical;
   }
   .as :global(.asf__i::placeholder) { color: var(--ink-faint); }
@@ -177,7 +177,7 @@
     font-family: var(--font-body); font-size: var(--t-xs); color: var(--ink-faint);
     background: transparent; border: 1px dashed var(--rule-strong);
     border-radius: var(--r-control); padding: 0.35rem 0.7rem;
-    cursor: pointer; text-align: start; min-block-size: 32px;
+    cursor: pointer; text-align: start; min-block-size: 44px;
     transition: color 0.12s ease, border-color 0.12s ease;
   }
   .as :global(.asf__o:hover) { color: var(--ink-strong); border-color: var(--ink-faint); border-style: solid; }
@@ -195,7 +195,7 @@
     font-family: var(--font-body); font-size: var(--t-xs); font-weight: 500;
     background: var(--accent); color: var(--accent-ink);
     border: 0; border-radius: var(--r-control);
-    padding: 0.5rem 1rem; cursor: pointer; min-block-size: 36px; white-space: nowrap;
+    padding: 0.5rem 1rem; cursor: pointer; min-block-size: 44px; white-space: nowrap;
   }
   .as__doc {
     background: var(--surface-sunk); border-radius: var(--r-control);
@@ -207,10 +207,10 @@
   .as__checks { margin-block-start: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
   .as :global(.as__check) {
     margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65;
-    border-inline-start: 2px solid #8A5A16; padding-inline-start: 0.85rem;
+    border-inline-start: 2px solid var(--state-warn); padding-inline-start: 0.85rem;
   }
   .as :global(.as__check--calm) { border-inline-start-color: var(--rule-strong); }
-  .as__checks.is-done :global(.as__check) { border-inline-start-color: #7E8B1F; }
+  .as__checks.is-done :global(.as__check) { border-inline-start-color: var(--state-ok); }
   .as :global(.as__check strong) { color: var(--ink-strong); }
 
   @media (max-width: 620px) {
