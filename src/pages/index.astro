@@ -18,7 +18,6 @@ const liveCount = live.length;
   <section class="wrap hero">
     <div class="hero__glow" aria-hidden="true"></div>
     <div class="hero__copy">
-      <p class="hero__eyebrow rise">אחרי שההרצאה נגמרת</p>
       <h1 class="hero__title rise">לא באנו להתלהב מ־ <span class="hero__ai">AI.</span></h1>
       <p class="hero__sub rise">באנו לוודא שהצוות שלכם עושה איתו משהו ביום שלישי בבוקר.</p>
       <div class="hero__actions rise">
@@ -213,14 +212,6 @@ const liveCount = live.length;
   .hero__cardTitle { grid-column: 1; grid-row: 2; font-family: var(--font-display); font-size: var(--t-lg); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .hero__cardArrow { grid-column: 2; grid-row: 1 / -1; color: var(--accent-deep); font-size: var(--t-xl); transition: transform var(--dur-base) var(--ease-out); }
   .hero__card:hover .hero__cardArrow { transform: translateX(-4px); }
-  .hero__eyebrow {
-    font-size: var(--t-sm); letter-spacing: 0.04em; color: var(--ink-muted);
-    margin-block-end: 0.85rem; display: flex; align-items: center; gap: 0.6rem;
-  }
-  .hero__eyebrow::before {
-    content: ""; inline-size: 1.6rem; block-size: 2px; border-radius: 2px;
-    background: var(--accent); flex: none;
-  }
   .hero__title { font-size: clamp(2.5rem, 5.4vw, 3.75rem); margin-block-end: 1.1rem; }
   .hero__sub { font-size: var(--t-xl); line-height: 1.6; color: var(--ink-muted); font-weight: 300; max-inline-size: 40ch; margin-block-end: 1.9rem; }
   .hero__actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
@@ -228,7 +219,6 @@ const liveCount = live.length;
   @keyframes kenBurns { to { transform: scale(1.07) translate(-1.5%, 1%); } }
   @media (max-width: 880px) {
     .hero { grid-template-columns: 1fr; gap: 2rem; padding-block: 3.5rem 2.5rem; }
-    .hero__eyebrow { margin-block-end: 0.45rem; }
     .hero__glow { inline-size: 80%; inset-inline-end: -30%; }
   }
 
