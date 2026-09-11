@@ -24,7 +24,7 @@ const usedIn = (await getCollection('maslul', (e) => e.data.published && e.data.
 const stageOf = (n: number) => STAGES.find((s) => s.n === n)?.title ?? '';
 const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
-<Base title={`${p.name} · מדריך הכלים · Nexadapt`} description={p.tagline}>
+<Base title={`מדריך הכלים · ${p.name} · Nexadapt`} description={p.tagline}>
   <TrackNav />
   <article class="tl">
     <header class="wrap tl__head">
