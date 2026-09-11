@@ -12,7 +12,7 @@ const liveCount = live.length;
 ---
 <Base
   title="Nexadapt · הכשרות והטמעת AI בארגונים"
-  description="מסלול לימוד AI פתוח וחינמי לארגונים, וסדנאות שבהן הצוות עובד בידיים במקום להקשיב. ארן נחמיאס ומתי מצוינים."
+  description="אחרי שההרצאה נגמרת. מסלול לימוד AI פתוח וחינמי לארגונים, וסדנאות שבהן הצוות עובד בידיים במקום להקשיב. ארן נחמיאס ומתי מצוינים."
 >
   <!-- hero -->
   <section class="wrap hero">
@@ -214,11 +214,12 @@ const liveCount = live.length;
   .hero__cardArrow { grid-column: 2; grid-row: 1 / -1; color: var(--accent-deep); font-size: var(--t-xl); transition: transform var(--dur-base) var(--ease-out); }
   .hero__card:hover .hero__cardArrow { transform: translateX(-4px); }
   .hero__eyebrow {
-    font-size: var(--t-sm); letter-spacing: 0.08em; color: var(--ink-muted);
-    margin-block-end: 0.85rem; display: inline-flex; align-items: center; gap: 0.6rem;
+    font-size: var(--t-sm); letter-spacing: 0.04em; color: var(--ink-muted);
+    margin-block-end: 0.85rem; display: flex; align-items: center; gap: 0.6rem;
   }
   .hero__eyebrow::before {
-    content: ""; inline-size: 1.75rem; block-size: 2px; border-radius: 2px; background: var(--accent);
+    content: ""; inline-size: 1.6rem; block-size: 2px; border-radius: 2px;
+    background: var(--accent); flex: none;
   }
   .hero__title { font-size: clamp(2.5rem, 5.4vw, 3.75rem); margin-block-end: 1.1rem; }
   .hero__sub { font-size: var(--t-xl); line-height: 1.6; color: var(--ink-muted); font-weight: 300; max-inline-size: 40ch; margin-block-end: 1.9rem; }
