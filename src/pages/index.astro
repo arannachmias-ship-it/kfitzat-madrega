@@ -227,7 +227,8 @@ const liveCount = live.length;
   .hero__img { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 4 / 3; object-fit: cover; animation: kenBurns 20s ease-in-out infinite alternate; }
   @keyframes kenBurns { to { transform: scale(1.07) translate(-1.5%, 1%); } }
   @media (max-width: 880px) {
-    .hero { grid-template-columns: 1fr; gap: 2rem; padding-block: 2rem 2.5rem; }
+    .hero { grid-template-columns: 1fr; gap: 2rem; padding-block: 3.5rem 2.5rem; }
+    .hero__eyebrow { margin-block-end: 1.1rem; }
     .hero__glow { inline-size: 80%; inset-inline-end: -30%; }
   }
 
