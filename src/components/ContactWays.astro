@@ -1,0 +1,174 @@
+---
+// שלוש דרכים ליצור קשר, במכוון.
+// הטופס הוא הדרך הראשית כי הוא עובד אצל כל אחד. הכתובת גלויה כטקסט
+// כי יש מי שמעדיף לכתוב מהתיבה שלו. הוואטסאפ קיים כי בישראל חלק
+// מהפניות העסקיות פשוט מתחילות שם.
+const MAIL = 'contact@nexadapt.co.il';
+const WA_NUMBER = '972548099878';
+const WA_TEXT = encodeURIComponent('היי, הגעתי מהאתר של Nexadapt ורציתי לשמוע על ההרצאות והסדנאות.');
+---
+<section class="ways" aria-labelledby="ways-title">
+  <div class="wrap">
+    <h2 id="ways-title" class="ways__title">איך מתחילים</h2>
+    <p class="ways__body">
+      כותבים לנו מה גודל הצוות, מה כבר ניסיתם, ומה ההנהלה ביקשה. אנחנו חוזרים עם המלצה לתוכנית אחת ועם הצעת מחיר,
+      ואם אנחנו חושבים שאתם לא צריכים אותנו עדיין, נגיד גם את זה.
+    </p>
+
+    <form class="ways__form" data-pniya novalidate>
+      <div class="ways__grid">
+        <p class="ways__field">
+          <label class="ways__label" for="p-name">השם שלכם</label>
+          <input class="ways__input" id="p-name" name="name" type="text" autocomplete="name" required />
+        </p>
+        <p class="ways__field">
+          <label class="ways__label" for="p-email">כתובת המייל שלכם</label>
+          <input
+            class="ways__input" id="p-email" name="email" type="email" inputmode="email"
+            dir="ltr" autocomplete="email" required placeholder="name@company.co.il"
+          />
+        </p>
+      </div>
+
+      <p class="ways__field">
+        <label class="ways__label" for="p-msg">מה אתם צריכים</label>
+        <textarea
+          class="ways__input ways__textarea" id="p-msg" name="message" rows="4" required
+          placeholder="גודל הצוות, מה כבר ניסיתם, ומה ההנהלה ביקשה"
+        ></textarea>
+      </p>
+
+      <!-- מלכודת בוטים: מוסתרת מהעין ומקוראי מסך כאחד -->
+      <div class="ways__trap" aria-hidden="true">
+        <label for="p-website">אל תמלאו שדה זה</label>
+        <input id="p-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <p class="ways__actions">
+        <button class="btn btn--primary" type="submit" data-submit>שליחת הפנייה</button>
+      </p>
+
+      <p class="ways__status" data-status role="status" aria-live="polite" hidden></p>
+    </form>
+
+    <p class="ways__alt">
+      מעדיפים לכתוב מהתיבה שלכם? <a href={`mailto:${MAIL}?subject=פנייה%20מהאתר`} dir="ltr">{MAIL}</a>
+      <span class="ways__sep" aria-hidden="true">·</span>
+      <a href={`https://wa.me/${WA_NUMBER}?text=${WA_TEXT}`} rel="noopener">או בוואטסאפ</a>
+    </p>
+  </div>
+</section>
+
+<script is:inline data-astro-rerun>
+// data-astro-rerun: בלעדיו הסקריפט לא רץ מחדש בניווט פנימי והטופס נשאר מת.
+function initPniya() {
+  document.querySelectorAll('[data-pniya]').forEach((form) => {
+    if (form.dataset.bound) return;
+    form.dataset.bound = '1';
+
+    const btn = form.querySelector('[data-submit]');
+    const status = form.querySelector('[data-status]');
+    const label = btn.textContent;
+
+    const say = (text, kind) => {
+      status.hidden = false;
+      status.textContent = text;
+      status.dataset.kind = kind;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const name = String(data.get('name') || '').trim();
+      const email = String(data.get('email') || '').trim();
+      const message = String(data.get('message') || '').trim();
+
+      if (!name) return say('צריך שם כדי שנדע למי לחזור', 'bad');
+      if (!email) return say('צריך כתובת מייל', 'bad');
+      if (message.length < 10) return say('כתבו שורה או שתיים על מה שאתם צריכים', 'bad');
+
+      btn.disabled = true;
+      btn.textContent = 'שולח…';
+      status.hidden = true;
+
+      try {
+        const r = await fetch('/api/pniya', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, message, website: data.get('website') || '' }),
+        });
+        const out = await r.json().catch(() => ({}));
+
+        if (r.ok) {
+          form.reset();
+          say('קיבלנו. נחזור אליכם למייל, בדרך כלל תוך יום עבודה.', 'ok');
+        } else {
+          say(out.message || 'משהו נתקע. אפשר לכתוב לנו ישירות למייל.', 'bad');
+        }
+      } catch {
+        say('אין חיבור כרגע. אפשר לכתוב לנו ישירות למייל.', 'bad');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = label;
+      }
+    });
+  });
+}
+
+initPniya();
+</script>
+
+<style>
+  .ways { padding-block: 3rem 4rem; border-block-start: 1px solid var(--rule); }
+  .ways__title { font-size: var(--t-2xl); margin-block-end: 0.8rem; }
+  .ways__body {
+    color: var(--ink-muted); font-weight: 300;
+    max-inline-size: 58ch; margin-block-end: 1.75rem; font-size: var(--t-lg);
+  }
+
+  .ways__form { max-inline-size: 46rem; }
+  .ways__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .ways__field { margin: 0 0 1rem; }
+  .ways__label {
+    display: block; font-size: var(--t-sm);
+    color: var(--ink-muted); margin-block-end: 0.4rem;
+  }
+  .ways__input {
+    inline-size: 100%;
+    background: var(--surface);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--r-control);
+    padding: 0.8rem 1rem;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--t-base);
+  }
+  .ways__input::placeholder { color: var(--ink-faint); }
+  .ways__input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .ways__textarea { resize: vertical; min-block-size: 6rem; line-height: var(--lh-normal); }
+
+  .ways__trap {
+    position: absolute; inline-size: 1px; block-size: 1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+
+  .ways__actions { margin: 0.4rem 0 0; }
+
+  .ways__status {
+    margin-block: 1rem 0; font-size: var(--t-sm); line-height: 1.55;
+    padding-inline-start: 0.85rem; border-inline-start: 3px solid var(--rule-strong);
+    max-inline-size: 46rem;
+  }
+  .ways__status[data-kind='ok'] { color: var(--ink); border-inline-start-color: var(--accent); }
+  .ways__status[data-kind='bad'] { color: var(--accent-deep); border-inline-start-color: var(--accent-deep); }
+
+  .ways__alt {
+    margin-block-start: 1.5rem; font-size: var(--t-sm); color: var(--ink-muted);
+  }
+  .ways__alt a { color: var(--ink); }
+  .ways__sep { margin-inline: 0.5rem; color: var(--ink-faint); }
+
+  @media (max-width: 640px) {
+    .ways__grid { grid-template-columns: 1fr; gap: 0; }
+  }
+</style>
