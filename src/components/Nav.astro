@@ -91,6 +91,7 @@ import Logo from './Logo.astro';
     --logo-h: 34px;
     display: inline-flex;
     align-items: center;
+    min-block-size: 44px;
     color: var(--ink-strong);
     text-decoration: none;
     white-space: nowrap;
@@ -147,10 +148,10 @@ import Logo from './Logo.astro';
     .nav__links a:not(.nav__cta) { grid-row: 2; }
     .nav__cta { grid-column: 2; grid-row: 1; padding: 0.45rem 0.9rem; font-size: var(--t-xs); }
     .nav__ctaLong { display: none; } .nav__ctaShort { display: inline; }
-    .nav__theme { grid-column: 3; grid-row: 1; inline-size: 2rem; block-size: 2rem; }
+    .nav__theme { grid-column: 3; grid-row: 1; inline-size: 2.75rem; block-size: 2.75rem; }
     .nav__strip { grid-column: 1 / -1; grid-row: 2; display: flex; gap: 1.1rem; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-block: 0.25rem 0.35rem; margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); mask-image: linear-gradient(to left, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent); -webkit-mask-image: linear-gradient(to left, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent); }
     .nav__strip::-webkit-scrollbar { display: none; }
-    .nav__strip a { flex: none; font-size: var(--t-sm); padding-block: 0.15rem; }
+    .nav__strip a { flex: none; font-size: var(--t-sm); padding-block: 0.15rem; min-block-size: 40px; }
     .nav--compact .nav__inner { padding-block: 0.45rem 0.35rem; }
   }
 </style>
