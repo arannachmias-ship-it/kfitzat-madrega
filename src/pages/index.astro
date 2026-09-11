@@ -266,23 +266,23 @@ const liveCount = live.length;
   .lesson__link > * { position: relative; }
   .lesson--flag .lesson__link { background: var(--accent-soft); border-color: var(--accent); }
   .lesson--flag .lesson__link:hover { background: rgba(198,214,63,0.18); }
-  .lesson__n { font-family: var(--font-display); font-size: 1.6rem; color: var(--ink-faint); line-height: 1.2; min-inline-size: 2.2rem; }
+  .lesson__n { font-family: var(--font-display); font-size: var(--t-xl); color: var(--ink-on-deep-mute); line-height: 1.2; min-inline-size: 2.2rem; }
   .lesson--flag .lesson__n { color: var(--accent); }
   .lesson__body { display: flex; flex-direction: column; gap: 0.3rem; }
   .lesson__title { font-weight: 700; font-size: var(--t-lg); color: var(--ink-on-deep); }
   .lesson__note { color: var(--ink-on-deep-mute); font-size: var(--t-sm); font-weight: 300; line-height: 1.6; }
-  .lesson__meta { color: var(--ink-faint); font-size: var(--t-xs); }
+  .lesson__meta { color: var(--ink-on-deep-mute); font-size: var(--t-xs); }
 
   .track__progress { margin-block-end: 1.75rem; }
   .track__rail { block-size: 3px; border-radius: 2px; background: var(--rule-on-deep); overflow: hidden; }
   .track__rail i { display: block; block-size: 100%; inline-size: var(--w); background: var(--accent); transform: scaleX(0); transform-origin: right; transition: transform 1.4s var(--ease-out) 0.2s; }
   .track__progress.is-in .track__rail i { transform: scaleX(1); }
-  .track__railLbl { display: flex; justify-content: space-between; font-size: var(--t-xs); color: var(--ink-faint); margin-block-start: 0.5rem; }
+  .track__railLbl { display: flex; justify-content: space-between; font-size: var(--t-xs); color: var(--ink-on-deep-mute); margin-block-start: 0.5rem; }
   .track__stages { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 0.75rem; padding-block-start: 1.5rem; border-block-start: 1px solid var(--rule-on-deep); }
   .stagechip { display: flex; flex-direction: column; gap: 0.15rem; }
   .stagechip__n { font-size: var(--t-xs); color: var(--accent); }
   .stagechip__t { font-size: var(--t-sm); color: var(--ink-on-deep); font-weight: 500; line-height: 1.45; }
-  .stagechip__c { font-size: var(--t-xs); color: var(--ink-faint); }
+  .stagechip__c { font-size: var(--t-xs); color: var(--ink-on-deep-mute); }
   @media (max-width: 860px) {
     .track__grid { grid-template-columns: 1fr; }
     .track__head { flex-direction: column; align-items: flex-start; gap: 1rem; }

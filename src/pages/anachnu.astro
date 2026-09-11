@@ -212,7 +212,7 @@ const faqLd = JSON.stringify({
   .faq__q::-webkit-details-marker { display: none; }
   .faq__q::after {
     content: '+'; font-family: var(--font-display); color: var(--accent-deep);
-    font-size: 1.4rem; line-height: 1; flex: none;
+    font-size: var(--t-xl); line-height: 1; flex: none;
     transition: transform var(--dur-fast) var(--ease-out);
   }
   .faq__item[open] .faq__q::after { transform: rotate(45deg); }
