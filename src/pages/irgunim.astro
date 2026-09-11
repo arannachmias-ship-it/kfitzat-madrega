@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import SignupBand from '../components/SignupBand.astro';
 import Testimonials from '../components/Testimonials.astro';
+import ContactWays from '../components/ContactWays.astro';
 
 const programs = [
   {
@@ -124,14 +125,7 @@ const programs = [
 
   <Testimonials />
 
-  <section class="wrap ask">
-    <h2 class="ask__title">איך מתחילים</h2>
-    <p class="ask__body">
-      כותבים לנו מה גודל הצוות, מה כבר ניסיתם, ומה ההנהלה ביקשה. אנחנו חוזרים עם המלצה לתוכנית אחת ועם הצעת מחיר,
-      ואם אנחנו חושבים שאתם לא צריכים אותנו עדיין, נגיד גם את זה.
-    </p>
-    <p><a class="btn btn--primary" href="mailto:contact@nexadapt.co.il?subject=פנייה%20מהאתר">כתבו לנו <span class="btn__arrow" aria-hidden="true">←</span></a></p>
-  </section>
+  <ContactWays />
 
   <SignupBand />
 </Base>
@@ -194,7 +188,4 @@ const programs = [
     .ag { grid-template-columns: 1fr; gap: 0.15rem; }
   }
 
-  .ask { padding-block: 3rem 4rem; border-block-start: 1px solid var(--rule); }
-  .ask__title { font-size: var(--t-2xl); margin-block-end: 0.8rem; }
-  .ask__body { color: var(--ink-muted); font-weight: 300; max-inline-size: 58ch; margin-block-end: 1.5rem; font-size: var(--t-lg); }
 </style>
