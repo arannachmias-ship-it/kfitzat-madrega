@@ -1,0 +1,116 @@
+---
+import Base from '../../layouts/Base.astro';
+import TrackNav from '../../components/TrackNav.astro';
+import SignupBand from '../../components/SignupBand.astro';
+import { getCollection } from 'astro:content';
+
+const all = (await getCollection('shinuyim', (e) => e.data.published))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const fmt = (d: Date) => d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+const newest = all.reduce((d, e) => (e.data.checked > d ? e.data.checked : d), new Date(0));
+---
+<Base
+  title="מה השתנה · Nexadapt"
+  description="סריקה שבועית של שינויים בכלים שבמדריך ובעולם האוטומציה. לכל פריט: מה השתנה, מה זה אומר לארגון שלכם, קישור לדף הרשמי של הספק ותאריך בדיקה."
+>
+  <TrackNav />
+  <section class="wrap sh-head">
+    <h1 class="sh-head__title">מה השתנה</h1>
+    <p class="sh-head__sub">
+      פעם בשבוע אנחנו עוברים על הכלים שבמדריך ועל עולם האוטומציה, ובודקים מה זז.
+      לכל פריט כאן יש <strong>מה זה אומר לכם</strong> — ההשלכה המעשית לארגון, ולא רק העובדה.
+    </p>
+    <p class="sh-head__note">
+      פריט נכנס לכאן רק אם הדף הרשמי של הספק מאשר אותו. פוסט, סרטון או כתבה הם רמז לאן ללכת,
+      לא מקור. מה שלא הצלחנו לאמת מסומן במפורש. עודכן לאחרונה: {fmt(newest)}.
+    </p>
+  </section>
+
+  <section class="wrap sh-list" aria-labelledby="sh-list-t">
+    <h2 id="sh-list-t" class="sr-only">הפריטים האחרונים</h2>
+    <ul class="sh-grid" data-stagger>
+      {all.map((e) => (
+        <li class="sh-card">
+          <p class="sh-card__meta">
+            <span class="sh-card__tool">{e.data.tool}</span>
+            <span class="sh-card__date">{fmt(e.data.date)}</span>
+          </p>
+          <h3 class="sh-card__title"><a href={`/shinuyim/${e.id}`}>{e.data.title}</a></h3>
+          <p class="sh-card__what">{e.data.what}</p>
+          {e.data.unverified && <p class="sh-card__flag">לא אומת</p>}
+          <p class="sh-card__foot">
+            <a class="sh-card__cta" href={`/shinuyim/${e.id}`}>לקריאה המלאה</a>
+            <a class="sh-card__src" href={e.data.source} rel="nofollow noopener" target="_blank">סימוכין: {e.data.sourceName}</a>
+            <span class="sh-card__checked">נבדק {fmt(e.data.checked)}</span>
+          </p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="wrap sh-scan reveal" aria-labelledby="sh-scan-t">
+    <h2 id="sh-scan-t" class="sec__title">מה נבדק בסריקה הזאת</h2>
+    <p class="sh-scan__p">
+      נבדקו הדפים הרשמיים של ChatGPT, קלוד, Make, Perplexity ו־Zapier.
+      אצל Make דף התוכניות לא השתנה ממה שכתוב אצלנו במדריך, ואצל Perplexity הרישום האחרון
+      בדף השינויים הוא מסוף אוגוסט. Gemini, NotebookLM וגאמה לא נבדקו בסריקה הזאת, ולכן
+      אין לגביהם שורה כאן — <strong>וזה לא אומר שלא השתנה אצלם דבר.</strong>
+    </p>
+  </section>
+
+  <SignupBand />
+</Base>
+
+<style>
+  .sh-head { max-inline-size: 46rem; padding-block: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 4vw, 2.5rem); }
+  .sh-head__title {
+    font-family: var(--font-display); font-weight: 400; line-height: 1.05;
+    font-size: clamp(2.4rem, 7vw, 4rem); color: var(--ink-strong); margin: 0 0 1.1rem;
+  }
+  .sh-head__sub { font-size: var(--t-lg); color: var(--ink-muted); line-height: 1.7; margin: 0 0 1.1rem; }
+  .sh-head__sub strong { color: var(--ink-strong); }
+  .sh-head__note { font-size: var(--t-sm); color: var(--ink-faint); line-height: 1.75; margin: 0; }
+
+  .sh-list { padding-block-end: clamp(2rem, 5vw, 3rem); }
+  .sh-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  .sh-card {
+    display: flex; flex-direction: column; gap: 0.55rem; block-size: 100%;
+    padding: clamp(1.15rem, 3vw, 1.6rem); border-radius: var(--r-card);
+    border: 1px solid var(--rule); background: var(--surface);
+    transition: border-color var(--dur-fast) ease;
+  }
+  .sh-card:hover { border-color: var(--ink-faint); }
+  .sh-card__meta { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: baseline; margin: 0; font-size: var(--t-xs); }
+  .sh-card__tool { color: var(--ink-strong); font-weight: 500; }
+  .sh-card__date { color: var(--ink-faint); }
+  .sh-card__title { font-family: var(--font-display); font-weight: 400; font-size: var(--t-lg); line-height: 1.25; margin: 0; }
+  .sh-card__title a { color: var(--ink-strong); text-decoration: none; }
+  .sh-card__title a:hover { text-decoration: underline; }
+  .sh-card__what { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.75; }
+  .sh-card__flag {
+    align-self: flex-start; margin: 0; font-size: var(--t-xs); color: var(--ink-strong);
+    border: 1px solid var(--rule); border-radius: var(--r-control); padding: 0.15rem 0.5rem;
+  }
+  .sh-card__foot {
+    margin: auto 0 0; padding-block-start: 0.35rem;
+    display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; align-items: baseline;
+    font-size: var(--t-sm);
+  }
+  .sh-card__cta { color: var(--ink-strong); font-weight: 500; }
+  .sh-card__src { color: var(--ink-muted); font-size: var(--t-xs); }
+  .sh-card__checked { color: var(--ink-faint); font-size: var(--t-xs); }
+
+  .sec__title {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: var(--t-2xl); color: var(--ink-strong); margin-block: 0 0.6rem;
+  }
+  .sr-only {
+    position: absolute; inline-size: 1px; block-size: 1px;
+    padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+
+  .sh-scan { padding-block-end: clamp(2.5rem, 6vw, 4rem); max-inline-size: 46rem; }
+  .sh-scan__p { margin: 0; font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.8; }
+  .sh-scan__p strong { color: var(--ink-strong); }
+</style>
