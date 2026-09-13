@@ -1,0 +1,238 @@
+---
+/**
+ * "מדף הסקילים" — שיעור 14 במדריך ChatGPT.
+ *
+ * מה שהרכיב מלמד: סקיל, פלאגין והוראה קבועה הם שלושה דברים שונים, ורוב
+ * הבלבול בארגונים הוא בלבול ביניהם. הקורא מסדר שישה נכסים ארגוניים על
+ * שלושה מדפים, וההסבר מגיע אחרי ההחלטה ולא לפניה.
+ *
+ * והשורה שכל זה מוביל אליה: סקילים קיימים בחשבון ארגוני בלבד. מי שקורא
+ * את השיעור מחשבון פרטי לא יראה את הכפתור, וזה לא באג אצלו.
+ *
+ * נגישות: הפריט גם נגרר וגם נושא שלושה כפתורים, ושניהם קוראים לאותה
+ * פונקציה. גרירה לבדה מוציאה מהמשחק מקלדת ונייד.
+ */
+
+const SHELVES = [
+  { id: 'skill', name: 'סקיל', note: 'נוהל חוזר עם תוצר קבוע' },
+  { id: 'plugin', name: 'פלאגין', note: 'חיבור למקור או למערכת' },
+  { id: 'none', name: 'לא זה ולא זה', note: 'מקומו במקום אחר' },
+];
+
+const ITEMS = [
+  {
+    id: 'a', shelf: 'skill',
+    text: 'הנוהל שלנו למענה ללקוח שמתלונן',
+    why: 'נוהל שחוזר על עצמו ומסתיים בתוצר קבוע. זה בדיוק ההגדרה של סקיל: הוראה ארוכה שנשמרת פעם אחת, ומופעלת בכל פעם שהמשימה חוזרת.',
+  },
+  {
+    id: 'b', shelf: 'plugin',
+    text: 'הדרייב והשרפוינט של הארגון',
+    why: 'זה מקור מידע, לא נוהל. הוא נכנס דרך הפלאגין של הידע הארגוני, שזמין מחשבון Business ומעלה. שימו לב לדבר החשוב בו: ההרשאות של המקור נשמרות, כלומר עובד שולף רק מה שכבר מותר לו לראות.',
+  },
+  {
+    id: 'c', shelf: 'skill',
+    text: 'המבנה הקבוע של דוח הסיכום החודשי',
+    why: 'אותה משימה, כל חודש, עם אותו מבנה פלט. במקום להדביק את ההוראות מחדש בכל פעם, הן יושבות בסקיל אחד שכל מי שיש לו גישה מפעיל.',
+  },
+  {
+    id: 'd', shelf: 'plugin',
+    text: 'מערכת הכרטיסים של התמיכה',
+    why: 'מערכת חיצונית שצריך להתחבר אליה. חיבור הוא פלאגין. ספריית הפלאגינים עצמה זמינה בכל התוכניות, אבל מה שיש בה משתנה לפי מה שהארגון אישר.',
+  },
+  {
+    id: 'e', shelf: 'none',
+    text: 'שאני רוצה תשובות בעברית וקצרות',
+    why: 'זו העדפה אישית שלכם, לא נכס ארגוני. מקומה בהוראות המותאמות, שמחזיקות עד חמשת אלפים תווים. לעטוף אותה בסקיל זה לייצר תחזוקה לדבר שיושב במקום אחד ממילא.',
+  },
+  {
+    id: 'f', shelf: 'none',
+    text: 'שלושת הקבצים שאני עובד עליהם החודש',
+    why: 'חומר של תקופה אחת, לא נוהל קבוע. מקומו בפרויקט, שמחזיק קבצים והוראות משלו. בעוד חודש תרצו שם קבצים אחרים, ואת הסקיל לא רוצים לשכתב כל חודש.',
+  },
+];
+---
+<div class="ss" data-ss>
+  <p class="ss__label">סדרו את השישה על שלושת המדפים</p>
+
+  <div class="ss__shelves">
+    {SHELVES.map((s) => (
+      <section class="ss__shelf" data-ss-shelf={s.id}>
+        <header class="ss__shelfhead">
+          <h4>{s.name}</h4>
+          <p>{s.note}</p>
+        </header>
+        <ul class="ss__drop" data-ss-drop={s.id}></ul>
+      </section>
+    ))}
+  </div>
+
+  <ul class="ss__pool" data-ss-pool>
+    {ITEMS.map((it) => (
+      <li class="ss__item" draggable="true" data-ss-item={it.id} data-ss-answer={it.shelf} data-ss-why={it.why}>
+        <span class="ss__text">{it.text}</span>
+        <span class="ss__btns">
+          {SHELVES.map((s) => (
+            <button type="button" data-ss-to={s.id}>{s.name}</button>
+          ))}
+        </span>
+      </li>
+    ))}
+  </ul>
+
+  <div class="ss__out" data-ss-out hidden></div>
+</div>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const root = document.querySelector('[data-ss]');
+    if (!root || root.dataset.ssReady) return;
+    root.dataset.ssReady = '1';
+
+    const pool = root.querySelector('[data-ss-pool]');
+    const out = root.querySelector('[data-ss-out]');
+    const items = Array.prototype.slice.call(root.querySelectorAll('[data-ss-item]'));
+    let dragging = null;
+
+    function assign(li, shelfId) {
+      const drop = root.querySelector('[data-ss-drop="' + shelfId + '"]');
+      if (!drop) return;
+      li.dataset.ssPlaced = shelfId;
+      li.querySelectorAll('[data-ss-to]').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.ssTo === shelfId));
+      });
+      drop.appendChild(li);
+      render();
+    }
+
+    items.forEach(function (li) {
+      li.querySelectorAll('[data-ss-to]').forEach(function (b) {
+        b.addEventListener('click', function () { assign(li, b.dataset.ssTo); });
+      });
+      li.addEventListener('dragstart', function () { dragging = li; li.classList.add('is-dragging'); });
+      li.addEventListener('dragend', function () { dragging = null; li.classList.remove('is-dragging'); });
+    });
+
+    root.querySelectorAll('[data-ss-drop]').forEach(function (drop) {
+      drop.addEventListener('dragover', function (e) { e.preventDefault(); drop.classList.add('is-over'); });
+      drop.addEventListener('dragleave', function () { drop.classList.remove('is-over'); });
+      drop.addEventListener('drop', function (e) {
+        e.preventDefault();
+        drop.classList.remove('is-over');
+        if (dragging) assign(dragging, drop.dataset.ssDrop);
+      });
+    });
+
+    function render() {
+      const placed = items.filter(function (li) { return li.dataset.ssPlaced; });
+      pool.hidden = placed.length === items.length;
+
+      if (placed.length < items.length) {
+        out.hidden = false;
+        out.innerHTML = '<p class="ss__wait">נשארו ' + (items.length - placed.length) + ' פריטים.</p>';
+        return;
+      }
+
+      const right = placed.filter(function (li) { return li.dataset.ssPlaced === li.dataset.ssAnswer; });
+
+      let rows = '';
+      items.forEach(function (li) {
+        const ok = li.dataset.ssPlaced === li.dataset.ssAnswer;
+        const name = li.querySelector('.ss__text').textContent;
+        const answerName = { skill: 'סקיל', plugin: 'פלאגין', none: 'לא זה ולא זה' }[li.dataset.ssAnswer];
+        rows +=
+          '<div class="ss__row' + (ok ? ' ss__row--ok' : '') + '">' +
+          '<p class="ss__rowhead"><span class="ss__mark">' + (ok ? 'כן' : 'לא') + '</span> ' + name +
+          ' <em>' + answerName + '</em></p>' +
+          '<p class="ss__why">' + li.dataset.ssWhy + '</p>' +
+          '</div>';
+      });
+
+      const tally =
+        '<p class="ss__tally" data-tally="' + right.length + '">' + right.length +
+        ' מתוך ' + items.length + ' במקום הנכון.</p>';
+
+      const punch =
+        '<div class="ss__punch">' +
+        '<p><strong>ועכשיו הדבר שמשנה את כל הדיון:</strong> סקילים קיימים בחשבון ארגוני בלבד — Business, ארגוני, חינוך ובריאות. ' +
+        '<strong>בחשבון פרטי אין אותם בכלל</strong>, וזה לא הגדרה שמצאתם. זה המוצר.</p>' +
+        '<p>ספריית הפלאגינים, לעומת זאת, זמינה בכל התוכניות, ומה שרואים בה משתנה לפי מה שהארגון אישר.</p>' +
+        '<p>לכן שני העמודים הראשונים בטבלה למעלה הם למעשה הנימוק המסחרי למושב ארגוני, וזו גם הסיבה ' +
+        'שכדאי להחליט מי כותב אותם לפני שקונים. על ההחלטה הזאת יש <a href="/maslul/yeda-pnimi">שיעור שלם במסלול</a>.</p>' +
+        '</div>';
+
+      out.hidden = false;
+      out.innerHTML = tally + rows + punch;
+    }
+  })();
+</script>
+
+<style>
+  .ss {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.65rem; margin-block: 2rem;
+  }
+  .ss__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1rem; }
+
+  .ss__shelves { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.9rem; }
+  @media (max-width: 680px) { .ss__shelves { grid-template-columns: 1fr; } }
+  .ss__shelf {
+    background: var(--surface-sunk); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 0.85rem 0.9rem; min-block-size: 7rem;
+  }
+  .ss__shelfhead h4 { font-size: var(--t-sm); color: var(--ink-strong); margin: 0; }
+  .ss__shelfhead p { font-size: var(--t-xs); color: var(--ink-faint); margin: 0.1rem 0 0.6rem; line-height: 1.4; }
+  .ss__drop { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; min-block-size: 2.5rem; border-radius: var(--r-control); }
+  .ss__drop.is-over { outline: 2px dashed var(--accent); outline-offset: 3px; }
+
+  .ss__pool { list-style: none; margin: 1.1rem 0 0; padding: 0; display: grid; gap: 0.5rem; }
+  .ss__pool[hidden] { display: none; }
+
+  .ss__item {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.7rem;
+    background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r-control);
+    padding: 0.5rem 0.7rem; cursor: grab;
+    transition: border-color var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+  }
+  .ss__item:hover { border-color: var(--rule-strong); }
+  .ss__item.is-dragging { opacity: 0.45; }
+  .ss__text { font-size: var(--t-sm); color: var(--ink); line-height: 1.45; flex: 1 1 12rem; }
+  .ss__btns { display: flex; gap: 0.3rem; flex: none; }
+  .ss__btns button {
+    font: inherit; font-size: var(--t-xs); cursor: pointer;
+    padding: 0.22rem 0.55rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: transparent; color: var(--ink-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .ss__btns button:hover { border-color: var(--rule-strong); color: var(--ink-strong); }
+  .ss__btns button[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500; }
+
+  .ss__drop .ss__item { background: var(--surface); }
+  .ss__drop .ss__text { font-size: var(--t-xs); }
+
+  .ss__out { margin-block-start: 1.3rem; }
+  .ss__out[hidden] { display: none; }
+  .ss :global(.ss__wait) { font-size: var(--t-sm); color: var(--ink-faint); margin: 0; }
+  .ss :global(.ss__tally) { font-family: var(--font-display); font-size: var(--t-lg); color: var(--ink-strong); margin: 0 0 0.8rem; }
+  .ss :global(.ss__row) {
+    border-inline-start: 3px solid var(--state-bad); background: var(--surface-sunk);
+    border-radius: var(--r-card); padding: 0.7rem 0.9rem; margin-block-end: 0.5rem;
+  }
+  .ss :global(.ss__row--ok) { border-inline-start-color: var(--state-ok); }
+  .ss :global(.ss__rowhead) { font-size: var(--t-sm); color: var(--ink-strong); margin: 0 0 0.25rem; font-weight: 500; }
+  .ss :global(.ss__rowhead em) { font-style: normal; color: var(--ink-faint); font-weight: 400; }
+  .ss :global(.ss__mark) {
+    display: inline-block; font-size: var(--t-xs); padding: 0.05rem 0.4rem;
+    border-radius: var(--r-control); background: var(--state-bad); color: var(--paper);
+  }
+  .ss :global(.ss__row--ok .ss__mark) { background: var(--state-ok); }
+  .ss :global(.ss__why) { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.6; margin: 0; max-inline-size: 70ch; }
+  .ss :global(.ss__punch) {
+    margin-block-start: 1rem; background: var(--deep); border-radius: var(--r-card);
+    padding: 1.1rem 1.3rem; border-inline-start: 3px solid var(--accent);
+  }
+  .ss :global(.ss__punch p) { font-size: var(--t-sm); line-height: 1.65; color: var(--ink-on-deep-mute); margin: 0 0 0.6rem; max-inline-size: 70ch; }
+  .ss :global(.ss__punch p:last-child) { margin-block-end: 0; }
+  .ss :global(.ss__punch strong) { color: var(--accent); }
+  .ss :global(.ss__punch a) { color: var(--ink-on-deep); }
+</style>
