@@ -1,0 +1,52 @@
+---
+/**
+ * שיעור בתוך מדריך כלי: /kelim/chatgpt/proyektim
+ *
+ * הנתיב הזה גובר על /kelim/[...slug].astro כי שני מקטעים דינמיים
+ * מקבלים עדיפות על פרמטר rest. עמוד הכלי עצמו נשאר ב-/kelim/chatgpt.
+ *
+ * הקודם והבא מחושבים רק מתוך השיעורים שכבר נכתבו, כדי שהניווט
+ * לעולם לא יצביע על עמוד שלא קיים.
+ */
+import { getCollection, render } from 'astro:content';
+import MadrichLesson from '../../../layouts/MadrichLesson.astro';
+import { MADRICHIM } from '../../../data/madrichim';
+
+export async function getStaticPaths() {
+  const all = await getCollection('madrich', (e) => e.data.published);
+
+  return MADRICHIM.flatMap((m) => {
+    const written = all
+      .filter((e) => e.data.guide === m.slug)
+      .sort((a, b) => a.data.order - b.data.order);
+
+    return written.map((entry, i) => {
+      const p = written[i - 1];
+      const n = written[i + 1];
+      const meta = (e: typeof entry) => ({
+        slug: e.id.split('/').pop()!,
+        n: e.data.order,
+        title: e.data.title,
+      });
+      return {
+        params: { tool: m.slug, lesson: entry.id.split('/').pop()! },
+        props: { entry, prev: p ? meta(p) : null, next: n ? meta(n) : null },
+      };
+    });
+  });
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+<MadrichLesson
+  guide={d.guide}
+  title={d.title} kicker={d.kicker} goal={d.goal}
+  order={d.order} readingTime={d.readingTime}
+  author={d.author} interactive={d.interactive}
+  checked={d.checked} lesson={d.lesson}
+  prev={prev} next={next}
+>
+  <Content />
+</MadrichLesson>
