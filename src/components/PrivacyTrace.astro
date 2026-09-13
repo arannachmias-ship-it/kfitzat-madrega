@@ -1,0 +1,245 @@
+---
+/**
+ * "מסלול ההודעה" — חמש תחנות אחרי הודעה אחת, בשני טורים: חשבון פרטי
+ * מול חשבון ארגוני.
+ *
+ * הרכיב משותף לשלושת המדריכים. `tool` בוחר את מערך הנתונים, והטקסט
+ * מגיע מ-claude/מה-אומת-על-שלושת-הכלים.md בלבד. טענה שאין לה שורה שם
+ * לא נכנסת לכאן, וטענה שלא אומתה כתובה כאן ככזאת.
+ *
+ * למה שני טורים ולא רשימה: כל הדיון המסחרי על מושבים ארגוניים יושב
+ * בפער בין הטורים. רשימה אחת מסתירה בדיוק את מה שצריך להיראות.
+ */
+
+type Station = { n: number; q: string; personal: string; org: string; sting?: string };
+type TraceSet = { label: string; personalName: string; orgName: string; stations: Station[] };
+
+const DATA: Record<string, TraceSet> = {
+  chatgpt: {
+    label: "ChatGPT",
+    personalName: "חשבון פרטי",
+    orgName: "חשבון ארגוני",
+    stations: [
+      {
+        n: 1,
+        q: "לאן ההודעה הולכת",
+        personal: "לשרתי OpenAI. יש עשרה אזורי אחסון אפשריים, ואת האזור אתם לא בוחרים.",
+        org: "לאותם שרתים, אבל בחשבון ארגוני אפשר לבחור אזור אחסון. בוBusiness אי אפשר — זו יכולת של התוכנית הארגונית בלבד.",
+        sting: "ישראל אינה אחד מעשרת האזורים. מי שיש לו דרישת ריבונות נתונים ישראלית צריך לדעת את זה לפני הרכש, לא אחריו.",
+      },
+      {
+        n: 2,
+        q: "מי מתאמן עליה",
+        personal: "ההגדרה נקראת שיפור המודל עבור כולם, והיא יושבת בהגדרות תחת שליטה בנתונים. כל עוד היא דלוקה, השיחות שלכם עשויות לשמש לאימון.",
+        org: "OpenAI כותבת שאינה משתמשת בנתונים מוChatGPT ארגוני, Business, חינוך, בריאות או הוAPI — לא בקלט ולא בפלט — לאימון.",
+        sting: "זה ההבדל היחיד שרוב האנשים מכירים, והוא באמת אמיתי. הוא פשוט לא ההבדל היחיד שיש.",
+      },
+      {
+        n: 3,
+        q: "כמה זמן היא נשמרת",
+        personal: "שיחה שמחקתם נמחקת לצמיתות תוך שלושים יום.",
+        org: "אותו מנגנון מחיקה.",
+        sting: "ההליך המשפטי מול הניו יורק טיימס: לפי ההצהרה האחרונה שנמצאה, הוא כיסה שיחות של חשבונות פרטיים בלבד, ולא ארגוני, Business, חינוך או API. ההצהרה הזאת היא מנובמבר 2025, ולכן היא נכתבת כאן כהצהרה אחרונה ולא כמצב נוכחי.",
+      },
+      {
+        n: 4,
+        q: "מי בארגון יכול לשלוף אותה",
+        personal: "אף אחד. אין ארגון, ואין מנהל מעליכם.",
+        org: "התוכנית העסקית כוללת כניסה מאוחדת, אימות דושלבי, ניתוח שימוש ושליטה בהוצאה.",
+        sting: "מה שוBusiness דווקא אינו כולל, ואנשים מניחים שכן: SCIM, ניהול מפתחות הצפנה, הרשאות לפי תפקיד, רשימת כתובות מורשות ובחירת מיקום אחסון. חמשת אלה שייכים לתוכנית הארגונית.",
+      },
+      {
+        n: 5,
+        q: "מה שיחה זמנית באמת עושה",
+        personal: "שיחה זמנית אינה קוראת מהזיכרון ואינה כותבת אליו. זה מה שהיא עושה, וזה כל מה שהיא עושה.",
+        org: "אותו הדבר.",
+        sting: "שיחה זמנית אינה מצב אנונימי. היא מנתקת את הזיכרון, לא את הארגון.",
+      },
+    ],
+  },
+
+  gemini: {
+    label: "ג'מיני",
+    personalName: "חשבון גוגל פרטי",
+    orgName: "חשבון Workspace",
+    stations: [
+      {
+        n: 1,
+        q: "לאן ההודעה הולכת",
+        personal: "לשרתי גוגל. אזורי הנתונים שמוצעים הם אירופה או ארצות הברית.",
+        org: "גוגל כותבת שהאינטראקציות שלכם עם ג'מיני נשארות בתוך הארגון.",
+        sting: "אין אזור נתונים בישראל ואין אזור במזרח התיכון. זו שורה שכדאי שתופיע במסמך הרכש.",
+      },
+      {
+        n: 2,
+        q: "מי קורא אותה",
+        personal: "בחשבון פרטי בני אדם קוראים חלק מהשיחות. גוגל כותבת את זה במפורש, ומבקשת לא להזין מידע חסוי שלא הייתם רוצים שבודק אנושי יראה.",
+        org: "בתוך הארגון השיחות אינן משמשות לאימון בלי רשות.",
+        sting: "המשפט הזה של גוגל הוא כנראה המשפט היחיד בכל שלושת המדריכים שאפשר לשים על שקופית אחת ולסיים איתו דיון. הוא גם מנוסח על ידי גוגל עצמה, ולכן אי אפשר להתווכח איתו.",
+      },
+      {
+        n: 3,
+        q: "כמה זמן היא נשמרת",
+        personal: "כששמירת פעילות דלוקה: מחיקה אוטומטית אחרי שמונה עשר חודשים כברירת מחדל, וניתן לשנות. שיחות שנבדקו על ידי אדם נשמרות עד שלוש שנים, מנותקות מהחשבון. כששמירת פעילות כבויה: שבעים ושתיים שעות, ובלי שימוש לשיפור המודל.",
+        org: "בהתאם למדיניות השמירה של הארגון.",
+        sting: "כיבוי שמירת הפעילות אינו מוחק רטרואקטיבית את העותק בן שלוש השנים. אותו מוחקים בנפרד, בוmyactivity.google.com.",
+      },
+      {
+        n: 4,
+        q: "מי בארגון יכול לשלוף אותה",
+        personal: "אף אחד.",
+        org: "Vault תומך בכללי שמירה ובהקפאה לצורכי משפט על שיחות באפליקציית ג'מיני.",
+        sting: "אבל רק על אפליקציית ג'מיני. היכולות שבתוך ג'ימייל ודוקס אינן מכוסות. זה פער ציות אמיתי, וארגון שחושב שיש לו כיסוי מלא טועה.",
+      },
+      {
+        n: 5,
+        q: "מה ההגדרה הזאת עוד מכבה",
+        personal: "כיבוי שמירת הפעילות מבטל גם את הזיכרון וגם את הפעולות המתוזמנות. הפרטיות כאן עולה בפונקציונליות, וזו עסקה אמיתית שצריך להחליט עליה.",
+        org: "הזיכרון דורש חשבון גוגל פרטי, ולא חשבון עבודה או לימודים.",
+        sting: "כלומר משתמש ארגוני לא יכול להשתמש בזיכרון בכלל. מי שמלמד את הצוות להישען עליו מלמד יכולת שלא תהיה להם.",
+      },
+    ],
+  },
+
+  claude: {
+    label: "קלוד",
+    personalName: "חשבון פרטי",
+    orgName: "צוות או ארגוני",
+    stations: [
+      {
+        n: 1,
+        q: "לאן ההודעה הולכת",
+        personal: "לשרתי אנתרופיק.",
+        org: "לאותם שרתים, תחת התנאים המסחריים.",
+      },
+      {
+        n: 2,
+        q: "מי מתאמן עליה",
+        personal: "אימון קורה רק אם בחרתם להסכים לו. זו בחירה שלכם, ואפשר לשנות אותה.",
+        org: "אנתרופיק כותבת שכברירת מחדל אינה משתמשת בקלט או בפלט שלכם לאימון.",
+      },
+      {
+        n: 3,
+        q: "כמה זמן היא נשמרת",
+        personal: "בלי הסכמה לאימון, שלושים יום. עם הסכמה, השמירה מתארכת לחמש שנים.",
+        org: "לפי מדיניות השמירה של הארגון.",
+        sting: "ההסכמה לאימון אינה רק שאלה של מי מתאמן. היא מכפילה את זמן השמירה פי שישים.",
+      },
+      {
+        n: 4,
+        q: "מי בארגון יכול לשלוף אותה",
+        personal: "אף אחד.",
+        org: "שיחה פרטית אינה נעלמת מהארגון. היא נשמרת שלושים יום כברירת מחדל, והיא נכללת בייצוא הנתונים הארגוני ובוAPI הציות.",
+        sting: "יומני ביקורת קיימים בתוכנית הארגונית בלבד, ולא בצוות, ונשמרים מאה שמונים יום. ארגון שקנה צוות וחושב שיש לו יומני ביקורת לא בדק.",
+      },
+      {
+        n: 5,
+        q: "מה דלוק כברירת מחדל",
+        personal: "הזיכרון פעיל.",
+        org: "בצוות ובארגוני הזיכרון כבוי כברירת מחדל, והבעלים מפעיל אותו. הזיכרון גם נפרד לכל פרויקט.",
+        sting: "זו הגדרה שכדאי להחליט עליה בכוונה ולא בדיעבד. בשני הכיוונים יש מחיר.",
+      },
+    ],
+  },
+};
+
+interface Props { tool: 'chatgpt' | 'gemini' | 'claude' }
+const { tool } = Astro.props;
+const set = DATA[tool];
+---
+<div class="pt" data-pt>
+  <p class="pt__label">מסלול ההודעה: חמש תחנות, שני חשבונות</p>
+
+  <div class="pt__track" role="tablist">
+    {set.stations.map((s, i) => (
+      <button type="button" role="tab" data-pt-go={String(i)} aria-selected={i === 0 ? 'true' : 'false'}>
+        <span class="pt__n">{s.n}</span>
+        <span>{s.q}</span>
+      </button>
+    ))}
+  </div>
+
+  <div class="pt__panel" data-pt-panel></div>
+
+  <script type="application/json" data-pt-data set:html={JSON.stringify(set)}></script>
+</div>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const root = document.querySelector('[data-pt]');
+    if (!root || root.dataset.ptReady) return;
+    root.dataset.ptReady = '1';
+
+    const set = JSON.parse(root.querySelector('[data-pt-data]').textContent);
+    const panel = root.querySelector('[data-pt-panel]');
+    const tabs = Array.prototype.slice.call(root.querySelectorAll('[data-pt-go]'));
+
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function show(i) {
+      const s = set.stations[i];
+      tabs.forEach(function (t) { t.setAttribute('aria-selected', String(Number(t.dataset.ptGo) === i)); });
+
+      const sting = s.sting
+        ? '<div class="pt__sting"><p><strong>השורה שמפתיעה:</strong> ' + esc(s.sting) + '</p></div>'
+        : '';
+
+      panel.innerHTML =
+        '<h4 class="pt__q">' + esc(s.q) + '</h4>' +
+        '<div class="pt__cols">' +
+        '<div class="pt__col"><p class="pt__colname">' + esc(set.personalName) + '</p><p class="pt__body">' + esc(s.personal) + '</p></div>' +
+        '<div class="pt__col pt__col--org"><p class="pt__colname">' + esc(set.orgName) + '</p><p class="pt__body">' + esc(s.org) + '</p></div>' +
+        '</div>' + sting;
+    }
+
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { show(Number(t.dataset.ptGo)); });
+    });
+
+    show(0);
+  })();
+</script>
+
+<style>
+  .pt {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.65rem; margin-block: 2rem;
+  }
+  .pt__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1rem; }
+
+  .pt__track { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.4rem; }
+  @media (max-width: 760px) { .pt__track { grid-template-columns: 1fr; } }
+  .pt__track button {
+    font: inherit; font-size: var(--t-xs); text-align: start; cursor: pointer;
+    display: flex; align-items: baseline; gap: 0.45rem; line-height: 1.35;
+    padding: 0.55rem 0.65rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: transparent; color: var(--ink-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .pt__track button:hover { border-color: var(--rule-strong); color: var(--ink-strong); }
+  .pt__track button[aria-selected='true'] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500; }
+  .pt__n { font-family: var(--font-display); font-size: var(--t-sm); flex: none; opacity: 0.7; }
+
+  .pt__panel { margin-block-start: 1.2rem; }
+  .pt :global(.pt__q) { font-family: var(--font-display); font-size: var(--t-xl); color: var(--ink-strong); margin: 0 0 0.8rem; }
+  .pt :global(.pt__cols) { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  @media (max-width: 680px) { .pt :global(.pt__cols) { grid-template-columns: 1fr; } }
+  .pt :global(.pt__col) {
+    background: var(--surface-sunk); border-radius: var(--r-card);
+    padding: 0.9rem 1.05rem; border-inline-start: 3px solid var(--rule-strong);
+  }
+  .pt :global(.pt__col--org) { background: var(--deep); border-inline-start-color: var(--accent); }
+  .pt :global(.pt__colname) { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 0.35rem; }
+  .pt :global(.pt__col--org .pt__colname) { color: var(--accent); }
+  .pt :global(.pt__body) { font-size: var(--t-sm); line-height: 1.65; color: var(--ink-muted); margin: 0; }
+  .pt :global(.pt__col--org .pt__body) { color: var(--ink-on-deep-mute); }
+  .pt :global(.pt__sting) {
+    margin-block-start: 0.9rem; padding: 0.85rem 1rem;
+    border: 1px solid var(--rule); border-inline-start: 3px solid var(--state-warn);
+    border-radius: var(--r-card);
+  }
+  .pt :global(.pt__sting p) { font-size: var(--t-sm); color: var(--ink); line-height: 1.65; margin: 0; max-inline-size: 74ch; }
+  .pt :global(.pt__sting strong) { color: var(--ink-strong); }
+</style>
