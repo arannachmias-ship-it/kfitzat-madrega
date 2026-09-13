@@ -1,0 +1,183 @@
+---
+/**
+ * "מי יכול לפתוח את זה" — שיעור 8 במדריך קלוד.
+ *
+ * השאלה היחידה שמשנה ב-Artifacts אינה מה אפשר לבנות, אלא למי אפשר
+ * לשלוח. והתשובה הפוכה ממה שרוב האנשים מניחים: בחשבון פרטי הפרסום
+ * ציבורי לגמרי, ובחשבון ארגוני הוא סגור לארגון — כלומר דווקא הארגון
+ * הוא זה שלא יכול לשלוח ללקוח.
+ *
+ * שני בוררים, ותשובה אחת. מי שרואה את זה פעם אחת לא שולח קישור מת.
+ */
+
+const ACCOUNTS = [
+  { id: 'personal', name: 'חינם, Pro או Max' },
+  { id: 'team', name: 'צוות' },
+  { id: 'org', name: 'ארגוני' },
+];
+
+const TARGETS = [
+  { id: 'colleague', name: 'עמית שיושב איתי בארגון' },
+  { id: 'client', name: 'לקוח מחוץ לארגון' },
+  { id: 'public', name: 'קישור פתוח לכל מי שיקבל אותו' },
+];
+---
+<div class="ar" data-ar>
+  <p class="ar__label">בניתם Artifact. עכשיו השאלה היחידה שחשובה: מי יצליח לפתוח אותו</p>
+
+  <div class="ar__pickers">
+    <fieldset>
+      <legend>החשבון שלכם</legend>
+      {ACCOUNTS.map((a, i) => (
+        <button type="button" data-ar-acc={a.id} aria-pressed={i === 0 ? 'true' : 'false'}>{a.name}</button>
+      ))}
+    </fieldset>
+    <fieldset>
+      <legend>למי אתם רוצים לשלוח</legend>
+      {TARGETS.map((t, i) => (
+        <button type="button" data-ar-tgt={t.id} aria-pressed={i === 0 ? 'true' : 'false'}>{t.name}</button>
+      ))}
+    </fieldset>
+  </div>
+
+  <div class="ar__out" data-ar-out></div>
+
+  <p class="ar__fine">
+    ועוד דבר אחד שהשתנה ושווה לדעת: <strong>כפתור ה־Remix הוסר.</strong>
+    מי שמקבל מכם Artifact לא יכול לקחת אותו ולשנות אצלו. הוא יכול לפתוח ולהשתמש, וזה הכל.
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const root = document.querySelector('[data-ar]');
+    if (!root || root.dataset.arReady) return;
+    root.dataset.arReady = '1';
+
+    const out = root.querySelector('[data-ar-out]');
+    let acc = 'personal';
+    let tgt = 'colleague';
+
+    const V = {
+      'personal|colleague': {
+        ok: true,
+        head: 'כן, והוא לא צריך כלום',
+        body: 'בחשבון חינם, Pro או Max הפרסום ציבורי. כל מי שמקבל את הקישור פותח אותו, בלי חשבון ובלי הרשאה.',
+        sting: 'זה נוח עד שזה לא. אותו קישור בדיוק יעבוד גם למי שלא התכוונתם — אם הוא הועבר הלאה, אין מנגנון שעוצר אותו.',
+      },
+      'personal|client': {
+        ok: true,
+        head: 'כן, בלי שום מכשול',
+        body: 'הפרסום ציבורי, ולכן לקוח מחוץ לארגון פותח את הקישור כמו כל אחד אחר.',
+        sting: 'ובדיוק בגלל זה: אל תשימו שם נתונים שאתם לא מוכנים שיהיו בחוץ. קישור ציבורי הוא ציבורי, גם אם שלחתם אותו לאדם אחד.',
+      },
+      'personal|public': {
+        ok: true,
+        head: 'כן. זה בדיוק מה שהפרסום הזה עושה',
+        body: 'בחשבון פרטי פרסום Artifact הוא פרסום לעולם. זו הדרך הקלה ביותר להראות משהו למישהו.',
+        sting: 'הבדיקה היחידה שצריך לעשות לפני: לפתוח את מה שבניתם בחלון פרטי, בלי להיות מחוברים. מה שנפתח שם — נפתח לכולם.',
+      },
+      'team|colleague': {
+        ok: true,
+        head: 'כן, אם הוא מחובר לארגון',
+        body: 'בצוות ובארגוני הפרסום סגור: רק מי שמחובר לאותו ארגון נכנס. עמית שלכם נכנס, בתנאי שהוא מחובר.',
+        sting: 'זו התנהגות טובה, והיא גם מקור לתקלה נפוצה: עמית שפותח את הקישור מהטלפון הפרטי שלו, בלי להיות מחובר, יראה עמוד סגור ויחשוב שהקישור שבור.',
+      },
+      'team|client': {
+        ok: false,
+        head: 'לא. הוא יקבל דלת סגורה',
+        body: 'בחשבון צוות הפרסום מוגבל למי שמחובר לארגון. לקוח חיצוני אינו מחובר, ולכן הוא פשוט לא ייכנס.',
+        sting: 'זו ההפתעה שכדאי לדעת עליה לפני ישיבה ולא באמצעה: דווקא החשבון שמשלמים עליו הוא זה שלא יכול לשלוח החוצה. אם התוצר מיועד ללקוח, תוציאו אותו כקובץ ולא כקישור.',
+      },
+      'team|public': {
+        ok: false,
+        head: 'לא. אין פרסום ציבורי בצוות',
+        body: 'האפשרות לפרסם לכולם אינה קיימת בחשבון צוות. כל Artifact שתפרסמו ייעצר בגבול הארגון.',
+        sting: 'כלומר החשבון הפרטי והחשבון הארגוני עושים כאן שני דברים הפוכים, ואי אפשר להחליף ביניהם בהגדרה. זו החלטה של המוצר, לא מתג.',
+      },
+      'org|colleague': {
+        ok: true,
+        head: 'כן, אם הוא מחובר לארגון',
+        body: 'כמו בצוות: רק מי שמחובר לארגון נכנס. בתוך הארגון זה עובד יופי, וזה בדיוק מה שרוצים ממנו.',
+        sting: 'שווה לומר את זה לצוות פעם אחת: הקישור אינו שבור, הוא פשוט מבקש שתהיו מחוברים. זה חוסך שלוש פניות לתמיכה בכל שבוע.',
+      },
+      'org|client': {
+        ok: false,
+        head: 'לא. והפעם זה בכוונה',
+        body: 'בחשבון ארגוני הפרסום סגור לארגון. לקוח חיצוני לא ייכנס, ואין דרך לפתוח לו את זה דרך אותו קישור.',
+        sting: 'מה עושים במקום: מייצאים את התוצר כקובץ ושולחים אותו. זה פחות מרשים ויותר בטוח, ובכל מקרה זה מה שיש.',
+      },
+      'org|public': {
+        ok: false,
+        head: 'לא. אין פרסום ציבורי בארגוני',
+        body: 'הפרסום הציבורי קיים בחשבונות הפרטיים בלבד. בארגוני הוא נסגר, וזה אחד הדברים שמחלקת אבטחה דווקא שמחה עליהם.',
+        sting: 'אם אתם צריכים עמוד ציבורי אמיתי, זו משימה אחרת ולא Artifact. אל תנסו לעקוף את זה דרך חשבון פרטי עם תוכן ארגוני — זה בדיוק הגבול שאסור לחצות.',
+      },
+    };
+
+    function render() {
+      const v = V[acc + '|' + tgt];
+      root.querySelectorAll('[data-ar-acc]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.arAcc === acc)); });
+      root.querySelectorAll('[data-ar-tgt]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.arTgt === tgt)); });
+      out.innerHTML =
+        '<div class="ar__card' + (v.ok ? ' ar__card--ok' : '') + '" data-tally="' + (v.ok ? '1' : '0') + '">' +
+        '<p class="ar__head">' + v.head + '</p>' +
+        '<p class="ar__body">' + v.body + '</p>' +
+        '</div>' +
+        '<p class="ar__sting"><strong>ומה שכדאי לדעת לפני:</strong> ' + v.sting + '</p>';
+    }
+
+    root.querySelectorAll('[data-ar-acc]').forEach(function (b) {
+      b.addEventListener('click', function () { acc = b.dataset.arAcc; render(); });
+    });
+    root.querySelectorAll('[data-ar-tgt]').forEach(function (b) {
+      b.addEventListener('click', function () { tgt = b.dataset.arTgt; render(); });
+    });
+
+    render();
+  })();
+</script>
+
+<style>
+  .ar {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.65rem; margin-block: 2rem;
+  }
+  .ar__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1rem; line-height: 1.5; }
+
+  .ar__pickers { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
+  @media (max-width: 680px) { .ar__pickers { grid-template-columns: 1fr; } }
+  .ar__pickers fieldset { border: 0; margin: 0; padding: 0; min-inline-size: 0; }
+  .ar__pickers legend { font-weight: 600; color: var(--ink-strong); font-size: var(--t-sm); margin-block-end: 0.45rem; padding: 0; }
+  .ar__pickers button {
+    display: block; inline-size: 100%; text-align: start;
+    font: inherit; font-size: var(--t-sm); cursor: pointer; line-height: 1.4;
+    padding: 0.45rem 0.7rem; margin-block-end: 0.3rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: transparent; color: var(--ink-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .ar__pickers button:hover { border-color: var(--rule-strong); color: var(--ink-strong); }
+  .ar__pickers button[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500; }
+
+  .ar__out { margin-block-start: 1.3rem; }
+  .ar :global(.ar__card) {
+    background: var(--surface-sunk); border-radius: var(--r-card);
+    padding: 1.1rem 1.3rem; border-inline-start: 3px solid var(--state-bad);
+  }
+  .ar :global(.ar__card--ok) { border-inline-start-color: var(--state-ok); }
+  .ar :global(.ar__head) { font-family: var(--font-display); font-size: var(--t-xl); color: var(--ink-strong); margin: 0 0 0.45rem; }
+  .ar :global(.ar__body) { font-size: var(--t-sm); line-height: 1.65; color: var(--ink-muted); margin: 0; max-inline-size: 70ch; }
+  .ar :global(.ar__sting) {
+    margin-block-start: 0.9rem; padding: 0.85rem 1rem;
+    border: 1px solid var(--rule); border-inline-start: 3px solid var(--accent);
+    border-radius: var(--r-card); font-size: var(--t-sm); color: var(--ink);
+    line-height: 1.65; max-inline-size: 72ch;
+  }
+  .ar :global(.ar__sting strong) { color: var(--ink-strong); }
+
+  .ar__fine {
+    margin: 1.2rem 0 0; padding-block-start: 1rem; border-block-start: 1px solid var(--rule);
+    font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; max-inline-size: 72ch;
+  }
+  .ar__fine strong { color: var(--ink-strong); }
+</style>
