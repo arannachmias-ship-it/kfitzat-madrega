@@ -53,7 +53,7 @@ export const MADRICHIM: Madrich[] = [
       { slug: "tmunot-vekol", n: 8, title: "תמונות וקול: מה מזה שימושי בעבודה", note: "ומה מזה מרשים בהדגמה ולא נוגעים בו אחר כך." },
       { slug: "mechkar-amok", n: 9, title: "מחקר עמוק: מתי זה שווה את הדקות", note: "ומתי חיפוש רגיל עושה את אותה עבודה." },
       { slug: "chatgpt-work", n: 10, title: "ChatGPT Work: מהתשובה לתוצר", note: "מה שהחליף את מצב הסוכן, ואיך יודעים מתי להשתמש בו.", interactive: true },
-      { slug: "mismachim-hachutza", n: 11, title: "מסמכים, גיליונות ומצגות החוצה", note: "וורד, אקסל, פאוורפוינט וגוגל, ותוסף האקסל." },
+      { slug: "mismachim-hachutza", n: 11, title: "מסמכים, גיליונות ומצגות החוצה", note: "וורד, אקסל, פאוורפוינט וגוגל, ומה שלא נכלל בהשקה." },
       { slug: "shlosha-dafdafanim", n: 12, title: "שלושת הדפדפנים: המובנה, התוסף, והדפדפן בענן", note: "שלושה דברים שונים שקל להתבלבל ביניהם." },
       { slug: "mesimot-metuzmanot", n: 13, title: "משימות מתוזמנות וטריגרים מהמייל ומסלאק", note: "עבודה שקורית בלי שביקשתם." },
       { slug: "skillim-veplaginim", n: 14, title: "סקילים, פלאגינים וידע ארגוני", note: "מה שהחליף את ה־GPT־ים המותאמים, ולמי זה זמין.", interactive: true },
