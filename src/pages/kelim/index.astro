@@ -2,10 +2,20 @@
 import Base from '../../layouts/Base.astro';
 import TrackNav from '../../components/TrackNav.astro';
 import SignupBand from '../../components/SignupBand.astro';
+import ToolMatch from '../../components/ToolMatch.astro';
 import { getCollection } from 'astro:content';
+import { MADRICHIM } from '../../data/madrichim';
 
 const all = (await getCollection('kelim', (e) => e.data.published))
   .sort((a, b) => a.data.order - b.data.order);
+
+// שלושת המדריכים הגדולים: כמה שיעורים כבר כתובים בכל אחד
+const madrichEntries = await getCollection('madrich', (e) => e.data.published);
+const guides = MADRICHIM.map((m) => ({
+  m,
+  tool: all.find((e) => e.id === m.slug),
+  done: madrichEntries.filter((e) => e.data.guide === m.slug).length,
+}));
 
 const CATEGORIES = ["צ'אטים כלליים", 'כלים למשימה מסוימת', 'תמלול וסיכום ישיבות'] as const;
 const byCategory = CATEGORIES.map((c) => ({ name: c, items: all.filter((e) => e.data.category === c) }))
@@ -21,10 +31,14 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
   <TrackNav />
   <section class="wrap head head--photo">
     <div class="head__text">
-    <h1 class="head__title">מדריך הכלים</h1>
+    <h1 class="head__title">הכלים</h1>
     <p class="head__sub">
       המסלול מלמד עקרונות שלא מתיישנים. המדור הזה עושה את הדבר ההפוך:
-      הוא עונה על השאלה "אז באיזה כלי להשתמש בפועל" — וזו שאלה שהתשובה עליה משתנה כל רבעון.
+      הוא עונה על השאלה "אז באיזה כלי להשתמש בפועל, ואיך" — וזו שאלה שהתשובה עליה משתנה כל רבעון.
+    </p>
+    <p class="head__sub">
+      לשלושת הכלים הגדולים יש כאן <strong>מדריך מלא של חמישה עשר שיעורים</strong>, ולא רק דף השוואה.
+      לשאר הכלים יש כרטיס אחד שאומר מה הם עושים ולמי הם מתאימים.
     </p>
     <p class="head__note">
       לכן לכל כלי כאן יש <strong>תאריך בדיקה גלוי</strong>. עודכן לאחרונה: {updated}.
@@ -35,6 +49,31 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
     <div class="head__media rise">
       <img src="/photos/kelim.webp" width="1200" height="800" alt="שני עמיתים משרטטים תרשים של תיבות וחיצים על לוח מחיק" fetchpriority="high" decoding="async" />
     </div>
+  </section>
+
+  <section class="wrap guides reveal" aria-labelledby="guides-h">
+    <h2 id="guides-h" class="sec__title">שלושת המדריכים הגדולים</h2>
+    <p class="sec__sub">כל מדריך הוא חמישה עשר שיעורים על כלי אחד, בנויים כרצף ולא כרשימת טיפים.</p>
+    <ul class="gcards" data-stagger="80">
+      {guides.map((g) => (
+        <li class="gcard">
+          <a href={`/kelim/${g.m.slug}`} class="gcard__inner">
+            <span class="gcard__top">
+              <img class="logo" src={`/kelim-logos/${g.m.slug}.svg`} alt="" width="44" height="44" loading="lazy" />
+              <span class="gcard__names">
+                <span class="gcard__name">{g.m.title}</span>
+                <span class="gcard__spine">{g.m.spine}</span>
+              </span>
+            </span>
+            <span class="gcard__who">{g.m.who}</span>
+            <span class="gcard__bar" aria-hidden="true"><i style={`--w:${(g.done / g.m.items.length) * 100}%`}></i></span>
+            <span class="gcard__count">{g.done} מתוך {g.m.items.length} שיעורים כתובים</span>
+            <span class="gcard__cta">{g.done > 0 ? 'למדריך' : 'למפת המדריך'}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <ToolMatch />
   </section>
 
   <section class="wrap tbl-sec reveal" aria-labelledby="hashvaa">
@@ -128,6 +167,20 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
 
   .sec__title { font-size: var(--t-2xl); margin-block: 0 0.5rem; }
   .sec__sub { color: var(--ink-muted); margin-block-end: 1.2rem; font-size: var(--t-sm); }
+
+  .guides { padding-block: 2rem 1rem; }
+  .gcards { list-style: none; padding: 0; margin: 0 0 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+  .gcard__inner { display: flex; flex-direction: column; gap: 0.5rem; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); padding: 1.25rem 1.4rem; text-decoration: none; block-size: 100%; transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-fast) var(--ease-out); }
+  .gcard__inner:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); border-color: var(--accent); }
+  .gcard__top { display: flex; align-items: center; gap: 0.8rem; }
+  .gcard__names { display: flex; flex-direction: column; }
+  .gcard__name { font-family: var(--font-display); font-size: var(--t-lg); color: var(--ink-strong); line-height: 1.25; }
+  .gcard__spine { font-size: var(--t-xs); color: var(--ink-faint); }
+  .gcard__who { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.55; }
+  .gcard__bar { display: block; block-size: 4px; border-radius: 999px; background: var(--surface-sunk); overflow: hidden; margin-block-start: auto; }
+  .gcard__bar i { display: block; block-size: 100%; inline-size: var(--w, 0%); background: var(--accent); border-radius: 999px; }
+  .gcard__count { font-size: var(--t-xs); color: var(--ink-faint); }
+  .gcard__cta { font-size: var(--t-sm); color: var(--accent-deep); font-weight: 500; }
 
   .tbl-sec { padding-block: 2rem 1rem; }
   .tbl-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--r-card); background: var(--surface); }
