@@ -104,6 +104,24 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
 <script>
   import { initReveal } from '../scripts/reveal';
   function initLesson() {
+    document.querySelectorAll<HTMLTableElement>('.lsn__body table').forEach((t) => {
+      if (t.parentElement?.classList.contains('lsn__tableWrap')) return;
+      const w = document.createElement('div');
+      w.className = 'lsn__tableWrap';
+      t.parentNode!.insertBefore(w, t);
+      w.appendChild(t);
+      const hint = document.createElement('p');
+      hint.className = 'lsn__tableHint';
+      hint.textContent = 'אפשר לגלול את הטבלה הצידה';
+      w.insertAdjacentElement('afterend', hint);
+    });
+    const markScrollable = () => {
+      document.querySelectorAll<HTMLElement>('.lsn__tableWrap').forEach((w) => {
+        w.classList.toggle('is-scrollable', w.scrollWidth - w.clientWidth > 4);
+      });
+    };
+    markScrollable();
+    window.addEventListener('resize', markScrollable, { passive: true });
     // split the key quote into words so it can reveal one word at a time
     document.querySelectorAll<HTMLElement>('.lsn__body blockquote:not(.reveal)').forEach((q) => {
       q.querySelectorAll('p').forEach((p) => {
@@ -144,6 +162,57 @@ const demoEntry = demo ? await getEntry('efshar', demo) : undefined;
   .lsn__body li::marker { color: var(--accent-deep); }
   .lsn__body strong { font-weight: 700; }
   .lsn__body img { max-inline-size: 100%; block-size: auto; border-radius: var(--r-card); box-shadow: var(--shadow-1); }
+
+  /* ---- table ---- */
+  .lsn__body > table, .lsn__body > .lsn__tableWrap { max-inline-size: 100%; }
+  .lsn__tableWrap {
+    margin-block: 1.9rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    background: var(--surface);
+  }
+  .lsn__body table {
+    inline-size: 100%;
+    border-collapse: collapse;
+    margin-block: 1.9rem;
+    font-size: var(--t-sm);
+    line-height: 1.55;
+  }
+  .lsn__body th, .lsn__body td {
+    padding: 0.7rem 0.9rem;
+    text-align: start;
+    vertical-align: top;
+    border-block-end: 1px solid var(--rule);
+    unicode-bidi: isolate;
+  }
+  .lsn__body thead th {
+    background: var(--surface-sunk);
+    color: var(--ink-strong);
+    font-weight: 700;
+    font-size: var(--t-xs);
+    white-space: nowrap;
+    border-block-end: 2px solid var(--rule-strong);
+  }
+  .lsn__body tbody td:first-child {
+    font-weight: 600;
+    color: var(--ink-strong);
+    inline-size: 1%;
+    white-space: nowrap;
+  }
+  .lsn__body tbody tr:last-child td { border-block-end: 0; }
+  .lsn__body tbody tr:hover td { background: var(--surface-sunk); }
+  .lsn__body thead th:not(:first-child), .lsn__body tbody td:not(:first-child) { text-align: center; }
+  .lsn__body .lsn__tableWrap > table { margin-block: 0; min-inline-size: 40rem; }
+  .lsn__body .lsn__tableHint {
+    display: none;
+    margin-block: -1.35rem 1.9rem;
+    font-size: var(--t-xs);
+    color: var(--ink-faint);
+  }
+  .lsn__tableWrap.is-scrollable + .lsn__tableHint { display: block; }
+  @media (max-width: 560px) { .lsn__body th, .lsn__body td { padding: 0.6rem 0.7rem; } }
 
   /* the demo block: the only part that ages, so it is visually separate */
   .lsn__body .demo {
