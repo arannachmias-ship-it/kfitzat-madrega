@@ -96,6 +96,36 @@ const shinuyim = defineCollection({
 });
 
 /**
+ * המדריכים. שכבה חמישית שיושבת בתוך משטח הכלים: לכל אחד משלושת הכלים הגדולים
+ * יש מדריך של 15 שיעורים, ולא רק דף אחד.
+ *
+ * הכלל שקובע את המבנה: המסלול מלמד עקרונות שלא מתיישנים, והמדריכים מלמדים
+ * ממשק שמתיישן כל חודש. לכן `checked` הוא שדה חובה כאן — בניגוד למסלול —
+ * ולכל שיעור יש `lesson`, ה-slug של השיעור במסלול שמחזיק את העיקרון שמאחוריו.
+ * בלי הקישור הזה המדריכים הופכים את האתר לאתר טיפים.
+ *
+ * הקבצים יושבים ב-src/content/madrich/<כלי>/<שיעור>.mdx, ולכן ה-id הוא "chatgpt/proyektim".
+ * ה-slug של הכלי חייב להתאים ל-slug באוסף kelim וב-src/data/madrichim.ts.
+ */
+const madrich = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/madrich' }),
+  schema: z.object({
+    guide: z.enum(['chatgpt', 'gemini', 'claude']),
+    order: z.number(),            // 1-15, המיקום במדריך
+    title: z.string(),
+    kicker: z.string(),           // הכאב, בשורה
+    goal: z.string(),             // מה תדעו בסוף
+    readingTime: z.number(),
+    author: z.enum(['ארן נחמיאס', 'מתי מצוינים']),
+    interactive: z.boolean().default(false),
+    published: z.boolean().default(true),
+    date: z.date(),
+    checked: z.date(),            // מתי נבדק מול הדף הרשמי של הספק. מוצג בגלוי.
+    lesson: z.string().optional(),// slug של שיעור במסלול: העיקרון שמאחורי השיעור הזה
+  }),
+});
+
+/**
  * עדויות של משתתפים. התשתית קיימת, אבל האתר לא מציג דבר עד שיש עדות אמיתית.
  * שני שערים לפני פרסום, ושניהם חייבים להיות true: `consent` — אישור בכתב של האדם
  * לפרסום בשמו ובתפקידו; `published` — ההחלטה שלנו להעלות. ציטוט הוא גוף הקובץ,
@@ -114,4 +144,4 @@ const edut = defineCollection({
   }),
 });
 
-export const collections = { maslul, kelim, efshar, shinuyim, edut };
+export const collections = { maslul, kelim, efshar, shinuyim, edut, madrich };
