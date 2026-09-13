@@ -72,6 +72,30 @@ const efshar = defineCollection({
 });
 
 /**
+ * "מה השתנה" — הסריקה השבועית. שכבה רביעית שיושבת במשטח של "מה כבר אפשר",
+ * ובאוסף נפרד ממנו בכוונה: הכללים של `efshar` מדברים על דברים שבנינו בפועל,
+ * ועדכון שקראנו עליו אינו דבר שבנינו. לכל פריט כאן יש `source` — הדף הרשמי של הספק —
+ * ו־`checked`, התאריך שבו נבדק. מה שלא אומת מסומן `unverified` ונכתב בגלוי.
+ */
+const shinuyim = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/shinuyim' }),
+  schema: z.object({
+    date: z.date(),                 // מתי הספק פרסם את השינוי
+    title: z.string(),
+    tool: z.string(),               // שם הכלי או המערכת, לתצוגה
+    toolSlug: z.string().optional(),// slug במדריך הכלים, כשיש כזה
+    what: z.string(),               // מה השתנה, בשתי שורות
+    meaning: z.string(),            // מה זה אומר לכם: ההשלכה המעשית לארגון
+    source: z.string(),             // קישור לדף הרשמי של הספק
+    sourceName: z.string(),         // שם הדף, לתצוגה
+    checked: z.date(),              // תאריך הבדיקה שלנו
+    lesson: z.string().optional(),  // slug של שיעור אחד במסלול שמתחבר לזה
+    unverified: z.boolean().default(false), // לא הצלחנו לאמת מול הדף הרשמי
+    published: z.boolean().default(true),
+  }),
+});
+
+/**
  * עדויות של משתתפים. התשתית קיימת, אבל האתר לא מציג דבר עד שיש עדות אמיתית.
  * שני שערים לפני פרסום, ושניהם חייבים להיות true: `consent` — אישור בכתב של האדם
  * לפרסום בשמו ובתפקידו; `published` — ההחלטה שלנו להעלות. ציטוט הוא גוף הקובץ,
@@ -90,4 +114,4 @@ const edut = defineCollection({
   }),
 });
 
-export const collections = { maslul, kelim, efshar, edut };
+export const collections = { maslul, kelim, efshar, shinuyim, edut };
