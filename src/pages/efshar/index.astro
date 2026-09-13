@@ -11,6 +11,12 @@ const lead = all[0];
 const rest = all.slice(1);
 
 const newest = all.reduce((d, e) => (e.data.checked > d ? e.data.checked : d), new Date(0));
+
+// "מה השתנה" — הסריקה השבועית. אוסף נפרד, אותו משטח: שלושת האחרונים בראש העמוד.
+const shinuyim = (await getCollection('shinuyim', (e) => e.data.published))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+const shDate = (d: Date) => d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
 const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
 <Base
@@ -30,6 +36,25 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
       עודכן לאחרונה: {updated}.
     </p>
   </section>
+
+  {shinuyim.length > 0 && (
+    <section class="wrap ef-sh reveal" aria-labelledby="ef-sh-t">
+      <div class="ef-sh__head">
+        <h2 id="ef-sh-t" class="ef-sh__title">מה השתנה השבוע</h2>
+        <a class="ef-sh__all" href="/shinuyim">כל העדכונים</a>
+      </div>
+      <ul class="ef-sh__list">
+        {shinuyim.map((e) => (
+          <li>
+            <a class="ef-sh__item" href={`/shinuyim/${e.id}`}>
+              <span class="ef-sh__meta">{e.data.tool} &middot; {shDate(e.data.date)}</span>
+              <span class="ef-sh__name">{e.data.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 
   {lead && (
     <section class="wrap ef-lead reveal" aria-labelledby="ef-lead-t">
@@ -103,6 +128,22 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
   .ef-head__sub strong { color: var(--ink-strong); }
   .ef-head__note { font-size: var(--t-sm); color: var(--ink-faint); line-height: 1.75; margin: 0; }
   .ef-head__note strong { color: var(--ink-muted); }
+
+  .ef-sh { margin-block-end: clamp(2rem, 5vw, 3rem); }
+  .ef-sh__head { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: baseline; margin-block-end: 0.9rem; }
+  .ef-sh__title { font-family: var(--font-display); font-weight: 400; font-size: var(--t-xl); color: var(--ink-strong); margin: 0; }
+  .ef-sh__all { font-size: var(--t-sm); color: var(--ink-muted); }
+  .ef-sh__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+  .ef-sh__item {
+    display: flex; flex-direction: column; gap: 0.25rem;
+    padding: 0.85rem 1rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: var(--surface);
+    text-decoration: none; color: inherit;
+    transition: border-color var(--dur-fast) ease;
+  }
+  .ef-sh__item:hover { border-color: var(--ink-faint); }
+  .ef-sh__meta { font-size: var(--t-xs); color: var(--ink-faint); }
+  .ef-sh__name { font-size: var(--t-base); color: var(--ink-strong); line-height: 1.5; }
 
   .ef-lead { margin-block-end: clamp(2.5rem, 6vw, 3.5rem); }
   .ef-lead__link {
