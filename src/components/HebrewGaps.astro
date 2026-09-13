@@ -1,0 +1,186 @@
+---
+/**
+ * "בודק העברית" — שיעור 3 במדריך ג'מיני, והשיעור שאין לו מקבילה בשוק.
+ *
+ * הקורא בוחר משימה ומקבל תשובה משלושה סוגים: עובד, לא עובד, או לא אומת.
+ * כשלא עובד — יש עקיפה, וזה העיקר. שיעור שאומר רק מה שבור הוא שיעור
+ * שמייאש; שיעור שאומר מה עושים במקום הוא שיעור שמשתמשים בו.
+ *
+ * כל שורה כאן מגיעה מטבלאות התמיכה של גוגל, ולא מניסיון אישי. השורה
+ * האחרונה, ג'מיני בכרום, מסומנת כלא אומתה — כי היא לא אומתה.
+ *
+ * הערת כתיב: כל מחרוזת כאן בגרשיים כפולים, כי יש בה גרש בתוך מילה
+ * עברית. מחרוזת בגרשיים בודדים נשברת עליו בשקט.
+ */
+
+type Task = { id: string; text: string; state: string; verdict: string; work?: string };
+
+const TASKS: Task[] = [
+  {
+    id: "app",
+    text: "לשאול שאלה באפליקציית ג'מיני",
+    state: "ok",
+    verdict: "עובד. האפליקציה תומכת ביותר משבעים שפות, ועברית ביניהן. זה גם המקום שאליו רוב העקיפות כאן מובילות.",
+  },
+  {
+    id: "gmail-write",
+    text: "עזרה בכתיבה בתוך ג'ימייל או דוקס",
+    state: "no",
+    verdict: "לא עובד בעברית. זו היכולת שכולם מנסים ראשונה, והיא בדיוק אחת מהשתיים שגוגל מציינת כלא נתמכות.",
+    work: "במקום הכפתור שבתוך שדה הטקסט, פתחו את הפאנל הצדדי של ג'מיני — הוא כן תומך בעברית — או עבדו מהאפליקציה עצמה והעתיקו פנימה. אותה תוצאה, שתי קליקים יותר.",
+  },
+  {
+    id: "meet",
+    text: "תסכם לי בסוף פגישת Meet",
+    state: "no",
+    verdict: "לא עובד בעברית. זו היכולת השנייה מהשתיים, והיא זו שהכי כואבת בארגון ישראלי — כי ישיבות זה בדיוק מה שרוצים לסכם.",
+    work: "הקליטו ותמללו קודם, ואז בקשו מאפליקציית ג'מיני לסכם מהתמלול. יש <a href=\"/kelim/tamlul-yeshivot-ivrit\">עמוד כלי שלם על תמלול ישיבות בעברית</a>, וזה הפער שהוא סוגר.",
+  },
+  {
+    id: "notebook",
+    text: "לשאול שאלות על המסמכים שלי ב־Gemini Notebook",
+    state: "ok",
+    verdict: "עובד. הממשק והפלט תומכים ביותר משמונים שפות. זה החלק החזק ביותר של ג'מיני בעברית, ולא במקרה הוא גם ההדגמה שהכי טוב עוברת בחדר.",
+  },
+  {
+    id: "audio",
+    text: "לייצר סקירת שמע מהנהלים שלנו",
+    state: "part",
+    verdict: "עובד בעברית, אבל לא הכל. יש ארבעה פורמטים: צלילה לעומק עם שני דוברים, תקציר של פחות משתי דקות, ביקורת ודיון.",
+    work: "מה שלא עובד בעברית הוא בקרת האורך — היא באנגלית בלבד. כלומר תקבלו פודקאסט בעברית, אבל תשלטו באורך שלו רק דרך בחירת הפורמט, לא דרך בקשה.",
+  },
+  {
+    id: "video-cine",
+    text: "סקירת וידאו קולנועית",
+    state: "no",
+    verdict: "לא עובד בעברית. הפורמט הקולנועי הוא אנגלית בלבד, והוא גם זמין רק בתוכנית העליונה.",
+    work: "שני הפורמטים האחרים של סקירת וידאו — ההסברתי והקצר — כן תומכים בעברית. אם ההדגמה שלכם נועדה להרשים, תשתמשו בהם ולא תגלו את הפער על הבמה.",
+  },
+  {
+    id: "images",
+    text: "לייצר תמונה בתוך דוקס או בשקופיות",
+    state: "ok",
+    verdict: "עובד. יצירת תמונות מתוך המסמך ומתוך המצגת תומכת בעברית.",
+  },
+  {
+    id: "panels",
+    text: "הפאנל הצדדי בג'ימייל, דוקס, שיטס ודרייב",
+    state: "ok",
+    verdict: "עובד. זה גם מה שהופך אותו לפתרון של שתיים מהבעיות ברשימה הזאת, ולא רק לעוד כפתור.",
+  },
+  {
+    id: "chrome",
+    text: "ג'מיני בכרום בעברית",
+    state: "unknown",
+    verdict: "לא אומת. לא נמצאה רשימת שפות רשמית ליכולת הזאת, ולכן אין כאן תשובה.",
+    work: "הכלל שגוגל כותבת בעצמה אומר שיכולת שלא מופיעה ברשימה כתומכת בעברית היא אנגלית בלבד. אז ההנחה הזהירה היא שלא, אבל זו הנחה ולא ממצא. תבדקו לפני שאתם בונים על זה.",
+  },
+];
+---
+<div class="hg" data-hg>
+  <p class="hg__label">בחרו משימה ותראו מה קורה לה בעברית</p>
+
+  <div class="hg__grid">
+    {TASKS.map((t) => (
+      <button type="button" data-hg-go={t.id} aria-pressed="false">{t.text}</button>
+    ))}
+  </div>
+
+  <div class="hg__out" data-hg-out hidden></div>
+  <script type="application/json" data-hg-data set:html={JSON.stringify(TASKS)}></script>
+
+  <p class="hg__rule">
+    <strong>הכלל שגוגל כותבת בעצמה:</strong> יכולת שלא מופיעה ברשימה כתומכת בעברית היא אנגלית בלבד.
+    זה אומר שהתשובה על כל יכולת חדשה היא לבדוק ברשימה, ולא לנסות ולהתאכזב.
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const root = document.querySelector('[data-hg]');
+    if (!root || root.dataset.hgReady) return;
+    root.dataset.hgReady = '1';
+
+    const tasks = JSON.parse(root.querySelector('[data-hg-data]').textContent);
+    const out = root.querySelector('[data-hg-out]');
+    const btns = Array.prototype.slice.call(root.querySelectorAll('[data-hg-go]'));
+    const seen = {};
+
+    const HEAD = {
+      ok: 'עובד בעברית',
+      no: 'לא עובד בעברית',
+      part: 'עובד, עם הסתייגות אחת',
+      unknown: 'לא אומת',
+    };
+
+    function show(id) {
+      const t = tasks.filter(function (x) { return x.id === id; })[0];
+      if (!t) return;
+      seen[id] = true;
+      btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.hgGo === id)); });
+
+      const n = Object.keys(seen).length;
+      const work = t.work ? '<div class="hg__work"><p><strong>מה עושים במקום:</strong> ' + t.work + '</p></div>' : '';
+
+      out.hidden = false;
+      out.innerHTML =
+        '<div class="hg__card hg__card--' + t.state + '">' +
+        '<p class="hg__verdicthead">' + HEAD[t.state] + '</p>' +
+        '<p class="hg__task">' + t.text + '</p>' +
+        '<p class="hg__body">' + t.verdict + '</p>' +
+        '</div>' + work +
+        '<p class="hg__tally" data-tally="' + n + '">בדקתם ' + n + ' מתוך ' + tasks.length + '.</p>';
+    }
+
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () { show(b.dataset.hgGo); });
+    });
+  })();
+</script>
+
+<style>
+  .hg {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.65rem; margin-block: 2rem;
+  }
+  .hg__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1rem; }
+
+  .hg__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem; }
+  @media (max-width: 760px) { .hg__grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .hg__grid { grid-template-columns: 1fr; } }
+  .hg__grid button {
+    font: inherit; font-size: var(--t-xs); text-align: start; cursor: pointer;
+    line-height: 1.4; padding: 0.55rem 0.7rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: transparent; color: var(--ink-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .hg__grid button:hover { border-color: var(--rule-strong); color: var(--ink-strong); }
+  .hg__grid button[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500; }
+
+  .hg__out { margin-block-start: 1.2rem; }
+  .hg__out[hidden] { display: none; }
+  .hg :global(.hg__card) {
+    background: var(--surface-sunk); border-radius: var(--r-card);
+    padding: 1.1rem 1.3rem; border-inline-start: 3px solid var(--rule-strong);
+  }
+  .hg :global(.hg__card--ok) { border-inline-start-color: var(--state-ok); }
+  .hg :global(.hg__card--no) { border-inline-start-color: var(--state-bad); }
+  .hg :global(.hg__card--part) { border-inline-start-color: var(--state-warn); }
+  .hg :global(.hg__verdicthead) { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 0.15rem; }
+  .hg :global(.hg__task) { font-family: var(--font-display); font-size: var(--t-xl); color: var(--ink-strong); margin: 0 0 0.55rem; }
+  .hg :global(.hg__body) { font-size: var(--t-sm); line-height: 1.65; color: var(--ink-muted); margin: 0; max-inline-size: 72ch; }
+  .hg :global(.hg__work) {
+    margin-block-start: 0.8rem; background: var(--deep); border-radius: var(--r-card);
+    padding: 0.95rem 1.15rem; border-inline-start: 3px solid var(--accent);
+  }
+  .hg :global(.hg__work p) { font-size: var(--t-sm); line-height: 1.65; color: var(--ink-on-deep-mute); margin: 0; max-inline-size: 72ch; }
+  .hg :global(.hg__work strong) { color: var(--accent); }
+  .hg :global(.hg__work a) { color: var(--ink-on-deep); }
+  .hg :global(.hg__tally) { font-size: var(--t-xs); color: var(--ink-faint); margin: 0.7rem 0 0; }
+
+  .hg__rule {
+    margin: 1.2rem 0 0; padding-block-start: 1rem; border-block-start: 1px solid var(--rule);
+    font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; max-inline-size: 72ch;
+  }
+  .hg__rule strong { color: var(--ink-strong); }
+</style>
