@@ -1,0 +1,151 @@
+---
+/**
+ * "שיחה או Work" — כלי הכרעה.
+ *
+ * הכלל שהרכיב מלמד: Work אינו "ChatGPT חזק יותר". הוא מצב שמתאים למשימה
+ * עם כמה שלבים שמסתיימת בתוצר. משימה של שלב אחד תיקח בו יותר זמן ותחזור
+ * פחות טובה, וזה לא באג.
+ *
+ * הרכיב אומר תמיד מה קורה בשתי הטעויות — גם כשבוחרים שיחה למשימה שצריכה
+ * Work, וגם ההפך. תשובה שיש בה רק המלצה אחת היא תשובה שאי אפשר ללמוד ממנה.
+ */
+---
+<div class="wo" data-wo>
+  <p class="wo__label">כלי ההכרעה: איך יודעים לאן ללכת</p>
+
+  <form class="wo__form">
+    <fieldset>
+      <legend>כמה שלבים יש במשימה?</legend>
+      <label><input type="radio" name="steps" value="1" /><span>דבר אחד: לנסח, לסכם, לתרגם</span></label>
+      <label><input type="radio" name="steps" value="2" /><span>שניים או שלושה, ואני מוביל ביניהם</span></label>
+      <label><input type="radio" name="steps" value="3" /><span>הרבה, ואני לא רוצה להוביל</span></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>מה אתם צריכים לקבל בסוף?</legend>
+      <label><input type="radio" name="out" value="1" /><span>טקסט שאעתיק למקום אחר</span></label>
+      <label><input type="radio" name="out" value="3" /><span>קובץ גמור: מסמך, גיליון או מצגת</span></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>מאיפה מגיע המידע?</legend>
+      <label><input type="radio" name="src" value="1" /><span>ממה שאדביק בשיחה</span></label>
+      <label><input type="radio" name="src" value="3" /><span>מכמה מקומות: רשת, קבצים, מערכות</span></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>כמה זמן אתם מוכנים לחכות?</legend>
+      <label><input type="radio" name="wait" value="1" /><span>אני יושב מול המסך ומחכה</span></label>
+      <label><input type="radio" name="wait" value="3" /><span>אני הולך ואחזור אחר כך</span></label>
+    </fieldset>
+  </form>
+
+  <div class="wo__out" data-wo-out hidden></div>
+</div>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const root = document.querySelector('[data-wo]');
+    if (!root || root.dataset.woReady) return;
+    root.dataset.woReady = '1';
+
+    const form = root.querySelector('.wo__form');
+    const out = root.querySelector('[data-wo-out]');
+
+    function render() {
+      const d = new FormData(form);
+      const keys = ['steps', 'out', 'src', 'wait'];
+      const vals = keys.map(function (k) { return Number(d.get(k) || 0); });
+      const answered = vals.filter(Boolean).length;
+
+      if (answered < 4) {
+        out.hidden = false;
+        out.innerHTML = '<p class="wo__wait">נשארו ' + (4 - answered) + ' שאלות.</p>';
+        return;
+      }
+
+      const score = vals.reduce(function (a, b) { return a + b; }, 0); // טווח 4 עד 12
+      const work = score >= 8;
+      const edge = score >= 7 && score <= 8;
+
+      const reasons = [];
+      if (vals[0] === 3) reasons.push('המשימה מתפרקת להרבה שלבים');
+      if (vals[1] === 3) reasons.push('אתם צריכים קובץ ולא טקסט');
+      if (vals[2] === 3) reasons.push('המידע מגיע מכמה מקומות');
+      if (vals[3] === 3) reasons.push('אתם לא יושבים ומחכים');
+      const against = [];
+      if (vals[0] === 1) against.push('זה שלב אחד');
+      if (vals[1] === 1) against.push('מספיק לכם טקסט');
+      if (vals[2] === 1) against.push('המידע כבר בידיים שלכם');
+      if (vals[3] === 1) against.push('אתם מחכים מול המסך');
+
+      const head = work
+        ? '<p class="wo__label2">זה מקרה ל־</p><p class="wo__verdict">ChatGPT Work</p>'
+        : '<p class="wo__label2">אל תסבכו. מספיקה</p><p class="wo__verdict">שיחה רגילה</p>';
+
+      const why = work
+        ? '<p class="wo__why"><strong>למה:</strong> ' + reasons.join(', ') + '. זה בדיוק מה ש־Work בנוי אליו — הוא מתכנן, אוסף, ומחזיר תוצר.</p>'
+        : '<p class="wo__why"><strong>למה:</strong> ' + against.join(', ') + '. שיחה תיתן לכם את זה מהר יותר.</p>';
+
+      const mistake = work
+        ? '<p class="wo__mis"><strong>ואם בכל זאת תעשו את זה בשיחה:</strong> תקבלו תשובה סבירה, ואז תגלו שאתם מנהלים את כל השלבים ביד — מעתיקים בין הודעות, מזכירים מה כבר נאמר, ומרכיבים את הקובץ לבד בסוף. זה עובד; זה פשוט לוקח לכם את הזמן שרציתם לחסוך.</p>'
+        : '<p class="wo__mis"><strong>ואם בכל זאת תשלחו את זה ל־Work:</strong> זה ייקח הרבה יותר זמן, ותקבלו תוצר מלוטש למשימה שלא הצדיקה אותו. <strong>Work אינו גרסה חזקה יותר של השיחה</strong> — הוא מצב אחר, והוא בזבזני על משימות קטנות.</p>';
+
+      const edgeNote = edge
+        ? '<p class="wo__edge">התשובות שלכם יושבות ממש על הגבול. במקרה כזה התחילו בשיחה, ואם מצאתם את עצמכם בהודעה השלישית עדיין מסבירים הקשר — עברו ל־Work.</p>'
+        : '';
+
+      out.hidden = false;
+      out.innerHTML = '<div class="wo__card' + (work ? ' wo__card--work' : '') + '">' + head + why + '</div>' + mistake + edgeNote;
+    }
+
+    form.addEventListener('change', render);
+  })();
+</script>
+
+<style>
+  .wo {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.65rem; margin-block: 2rem;
+  }
+  .wo__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1rem; }
+
+  .wo__form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.1rem 1.5rem; }
+  @media (max-width: 680px) { .wo__form { grid-template-columns: 1fr; } }
+  .wo__form fieldset { border: 0; margin: 0; padding: 0; min-inline-size: 0; }
+  .wo__form legend { font-weight: 600; color: var(--ink-strong); font-size: var(--t-sm); margin-block-end: 0.45rem; padding: 0; }
+  .wo__form label {
+    display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
+    padding: 0.45rem 0.7rem; margin-block-end: 0.3rem;
+    border: 1px solid var(--rule); border-radius: var(--r-control);
+    font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.4;
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .wo__form label:hover { border-color: var(--rule-strong); color: var(--ink); }
+  .wo__form input { accent-color: var(--accent-deep); flex: none; }
+  .wo__form label:has(input:checked) { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500; }
+
+  .wo__out { margin-block-start: 1.3rem; }
+  .wo__out[hidden] { display: none; }
+  .wo :global(.wo__wait) { font-size: var(--t-sm); color: var(--ink-faint); margin: 0; }
+  .wo :global(.wo__card) {
+    background: var(--surface-sunk); border-radius: var(--r-card);
+    padding: 1.2rem 1.4rem; border-inline-start: 3px solid var(--rule-strong);
+  }
+  .wo :global(.wo__card--work) { background: var(--deep); border-inline-start-color: var(--accent); }
+  .wo :global(.wo__label2) { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 0.15rem; }
+  .wo :global(.wo__card--work .wo__label2) { color: var(--accent); }
+  .wo :global(.wo__verdict) { font-family: var(--font-display); font-size: var(--t-2xl); color: var(--ink-strong); margin: 0 0 0.6rem; }
+  .wo :global(.wo__card--work .wo__verdict) { color: var(--ink-on-deep); }
+  .wo :global(.wo__why) { font-size: var(--t-sm); line-height: 1.65; color: var(--ink-muted); margin: 0; max-inline-size: 64ch; }
+  .wo :global(.wo__card--work .wo__why) { color: var(--ink-on-deep-mute); }
+  .wo :global(.wo__why strong) { color: var(--ink-strong); }
+  .wo :global(.wo__card--work .wo__why strong) { color: var(--accent); }
+  .wo :global(.wo__mis), .wo :global(.wo__edge) {
+    margin-block-start: 0.9rem; padding: 0.85rem 1rem;
+    border: 1px solid var(--rule); border-radius: var(--r-card);
+    font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; max-inline-size: 70ch;
+  }
+  .wo :global(.wo__mis strong) { color: var(--ink-strong); }
+  .wo :global(.wo__edge) { border-inline-start: 3px solid var(--accent); color: var(--ink); }
+</style>
