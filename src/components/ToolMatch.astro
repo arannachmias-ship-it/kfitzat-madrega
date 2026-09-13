@@ -1,0 +1,205 @@
+---
+/**
+ * "באיזה מדריך להתחיל" — ארבע שאלות על הארגון, ובסוף מדריך אחד מומלץ.
+ *
+ * הכלל שקובע את הרכיב: הוא לא טוען שכלי אחד חכם יותר מאחר. אין לזה מקור
+ * רשמי — אף אחת משלוש החברות לא משווה את עצמה למתחרה בשם — ולכן ההמלצה
+ * נשענת על הסביבה שלכם ועל סוג העבודה, ולא על "מי יותר טוב".
+ *
+ * ובכוונה: כל תשובה אומרת גם מה הכלי המומלץ *לא* נותן, ומה היה הופך
+ * את ההמלצה. תשובה שיש בה רק זוכה היא תשובה שאי אפשר לסמוך עליה.
+ */
+---
+<section class="tmx" aria-labelledby="tmx-h">
+  <h2 id="tmx-h" class="tmx__title">באיזה מדריך להתחיל</h2>
+  <p class="tmx__sub">ארבע שאלות על הארגון שלכם. אין כאן שאלה על תקציב, כי בשלושתם יש גרסה חינמית שמספיקה כדי ללמוד.</p>
+
+  <form class="tmx__form" id="tmx-form">
+    <fieldset class="tmx__q">
+      <legend>1. איפה יושבת העבודה שלכם היום?</legend>
+      <div class="tmx__opts">
+        <label><input type="radio" name="env" value="google" /><span>Google Workspace — ג'ימייל, דרייב, דוקס</span></label>
+        <label><input type="radio" name="env" value="ms" /><span>Microsoft 365 — אאוטלוק, אקסל, שרפוינט</span></label>
+        <label><input type="radio" name="env" value="none" /><span>מעורב, או שאין משהו מסודר</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="tmx__q">
+      <legend>2. מה אתם רוצים שהכלי יעשה קודם כול?</legend>
+      <div class="tmx__opts">
+        <label><input type="radio" name="need" value="write" /><span>לנסח, לסכם ולנקות טקסט</span></label>
+        <label><input type="radio" name="need" value="files" /><span>לקרוא קבצים וגיליונות ולהוציא מהם נתונים</span></label>
+        <label><input type="radio" name="need" value="task" /><span>לקחת משימה שלמה ולהחזיר תוצר גמור</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="tmx__q">
+      <legend>3. מי הולך להשתמש בזה?</legend>
+      <div class="tmx__opts">
+        <label><input type="radio" name="who" value="solo" /><span>בעיקר אני</span></label>
+        <label><input type="radio" name="who" value="team" /><span>צוות של עד עשרים איש</span></label>
+        <label><input type="radio" name="who" value="org" /><span>ארגון שיש בו IT ויועצת משפטית</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="tmx__q">
+      <legend>4. מה יקבע את ההחלטה בסוף?</legend>
+      <div class="tmx__opts">
+        <label><input type="radio" name="top" value="price" /><span>מחיר — צריך לפרוס לאנשים רבים</span></label>
+        <label><input type="radio" name="top" value="hebrew" /><span>עברית — רוב העבודה שלנו בעברית</span></label>
+        <label><input type="radio" name="top" value="sec" /><span>אישור — האבטחה והמשפטית צריכות לומר כן</span></label>
+      </div>
+    </fieldset>
+  </form>
+
+  <div class="tmx__out" id="tmx-out" hidden></div>
+  <p class="tmx__foot">
+    שלושתם טובים. ההמלצה כאן היא על הכלי שיפגוש הכי מעט חיכוך אצלכם,
+    ולא על הכלי ה"חזק" — אין מקור רשמי שמשווה ביניהם, ואנחנו לא ממציאים אחד.
+  </p>
+</section>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const form = document.getElementById('tmx-form');
+    const out = document.getElementById('tmx-out');
+    if (!form || !out) return;
+
+    const GUIDES = {
+      chatgpt: {
+        name: 'ChatGPT',
+        href: '/kelim/chatgpt',
+        gain: 'המשטח הרחב ביותר: ניתוח קבצים, יצירת מסמכים ומצגות, דפדפן, ומשימות מתוזמנות — הכול במקום אחד.',
+        cost: 'הוא גם המשתנה ביותר. חמישה דברים מרכזיים נסגרו בו השנה, ולכן השיעור הראשון במדריך הוא מה השתנה ולא איך מתחילים.',
+      },
+      gemini: {
+        name: "ג'מיני",
+        href: '/kelim/gemini',
+        gain: "הוא כבר יושב בתוך הג'ימייל, הדרייב והדוקס שלכם, והוא היחיד שיכול לחפש בהם. יש לו גם דף מחירים ישראלי רשמי בשקלים.",
+        cost: 'יש לו פערי עברית ספציפיים, ודווקא בשני המקומות שתנסו ראשונים. השיעור השלישי במדריך מוקדש בדיוק לזה.',
+      },
+      claude: {
+        name: 'קלוד',
+        href: '/kelim/claude',
+        gain: 'הוא הכי חזק בעבודה שרצה לבד: משימה שמתפרקת לשלבים, ממשיכה בלי שתשבו מולה, וחוזרת עם תוצר.',
+        cost: 'הוא לא מייצר תמונות ולא וידאו, ויש בו פחות חיבורים מוכנים למערכות שכבר יש לכם.',
+      },
+    };
+
+    const W = {
+      env:  { google: { gemini: 3 },            ms:   { chatgpt: 2, claude: 1 }, none: { chatgpt: 2 } },
+      need: { write:  { gemini: 1, chatgpt: 1 }, files:{ chatgpt: 2, claude: 1 }, task: { claude: 3 } },
+      who:  { solo:   { chatgpt: 1, gemini: 1 }, team: { chatgpt: 1, gemini: 1 }, org:  { claude: 1, chatgpt: 1 } },
+      top:  { price:  { gemini: 3 },             hebrew:{ chatgpt: 2, claude: 1 }, sec: { claude: 2, chatgpt: 1 } },
+    };
+
+    // מה היה משנה את ההמלצה: הבחירה האחת שמזיזה הכי הרבה
+    const FLIP = {
+      google: "אם תעברו מ־Google Workspace למשהו אחר, ג'מיני מאבד את היתרון המרכזי שלו.",
+      ms: "אם העבודה שלכם תעבור לגוגל, ג'מיני יקפוץ קדימה — הוא היחיד שקורא את המייל והדרייב שלכם.",
+      none: 'ברגע שתתייצבו על גוגל או על מיקרוסופט, ההמלצה כנראה תשתנה.',
+      task: 'אם בעצם אתם רק רוצים לנסח ולסכם, אל תתחילו בעבודה שרצה לבד — היא דורשת יותר הכנה ממה שנדמה.',
+      price: 'שימו לב שהמחיר משנה רק בפריסה רחבה. לחמישה אנשים ההפרש בין השלושה זניח.',
+      sec: 'אם האבטחה היא החסם, שווה לקרוא קודם את שיעור הפרטיות בכל מדריך — שם ההבדל האמיתי, לא ביכולות.',
+      hebrew: 'עברית היא המקום שבו ההבדל בין השלושה הכי גדול, וגם הכי פחות מתועד רשמית.',
+    };
+
+    function render() {
+      const d = new FormData(form);
+      const picks = { env: d.get('env'), need: d.get('need'), who: d.get('who'), top: d.get('top') };
+      const answered = Object.values(picks).filter(Boolean).length;
+
+      if (answered < 4) {
+        out.hidden = false;
+        out.innerHTML =
+          '<p class="tmx__wait">ענו על ' + (4 - answered) + ' שאלות נוספות כדי לקבל המלצה.</p>';
+        return;
+      }
+
+      const score = { chatgpt: 0, gemini: 0, claude: 0 };
+      Object.keys(picks).forEach(function (k) {
+        const add = W[k][picks[k]] || {};
+        Object.keys(add).forEach(function (g) { score[g] += add[g]; });
+      });
+
+      const ranked = Object.keys(score).sort(function (a, b) { return score[b] - score[a]; });
+      const win = ranked[0];
+      const second = ranked[1];
+      const tie = score[win] === score[second];
+
+      const flipKey = picks.top === 'price' || picks.top === 'sec' || picks.top === 'hebrew' ? picks.top
+        : picks.need === 'task' ? 'task' : picks.env;
+      const flip = FLIP[flipKey] || '';
+
+      const g = GUIDES[win];
+      const s = GUIDES[second];
+
+      out.hidden = false;
+      out.innerHTML =
+        '<div class="tmx__card">' +
+          '<p class="tmx__label">' + (tie ? 'שניים יצאו שווים. התחילו כאן' : 'התחילו כאן') + '</p>' +
+          '<p class="tmx__win">' + g.name + '</p>' +
+          '<p class="tmx__why">' + g.gain + '</p>' +
+          '<p class="tmx__cost"><strong>ומה הוא לא נותן לכם:</strong> ' + g.cost + '</p>' +
+          '<a class="tmx__go" href="' + g.href + '">למדריך הגדול ל' + g.name + '</a>' +
+        '</div>' +
+        '<div class="tmx__second">' +
+          '<p><strong>הבא בתור: ' + s.name + '.</strong> ' + s.gain + '</p>' +
+          (flip ? '<p class="tmx__flip">' + flip + '</p>' : '') +
+          (tie ? '<p class="tmx__flip">שתי התשובות קיבלו ניקוד זהה, כלומר במקרה שלכם באמת אין הכרעה ברורה. התחילו במה שכבר פתוח אצלכם.</p>' : '') +
+        '</div>';
+    }
+
+    form.addEventListener('change', render);
+  })();
+</script>
+
+<style>
+  .tmx {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card);
+    padding: 1.6rem 1.75rem; margin-block: 1.5rem;
+  }
+  .tmx__title { font-size: var(--t-2xl); margin-block: 0 0.4rem; }
+  .tmx__sub { color: var(--ink-muted); font-size: var(--t-sm); margin-block-end: 1.3rem; max-inline-size: 64ch; }
+
+  .tmx__form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem 1.6rem; }
+  @media (max-width: 720px) { .tmx__form { grid-template-columns: 1fr; } }
+  .tmx__q { border: 0; margin: 0; padding: 0; min-inline-size: 0; }
+  .tmx__q legend { font-weight: 600; color: var(--ink-strong); font-size: var(--t-sm); margin-block-end: 0.5rem; padding: 0; }
+  .tmx__opts { display: flex; flex-direction: column; gap: 0.35rem; }
+  .tmx__opts label {
+    display: flex; align-items: center; gap: 0.55rem; cursor: pointer;
+    padding: 0.5rem 0.7rem; border: 1px solid var(--rule); border-radius: var(--r-control);
+    font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.4;
+    transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+  .tmx__opts label:hover { border-color: var(--rule-strong); color: var(--ink); }
+  .tmx__opts input { accent-color: var(--accent-deep); flex: none; }
+  /* מצב נבחר: רקע ציטרון וטקסט כהה — עובד גם במצב כהה, שבו שני צבעי הטקסט בהירים */
+  .tmx__opts label:has(input:checked) {
+    background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500;
+  }
+
+  .tmx__out { margin-block-start: 1.4rem; }
+  .tmx__wait { font-size: var(--t-sm); color: var(--ink-faint); margin: 0; }
+  .tmx :global(.tmx__card) {
+    background: var(--deep); color: var(--ink-on-deep);
+    border-radius: var(--r-card); padding: 1.4rem 1.6rem;
+  }
+  .tmx :global(.tmx__label) { font-size: var(--t-xs); color: var(--accent); margin: 0 0 0.2rem; }
+  .tmx :global(.tmx__win) { font-family: var(--font-display); font-size: var(--t-2xl); margin: 0 0 0.5rem; color: var(--ink-on-deep); }
+  .tmx :global(.tmx__why) { font-size: var(--t-sm); color: var(--ink-on-deep-mute); line-height: 1.65; margin: 0 0 0.7rem; max-inline-size: 62ch; }
+  .tmx :global(.tmx__cost) { font-size: var(--t-sm); color: var(--ink-on-deep-mute); line-height: 1.65; margin: 0 0 1rem; max-inline-size: 62ch; }
+  .tmx :global(.tmx__cost strong) { color: var(--accent); font-weight: 600; }
+  .tmx :global(.tmx__go) {
+    display: inline-block; background: var(--accent); color: var(--accent-ink);
+    padding: 0.55rem 1.1rem; border-radius: var(--r-control); text-decoration: none; font-weight: 600; font-size: var(--t-sm);
+  }
+  .tmx :global(.tmx__second) { margin-block-start: 0.9rem; }
+  .tmx :global(.tmx__second p) { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65; margin: 0 0 0.4rem; max-inline-size: 66ch; }
+  .tmx :global(.tmx__second strong) { color: var(--ink-strong); }
+  .tmx :global(.tmx__flip) { color: var(--ink-faint); }
+
+  .tmx__foot { margin-block-start: 1.2rem; font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.6; max-inline-size: 70ch; }
+  .tmx__out[hidden] { display: none; }
+</style>
