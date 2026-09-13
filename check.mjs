@@ -54,7 +54,8 @@ console.log('\n== /kelim ==');
 await go('/kelim');
 ok((await page.locator('.gcard').count()) === 3, 'שלושה כרטיסי מדריך');
 ok((await page.locator('.gcard__count').first().innerText()).includes('15 מתוך 15'), 'הכרטיס הראשון מראה 15 מתוך 15');
-ok((await page.locator('.gcard__count').nth(1).innerText()).includes('10 מתוך 15'), 'הכרטיס השני מראה 10 מתוך 15');
+ok((await page.locator('.gcard__count').nth(1).innerText()).includes('15 מתוך 15'), 'הכרטיס השני מראה 15 מתוך 15');
+ok((await page.locator('.gcard__count').nth(2).innerText()).includes('15 מתוך 15'), 'הכרטיס השלישי מראה 15 מתוך 15');
 ok(await page.locator('#tmx-form').isVisible(), 'ToolMatch מוצג');
 
 // תשובה חלקית לא אמורה להכריע
@@ -167,7 +168,7 @@ ok(t.includes('ממש על הגבול'), 'ניקוד 7: מזוהה כמקרה ג
 
 // ---------- 6. RTL, מצב כהה, ונייד ----------
 console.log('\n== RTL, כהה ונייד ==');
-const PAGES = ['/kelim', '/kelim/chatgpt', '/kelim/gemini', '/kelim/chatgpt/ma-hishtana-2026', '/kelim/chatgpt/bloki-ktiva', '/kelim/chatgpt/chatgpt-work', '/kelim/chatgpt/skillim-veplaginim', '/kelim/chatgpt/pratiyut', '/kelim/gemini/ivrit', '/kelim/gemini/notebook'];
+const PAGES = ['/kelim', '/kelim/chatgpt', '/kelim/gemini', '/kelim/claude', '/kelim/claude/artifacts', '/kelim/claude/cowork', '/kelim/claude/pratiyut-umimshal', '/kelim/chatgpt/ma-hishtana-2026', '/kelim/chatgpt/bloki-ktiva', '/kelim/chatgpt/chatgpt-work', '/kelim/chatgpt/skillim-veplaginim', '/kelim/chatgpt/pratiyut', '/kelim/gemini/ivrit', '/kelim/gemini/notebook'];
 for (const p of PAGES) {
   await go(p);
   const dir = await page.evaluate(() => getComputedStyle(document.documentElement).direction);
@@ -201,14 +202,23 @@ ok((await page.locator('.lsn__navItem').count()) === 1, 'שיעור חמישה �
 await go('/kelim/gemini/shlosha-mutzarim');
 ok((await page.locator('.lsn__navItem').count()) === 1, 'ג׳מיני שיעור ראשון: רק הבא');
 await go('/kelim/gemini/betoch-workspace');
-ok((await page.locator('.lsn__navItem').count()) === 1, 'ג׳מיני שיעור עשירי, האחרון שנכתב: רק הקודם');
+ok((await page.locator('.lsn__navItem').count()) === 2, 'ג׳מיני שיעור עשירי: קודם והבא');
+await go('/kelim/gemini/shmirat-peilut');
+ok((await page.locator('.lsn__navItem').count()) === 1, 'ג׳מיני שיעור חמישה עשר: רק הקודם');
+await go('/kelim/claude/ma-hu-tov-bo');
+ok((await page.locator('.lsn__navItem').count()) === 1, 'קלוד שיעור ראשון: רק הבא');
+await go('/kelim/claude/pratiyut-umimshal');
+ok((await page.locator('.lsn__navItem').count()) === 1, 'קלוד שיעור חמישה עשר: רק הקודם');
 await go('/kelim/chatgpt/proyektim');
 ok((await page.locator('.lsn__navItem').count()) === 2, 'שיעור אמצעי: קודם והבא');
 // כל הקישורים הפנימיים בשיעורים חייבים להוביל לעמוד קיים
 const links = new Set();
 const CHATGPT = ['ma-hishtana-2026','hameshbonot','bchirat-model','horaot-vezikaron','proyektim','bloki-ktiva','nituach-netunim','tmunot-vekol','mechkar-amok','chatgpt-work','mismachim-hachutza','shlosha-dafdafanim','mesimot-metuzmanot','skillim-veplaginim','pratiyut'];
-const GEMINI = ['shlosha-mutzarim','mechirim-bashkalim','ivrit','bchirat-model-gemini','canvas','gems','mechkar-amok-gemini','notebook','skirot-shema','betoch-workspace'];
-const ALL_LESSONS = CHATGPT.map((x) => '/kelim/chatgpt/' + x).concat(GEMINI.map((x) => '/kelim/gemini/' + x));
+const GEMINI = ['shlosha-mutzarim','mechirim-bashkalim','ivrit','bchirat-model-gemini','canvas','gems','mechkar-amok-gemini','notebook','skirot-shema','betoch-workspace','tmunot-vevideo','peulot-metuzmanot','bechrome-vebashulchan','aplikatziot-mechubarot','shmirat-peilut'];
+const CLAUDE = ['ma-hu-tov-bo','hameshbonot-claude','model-umaamatz','kvatzim','proyektim-claude','zikaron','chipus-vemechkar','artifacts','skillim','chiburim','plaginim','cowork','mesimot-metuzmanot-claude','bechrome-ubeoffice','pratiyut-umimshal'];
+const ALL_LESSONS = CHATGPT.map((x) => '/kelim/chatgpt/' + x)
+  .concat(GEMINI.map((x) => '/kelim/gemini/' + x))
+  .concat(CLAUDE.map((x) => '/kelim/claude/' + x));
 for (const p of ALL_LESSONS) {
   await go(p);
   for (const h of await page.locator('.lsn__body a').evaluateAll((as) => as.map((a) => a.getAttribute('href')))) {
@@ -227,7 +237,7 @@ await go('/kelim/gemini');
 const gAll = await page.locator('.mm__item').count();
 const gSoon = await page.locator('.mm__item--soon').count();
 ok(gAll === 15, `גמיני: 15 פריטים במפה (נמצאו ${gAll})`);
-ok(gSoon === 5, `גמיני: 5 מסומנים בקרוב (נמצאו ${gSoon})`);
+ok(gSoon === 0, `גמיני: אין בקרוב (נמצאו ${gSoon})`);
 const gLinks = await page.locator('.mm__item a.mm__row').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
 for (const h of gLinks) {
   const r = await page.request.get(BASE + h);
@@ -336,6 +346,97 @@ await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'd
 await page.waitForTimeout(120);
 const ptSel = await page.locator('[data-pt-go][aria-selected="true"]').evaluate((el) => { const s = getComputedStyle(el); return { bg: s.backgroundColor, fg: s.color }; });
 ok(ptSel.bg !== ptSel.fg, `PrivacyTrace כהה: הנבחר קריא (רקע ${ptSel.bg}, טקסט ${ptSel.fg})`);
+
+
+// ---------- 14. מפת קלוד ----------
+console.log('\n== מפת קלוד ==');
+await go('/kelim/claude');
+ok((await page.locator('.mm__item').count()) === 15, 'קלוד: 15 פריטים במפה');
+ok((await page.locator('.mm__item--soon').count()) === 0, 'קלוד: אין בקרוב');
+for (const h of await page.locator('.mm__item a.mm__row').evaluateAll((as) => as.map((a) => a.getAttribute('href')))) {
+  const r = await page.request.get(BASE + h);
+  ok(r.status() === 200, `מפת קלוד: ${h} חי`);
+}
+
+// ---------- 15. ArtifactReach ----------
+console.log('\n== ArtifactReach ==');
+await go('/kelim/claude/artifacts');
+ok((await page.locator('[data-ar-acc]').count()) === 3, 'ArtifactReach: שלושה סוגי חשבון');
+ok((await page.locator('[data-ar-tgt]').count()) === 3, 'ArtifactReach: שלושה נמענים');
+for (const t of ['colleague', 'client', 'public']) {
+  await page.click('[data-ar-acc="personal"]');
+  await page.click(`[data-ar-tgt="${t}"]`);
+  await page.waitForTimeout(80);
+  ok((await page.locator('.ar__card').getAttribute('data-tally')) === '1', `ArtifactReach: פרטי אל ${t} נפתח`);
+}
+for (const a of ['team', 'org']) {
+  await page.click(`[data-ar-acc="${a}"]`);
+  await page.click('[data-ar-tgt="colleague"]');
+  await page.waitForTimeout(80);
+  ok((await page.locator('.ar__card').getAttribute('data-tally')) === '1', `ArtifactReach: ${a} אל עמית נפתח`);
+  for (const t of ['client', 'public']) {
+    await page.click(`[data-ar-tgt="${t}"]`);
+    await page.waitForTimeout(80);
+    ok((await page.locator('.ar__card').getAttribute('data-tally')) === '0', `ArtifactReach: ${a} אל ${t} נחסם`);
+  }
+}
+ok((await page.locator('.ar__sting').innerText()).length > 20, 'ArtifactReach: תמיד יש שורת אזהרה');
+
+// ---------- 16. CoworkCheck ----------
+console.log('\n== CoworkCheck ==');
+await go('/kelim/claude/cowork');
+ok((await page.locator('[data-cw-plan]').count()) === 5, 'CoworkCheck: חמש תוכניות');
+ok((await page.locator('.cw__row').count()) === 5, 'CoworkCheck: חמש יכולות');
+const cwExpect = { free: '0', pro: '4', max: '4', team: '4', org: '3' };
+for (const [plan, want] of Object.entries(cwExpect)) {
+  await page.click(`[data-cw-plan="${plan}"]`);
+  await page.waitForTimeout(80);
+  const got = await page.locator('.cw__verdict').getAttribute('data-tally');
+  ok(got === want, `CoworkCheck: ${plan} = ${want} יכולות (התקבל ${got})`);
+}
+for (const plan of ['team', 'org']) {
+  await page.click(`[data-cw-plan="${plan}"]`);
+  await page.waitForTimeout(80);
+  const rowClass = await page.locator('.cw__row').nth(2).getAttribute('class');
+  ok(rowClass.includes('cw__row--no'), `CoworkCheck: ${plan} — שליטה במחשב מסומנת כאין`);
+}
+await page.click('[data-cw-plan="pro"]');
+await page.waitForTimeout(80);
+ok((await page.locator('.cw__row').nth(2).getAttribute('class')).includes('cw__row--beta'), 'CoworkCheck: Pro — שליטה במחשב מסומנת ביתא');
+ok((await page.locator('.cw__row').nth(4).getAttribute('class')).includes('cw__row--no'), 'CoworkCheck: Pro — אין הפצת סקילים לארגון');
+
+// ---------- 17. PrivacyTrace בשלושת המדריכים ----------
+console.log('\n== PrivacyTrace בשלושתם ==');
+for (const p of ['/kelim/chatgpt/pratiyut', '/kelim/gemini/shmirat-peilut', '/kelim/claude/pratiyut-umimshal']) {
+  await go(p);
+  ok((await page.locator('[data-pt-go]').count()) === 5, `${p}: חמש תחנות`);
+  const names = [];
+  for (let i = 0; i < 5; i++) {
+    await page.click(`[data-pt-go="${i}"]`);
+    await page.waitForTimeout(60);
+    names.push(await page.locator('.pt__q').innerText());
+    ok((await page.locator('.pt__col--org .pt__body').innerText()).trim().length > 0, `${p}: תחנה ${i + 1} עם טור ארגוני`);
+  }
+  ok(new Set(names).size === 5, `${p}: חמש תחנות שונות זו מזו`);
+}
+await go('/kelim/gemini/shmirat-peilut');
+const gOrgName = await page.locator('.pt__col--org .pt__colname').innerText();
+await go('/kelim/claude/pratiyut-umimshal');
+const cOrgName = await page.locator('.pt__col--org .pt__colname').innerText();
+ok(gOrgName !== cOrgName, `PrivacyTrace: שם הטור הארגוני מותאם לכלי (${gOrgName} מול ${cOrgName})`);
+
+// ---------- 18. מצב כהה ברכיבי קלוד ----------
+console.log('\n== מצב כהה ברכיבי קלוד ==');
+await go('/kelim/claude/cowork');
+await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
+await page.waitForTimeout(100);
+const cwSel = await page.locator('[data-cw-plan][aria-pressed="true"]').evaluate((el) => { const s = getComputedStyle(el); return { bg: s.backgroundColor, fg: s.color }; });
+ok(cwSel.bg !== cwSel.fg, `CoworkCheck כהה: הנבחר קריא (רקע ${cwSel.bg}, טקסט ${cwSel.fg})`);
+await go('/kelim/claude/artifacts');
+await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
+await page.waitForTimeout(100);
+const arSel = await page.locator('[data-ar-acc][aria-pressed="true"]').evaluate((el) => { const s = getComputedStyle(el); return { bg: s.backgroundColor, fg: s.color }; });
+ok(arSel.bg !== arSel.fg, `ArtifactReach כהה: הנבחר קריא (רקע ${arSel.bg}, טקסט ${arSel.fg})`);
 
 console.log('\n== שגיאות ריצה ==');
 ok(errs.length === 0, errs.length ? 'שגיאות: ' + errs.join(' | ') : 'אין שגיאות ריצה בדף');
