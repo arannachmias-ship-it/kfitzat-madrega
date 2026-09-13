@@ -1,0 +1,123 @@
+---
+import Base from '../../layouts/Base.astro';
+import TrackNav from '../../components/TrackNav.astro';
+import SignupBand from '../../components/SignupBand.astro';
+import { getCollection, render } from 'astro:content';
+import { STAGES } from '../../data/track';
+
+export async function getStaticPaths() {
+  const all = await getCollection('shinuyim', (e) => e.data.published);
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+
+const fmt = (x: Date) => x.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const lessons = STAGES.flatMap((s) => s.items);
+const lesson = d.lesson ? lessons.find((l) => l.slug === d.lesson) : undefined;
+---
+<Base title={`${d.title} · מה השתנה · Nexadapt`} description={d.what}>
+  <TrackNav />
+
+  <article class="wrap sh">
+    <p class="sh__back"><a href="/shinuyim">מה השתנה</a></p>
+
+    <header class="sh__head">
+      <p class="sh__meta">
+        <span class="sh__tool">{d.tool}</span>
+        <span class="sh__sep" aria-hidden="true">&middot;</span>
+        <span>פורסם {fmt(d.date)}</span>
+      </p>
+      <h1 class="sh__title">{d.title}</h1>
+      {d.unverified && <p class="sh__flag">לא אומת מול הדף הרשמי של הספק</p>}
+    </header>
+
+    <section class="sh__block" aria-labelledby="sh-what">
+      <h2 id="sh-what" class="sh__h2">מה השתנה</h2>
+      <p class="sh__p">{d.what}</p>
+    </section>
+
+    <section class="sh__block sh__block--mean" aria-labelledby="sh-mean">
+      <h2 id="sh-mean" class="sh__h2">מה זה אומר לכם</h2>
+      <p class="sh__p">{d.meaning}</p>
+    </section>
+
+    <div class="sh__body">
+      <Content />
+    </div>
+
+    <section class="sh__block" aria-labelledby="sh-src">
+      <h2 id="sh-src" class="sh__h2">מקור ותאריך בדיקה</h2>
+      <p class="sh__p sh__src">
+        <a href={d.source} rel="nofollow noopener" target="_blank">{d.sourceName}</a>
+        <span class="sh__checked">נבדק אצלנו {fmt(d.checked)}</span>
+      </p>
+    </section>
+
+    {lesson && (
+      <aside class="sh__lesson">
+        <p class="sh__lesson-eyebrow">השיעור שמתחבר לזה</p>
+        <a class="sh__lesson-link" href={`/maslul/${lesson.slug}`}>{lesson.n} &middot; {lesson.title}</a>
+        <p class="sh__lesson-note">{lesson.note}</p>
+      </aside>
+    )}
+  </article>
+
+  <SignupBand />
+</Base>
+
+<style>
+  .sh { max-inline-size: 44rem; padding-block: clamp(1.5rem, 4vw, 2.5rem) clamp(2.5rem, 6vw, 4rem); }
+  .sh__back { margin: 0 0 1.5rem; font-size: var(--t-sm); }
+  .sh__back a { color: var(--ink-muted); }
+
+  .sh__head { margin-block-end: clamp(1.5rem, 4vw, 2.25rem); }
+  .sh__meta { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 0.75rem; font-size: var(--t-xs); color: var(--ink-faint); }
+  .sh__tool { color: var(--ink-strong); font-weight: 500; }
+  .sh__sep { color: var(--ink-faint); }
+  .sh__title {
+    font-family: var(--font-display); font-weight: 400; line-height: 1.12;
+    font-size: clamp(1.9rem, 5.5vw, 3rem); color: var(--ink-strong); margin: 0;
+  }
+  .sh__flag {
+    display: inline-block; margin: 0.9rem 0 0; padding: 0.2rem 0.6rem;
+    font-size: var(--t-xs); color: var(--ink-strong);
+    border: 1px solid var(--rule); border-radius: var(--r-control);
+  }
+
+  .sh__block { margin-block-end: clamp(1.25rem, 3vw, 1.75rem); }
+  .sh__h2 {
+    font-family: var(--font-display); font-weight: 400; font-size: var(--t-lg);
+    color: var(--ink-strong); margin: 0 0 0.5rem;
+  }
+  .sh__p { margin: 0; font-size: var(--t-base); line-height: 1.85; color: var(--ink-muted); }
+  .sh__block--mean {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-inline-start: 3px solid var(--accent);
+    border-radius: var(--r-card); padding: clamp(1.1rem, 3vw, 1.5rem);
+  }
+  .sh__block--mean .sh__p { color: var(--ink-strong); }
+
+  .sh__body { margin-block-end: clamp(1.25rem, 3vw, 1.75rem); font-size: var(--t-base); line-height: 1.85; color: var(--ink-muted); }
+  .sh__body :global(p) { margin: 0 0 1rem; }
+  .sh__body :global(strong) { color: var(--ink-strong); }
+
+  .sh__src { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: baseline; word-break: break-word; }
+  .sh__checked { font-size: var(--t-xs); color: var(--ink-faint); }
+
+  .sh__lesson {
+    margin-block-start: clamp(1.75rem, 4vw, 2.5rem);
+    padding: clamp(1.1rem, 3vw, 1.5rem);
+    border-radius: var(--r-card); background: var(--deep); color: var(--ink-on-deep);
+  }
+  .sh__lesson-eyebrow { margin: 0 0 0.4rem; font-size: var(--t-xs); color: var(--accent); }
+  .sh__lesson-link {
+    font-family: var(--font-display); font-size: var(--t-lg); line-height: 1.3;
+    color: var(--ink-on-deep); text-decoration: none;
+  }
+  .sh__lesson-link:hover { text-decoration: underline; }
+  .sh__lesson-note { margin: 0.45rem 0 0; font-size: var(--t-sm); line-height: 1.7; color: var(--ink-on-deep-mute); }
+</style>
