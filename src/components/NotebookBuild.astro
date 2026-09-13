@@ -1,0 +1,166 @@
+---
+/**
+ * "מה נגמר ראשון" — שיעור 8 במדריך ג'מיני.
+ *
+ * הקורא בוחר תוכנית ורואה מיד אילו מארבעה תרחישים ארגוניים אמיתיים
+ * נכנסים במכסה ואילו נחסמים. הנקודה אינה טבלת המספרים — היא שבכל
+ * תוכנית יש מכסה אחרת שנגמרת ראשונה, וזה מה שקובע מה לקנות.
+ *
+ * המספרים מהעמוד הרשמי של גוגל, שמסומן שם במפורש כנתון לשינוי.
+ * לכן הרכיב אומר את זה בעצמו, במקום להציג את המספרים כעובדת עולם.
+ */
+
+type Plan = { id: string; name: string; notebooks: number; sources: number; questions: number; audio: number; video: number };
+
+const PLANS: Plan[] = [
+  { id: 'free',  name: 'חינם',      notebooks: 100, sources: 50,  questions: 50,   audio: 3,   video: 3 },
+  { id: 'plus',  name: 'Plus',      notebooks: 200, sources: 100, questions: 200,  audio: 6,   video: 6 },
+  { id: 'pro',   name: 'Pro',       notebooks: 500, sources: 300, questions: 500,  audio: 20,  video: 20 },
+  { id: 'u20',   name: 'Ultra 20TB', notebooks: 500, sources: 500, questions: 2500, audio: 100, video: 100 },
+  { id: 'u30',   name: 'Ultra 30TB', notebooks: 500, sources: 600, questions: 5000, audio: 200, video: 200 },
+];
+
+type Scenario = { id: string; text: string; field: 'notebooks' | 'sources' | 'questions' | 'audio'; need: number; unit: string; fix: string };
+
+const SCENARIOS: Scenario[] = [
+  {
+    id: 'perproc', text: 'מחברת נפרדת לכל נוהל, ויש לנו ארבעים נהלים',
+    field: 'notebooks', need: 40, unit: 'מחברות',
+    fix: 'מספר המחברות הוא המכסה הנדיבה ביותר, והוא כמעט אף פעם לא זה שנגמר. אל תתכננו סביבו.',
+  },
+  {
+    id: 'alldocs', text: 'מחברת אחת עם כל מאה ושמונים המסמכים של המחלקה',
+    field: 'sources', need: 180, unit: 'מקורות במחברת',
+    fix: 'אם המכסה חוסמת, פצלו לפי נושא במקום לפי מחלקה. מחברת ממוקדת גם מחזירה תשובות טובות יותר, אז זו לא רק עקיפה.',
+  },
+  {
+    id: 'team', text: 'צוות של שנים עשר, כל אחד שואל עשר שאלות ביום',
+    field: 'questions', need: 120, unit: 'שאלות ביום',
+    fix: 'זה המספר שמפיל ארגונים. שימו לב שהוא יומי ולא חודשי, ושהוא נמדד על החשבון — כלומר חשבון משותף לצוות שלם נחסם הרבה לפני שחשבון לאדם נחסם.',
+  },
+  {
+    id: 'podcast', text: 'סקירת שמע לכל נוהל, שמונה ביום',
+    field: 'audio', need: 8, unit: 'סקירות שמע ביום',
+    fix: 'זו המכסה שהכי קל לשרוף בלי לשים לב, כי כל ניסיון כושל נספר. תכננו את הנוהל לפני שאתם מפעילים, לא תוך כדי.',
+  },
+];
+---
+<div class="nb" data-nb>
+  <p class="nb__label">בחרו תוכנית, ותראו מה נגמר ראשון</p>
+
+  <div class="nb__plans">
+    {PLANS.map((p, i) => (
+      <button type="button" data-nb-plan={p.id} aria-pressed={i === 0 ? 'true' : 'false'}>{p.name}</button>
+    ))}
+  </div>
+
+  <div class="nb__out" data-nb-out></div>
+
+  <script type="application/json" data-nb-plans set:html={JSON.stringify(PLANS)}></script>
+  <script type="application/json" data-nb-scen set:html={JSON.stringify(SCENARIOS)}></script>
+
+  <p class="nb__fine">
+    המספרים מהעמוד הרשמי של גוגל, והעמוד הזה מסומן שם במפורש כנתון לשינוי.
+    כשאתם מתכננים פריסה לארגון, תבדקו אותו באותו יום ולא תסתמכו על מה שכתוב כאן לפני חודשיים.
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const root = document.querySelector('[data-nb]');
+    if (!root || root.dataset.nbReady) return;
+    root.dataset.nbReady = '1';
+
+    const plans = JSON.parse(root.querySelector('[data-nb-plans]').textContent);
+    const scen = JSON.parse(root.querySelector('[data-nb-scen]').textContent);
+    const out = root.querySelector('[data-nb-out]');
+    const btns = Array.prototype.slice.call(root.querySelectorAll('[data-nb-plan]'));
+
+    function show(id) {
+      const p = plans.filter(function (x) { return x.id === id; })[0];
+      if (!p) return;
+      btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.nbPlan === id)); });
+
+      let rows = '';
+      let blocked = 0;
+      let firstBlock = null;
+
+      scen.forEach(function (s) {
+        const cap = p[s.field];
+        const ok = s.need <= cap;
+        if (!ok) { blocked++; if (!firstBlock) firstBlock = s; }
+        rows +=
+          '<div class="nb__row' + (ok ? ' nb__row--ok' : '') + '">' +
+          '<p class="nb__rowhead"><span class="nb__mark">' + (ok ? 'נכנס' : 'נחסם') + '</span> ' + s.text + '</p>' +
+          '<p class="nb__num">צריך ' + s.need + ' ' + s.unit + '. התוכנית נותנת ' + cap + '.</p>' +
+          (ok ? '' : '<p class="nb__fix">' + s.fix + '</p>') +
+          '</div>';
+      });
+
+      const head =
+        blocked === 0
+          ? '<p class="nb__verdict" data-tally="0">כל ארבעת התרחישים נכנסים ב' + p.name + '.</p>'
+          : '<p class="nb__verdict" data-tally="' + blocked + '">' + blocked + ' מתוך 4 נחסמים ב' + p.name + '.</p>';
+
+      const first = firstBlock
+        ? '<p class="nb__first"><strong>מה שנגמר ראשון:</strong> ' + firstBlock.unit + '. זה המספר שכדאי לבדוק לפני שקונים, ולא מספר המחברות.</p>'
+        : '<p class="nb__first"><strong>ובכל זאת:</strong> התוכנית הזאת פותרת את המכסות ולא את העברית. בדקו את <a href="/kelim/gemini/ivrit">השיעור על העברית</a> לפני שאתם מבטיחים לצוות מה יעבוד.</p>';
+
+      out.innerHTML = head + rows + first;
+    }
+
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () { show(b.dataset.nbPlan); });
+    });
+
+    show(plans[0].id);
+  })();
+</script>
+
+<style>
+  .nb {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.65rem; margin-block: 2rem;
+  }
+  .nb__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 1rem; }
+
+  .nb__plans { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .nb__plans button {
+    font: inherit; font-size: var(--t-sm); cursor: pointer;
+    padding: 0.4rem 0.9rem; border-radius: var(--r-control);
+    border: 1px solid var(--rule); background: transparent; color: var(--ink-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .nb__plans button:hover { border-color: var(--rule-strong); color: var(--ink-strong); }
+  .nb__plans button[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500; }
+
+  .nb__out { margin-block-start: 1.2rem; }
+  .nb :global(.nb__verdict) { font-family: var(--font-display); font-size: var(--t-lg); color: var(--ink-strong); margin: 0 0 0.8rem; }
+  .nb :global(.nb__row) {
+    background: var(--surface-sunk); border-radius: var(--r-card);
+    padding: 0.75rem 0.95rem; margin-block-end: 0.5rem;
+    border-inline-start: 3px solid var(--state-bad);
+  }
+  .nb :global(.nb__row--ok) { border-inline-start-color: var(--state-ok); }
+  .nb :global(.nb__rowhead) { font-size: var(--t-sm); color: var(--ink-strong); margin: 0 0 0.2rem; font-weight: 500; }
+  .nb :global(.nb__mark) {
+    display: inline-block; font-size: var(--t-xs); font-weight: 400;
+    padding: 0.05rem 0.4rem; border-radius: var(--r-control);
+    background: var(--state-bad); color: var(--paper);
+  }
+  .nb :global(.nb__row--ok .nb__mark) { background: var(--state-ok); }
+  .nb :global(.nb__num) { font-size: var(--t-xs); color: var(--ink-faint); margin: 0; }
+  .nb :global(.nb__fix) { font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.6; margin: 0.4rem 0 0; max-inline-size: 70ch; }
+  .nb :global(.nb__first) {
+    margin-block-start: 0.9rem; padding: 0.85rem 1rem;
+    border: 1px solid var(--rule); border-inline-start: 3px solid var(--accent);
+    border-radius: var(--r-card); font-size: var(--t-sm); color: var(--ink);
+    line-height: 1.65; max-inline-size: 72ch;
+  }
+  .nb :global(.nb__first strong) { color: var(--ink-strong); }
+
+  .nb__fine {
+    margin: 1.2rem 0 0; padding-block-start: 1rem; border-block-start: 1px solid var(--rule);
+    font-size: var(--t-xs); color: var(--ink-faint); line-height: 1.6; max-inline-size: 72ch;
+  }
+</style>
