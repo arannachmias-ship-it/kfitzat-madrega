@@ -1,0 +1,192 @@
+---
+/**
+ * "מה השתנה ב־ChatGPT ב־2026" — ציר זמן מתגלגל.
+ * הקוראת מתקדמת חודש־חודש, ושתי הרשימות מתמלאות מולה:
+ * מה נסגר, ומה בא במקומו. המונה למטה הוא הפואנטה.
+ *
+ * צורת אינטראקציה שהאתר עוד לא ניצל: התוכן לא מוצג בבת אחת אלא מצטבר
+ * לפי ציר זמן. זה הופך רשימה של עדכונים לתחושה של קצב.
+ *
+ * כל פריט כאן אומת מול מרכז העזרה של OpenAI ב-13.9.2026. הפריט האחרון
+ * במכוון בלי חודש — OpenAI לא פרסמה תאריך, ואנחנו לא ממציאים אחד.
+ */
+---
+<div class="wc" data-wc>
+  <p class="wc__label">ציר הזמן: מה קרה ל־ChatGPT ב־2026</p>
+  <p class="wc__lead">לחצו על חודש, או התקדמו קדימה. שתי הרשימות מתמלאות תוך כדי.</p>
+
+  <div class="wc__months" role="group" aria-label="בחירת חודש בציר הזמן">
+    <button type="button" data-wc-m="0">פבר'</button>
+    <button type="button" data-wc-m="1">מרץ</button>
+    <button type="button" data-wc-m="2">אפר'</button>
+    <button type="button" data-wc-m="3">מאי</button>
+    <button type="button" data-wc-m="4">יוני</button>
+    <button type="button" data-wc-m="5">יולי</button>
+    <button type="button" data-wc-m="6">אוג'</button>
+    <button type="button" data-wc-m="7">ספט'</button>
+  </div>
+
+  <div class="wc__steps">
+    <button type="button" data-wc-back>אחורה</button>
+    <span data-wc-now>פברואר 2026</span>
+    <button type="button" data-wc-fwd>קדימה</button>
+  </div>
+
+  <div class="wc__cols">
+    <div class="wc__col wc__col--gone">
+      <h4>מה נסגר</h4>
+      <ul data-wc-gone></ul>
+    </div>
+    <div class="wc__col wc__col--new">
+      <h4>מה יש במקום</h4>
+      <ul data-wc-new></ul>
+    </div>
+  </div>
+
+  <p class="wc__tally" data-wc-tally></p>
+  <p class="wc__note" data-wc-end hidden></p>
+</div>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const root = document.querySelector('[data-wc]');
+    if (!root || root.dataset.wcReady) return;
+    root.dataset.wcReady = '1';
+
+    const MONTHS = ['פברואר 2026','מרץ 2026','אפריל 2026','מאי 2026','יוני 2026','יולי 2026','אוגוסט 2026','ספטמבר 2026'];
+
+    // כל פריט אומת מול מרכז העזרה של OpenAI ב-13.9.2026.
+    const EVENTS = [
+      { m: 0, gone: 'הדגמים הישנים שכולם הכירו הוסרו בבת אחת', repl: 'השיחות, הפרויקטים וה־GPT־ים הועברו אוטומטית לדגם המקביל הקרוב ביותר' },
+      { m: 0, gone: null, repl: 'פרסומות נכנסו לגרסה החינמית ולגרסת Go. בתוכניות בתשלום אין' },
+      { m: 1, gone: 'מצב המחקר העמוק הישן', repl: 'מחקר עמוק מובנה, שמופעל מתפריט הכלים ולא כמצב נפרד' },
+      { m: 2, gone: 'Sora — יצירת הווידאו — נסגרה באתר ובאפליקציה', repl: 'אין לזה מחליף ב־ChatGPT. מי שצריך וידאו צריך כלי אחר' },
+      { m: 3, gone: 'Canvas — חלון העריכה לצד השיחה', repl: 'בלוקי כתיבה ובלוקי קוד, בתוך השיחה עצמה' },
+      { m: 4, gone: 'Pulse — התקציר היומי', repl: 'משימות מתוזמנות, שאתם מגדירים בעצמכם ולא מקבלים מוכן' },
+      { m: 5, gone: 'ספריית האפליקציות הנפרדת', repl: 'ספריית הפלאגינים, שמאגדת אפליקציות וסקילים לזרימת עבודה אחת' },
+      { m: 6, gone: 'דפדפן Atlas הפסיק לעבוד', repl: 'דפדפן מובנה באפליקציית שולחן העבודה, תוסף לכרום, ודפדפן שרץ בענן' },
+      { m: 7, gone: 'יצירת GPT־ים מותאמים בחשבון פרטי — נסגרה לגמרי', repl: 'פרויקטים למשתמש הפרטי, וסקילים ופלאגינים בחשבון ארגוני' },
+    ];
+
+    // OpenAI לא פרסמה תאריך לסגירת מצב הסוכן, ולכן הוא לא יושב על החודשים.
+    const UNDATED = {
+      gone: 'מצב הסוכן — ההרצה שביצעה משימות בדפדפן',
+      repl: 'ChatGPT Work, שמחזיר תוצר גמור ולא רק ביצוע',
+    };
+
+    const monthBtns = root.querySelectorAll('[data-wc-m]');
+    const now = root.querySelector('[data-wc-now]');
+    const goneList = root.querySelector('[data-wc-gone]');
+    const newList = root.querySelector('[data-wc-new]');
+    const tally = root.querySelector('[data-wc-tally]');
+    const endNote = root.querySelector('[data-wc-end]');
+    let at = 0;
+
+    function li(text, fresh) {
+      return '<li' + (fresh ? ' class="is-fresh"' : '') + '>' + text + '</li>';
+    }
+
+    function render() {
+      now.textContent = MONTHS[at];
+      monthBtns.forEach(function (b) {
+        const i = Number(b.dataset.wcM);
+        b.setAttribute('aria-pressed', String(i === at));
+        b.classList.toggle('is-past', i < at);
+      });
+
+      let gone = '', made = '', count = 0;
+      EVENTS.forEach(function (e) {
+        if (e.m > at) return;
+        const fresh = e.m === at;
+        if (e.gone) { gone += li(e.gone, fresh); count++; }
+        if (e.repl) made += li(e.repl, fresh);
+      });
+
+      const done = at === MONTHS.length - 1;
+      if (done) {
+        gone += li(UNDATED.gone + ' <em>— בלי תאריך מפורסם</em>', true);
+        made += li(UNDATED.repl, true);
+        count++;
+      }
+
+      goneList.innerHTML = gone || '<li class="is-empty">עוד כלום</li>';
+      newList.innerHTML = made || '<li class="is-empty">עוד כלום</li>';
+      tally.innerHTML = 'עד ' + MONTHS[at] + ': <strong>' + count + '</strong> ' +
+        (count === 1 ? 'דבר נסגר' : 'דברים נסגרו') + '.';
+
+      endNote.hidden = !done;
+      if (done) {
+        endNote.innerHTML = 'הפריט האחרון הוא המעניין: <strong>OpenAI לא פרסמה תאריך לסגירת מצב הסוכן</strong>, ' +
+          'ולכן הוא לא יושב על אף חודש. לא המצאנו לו אחד. ' +
+          'וזו בדיוק הסיבה שכל שיעור במדריך הזה נושא תאריך בדיקה: אנחנו כותבים מה ראינו, וביום שראינו אותו.';
+      }
+    }
+
+    monthBtns.forEach(function (b) {
+      b.addEventListener('click', function () { at = Number(b.dataset.wcM); render(); });
+    });
+    root.querySelector('[data-wc-back]').addEventListener('click', function () { at = Math.max(0, at - 1); render(); });
+    root.querySelector('[data-wc-fwd]').addEventListener('click', function () { at = Math.min(MONTHS.length - 1, at + 1); render(); });
+
+    render();
+  })();
+</script>
+
+<style>
+  .wc {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.65rem; margin-block: 2rem;
+  }
+  .wc__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 0.3rem; }
+  .wc__lead { font-size: var(--t-sm); color: var(--ink-muted); margin: 0 0 1.1rem; }
+
+  .wc__months { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-block-end: 0.9rem; }
+  .wc__months button {
+    font: inherit; font-size: var(--t-sm); cursor: pointer;
+    padding: 0.4rem 0.75rem; border: 1px solid var(--rule); border-radius: var(--r-control);
+    background: transparent; color: var(--ink-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .wc__months button:hover { border-color: var(--rule-strong); color: var(--ink); }
+  .wc__months button.is-past { border-color: var(--accent); color: var(--ink); }
+  /* נבחר: רקע ציטרון וטקסט כהה — עובד גם במצב כהה */
+  .wc__months button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+
+  .wc__steps { display: flex; align-items: center; gap: 0.8rem; margin-block-end: 1.1rem; }
+  .wc__steps span { font-family: var(--font-display); font-size: var(--t-lg); color: var(--ink-strong); }
+  .wc__steps button {
+    font: inherit; font-size: var(--t-sm); cursor: pointer; padding: 0.35rem 0.9rem;
+    border: 1px solid var(--rule-strong); border-radius: var(--r-control);
+    background: var(--surface-sunk); color: var(--ink);
+  }
+  .wc__steps button:hover { border-color: var(--accent); }
+
+  .wc__cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 620px) { .wc__cols { grid-template-columns: 1fr; } }
+  .wc__col { background: var(--surface-sunk); border-radius: var(--r-card); padding: 1rem 1.15rem; }
+  .wc__col h4 { margin: 0 0 0.6rem; font-size: var(--t-sm); font-family: var(--font-body); }
+  .wc__col--gone h4 { color: var(--ink-strong); }
+  .wc__col--new h4 { color: var(--accent-deep); }
+  .wc :global(.wc__col ul) { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  .wc :global(.wc__col li) {
+    font-size: var(--t-sm); line-height: 1.55; color: var(--ink-muted);
+    padding-inline-start: 0.8rem; border-inline-start: 2px solid var(--rule-strong);
+    animation: wcIn var(--dur-base) var(--ease-out) both;
+  }
+  .wc :global(.wc__col--new li) { border-inline-start-color: var(--accent); }
+  .wc :global(.wc__col li.is-fresh) { color: var(--ink-strong); font-weight: 500; }
+  .wc :global(.wc__col li.is-empty) { color: var(--ink-faint); border-inline-start-color: transparent; padding-inline-start: 0; }
+  .wc :global(.wc__col li em) { color: var(--ink-faint); font-style: normal; }
+  @keyframes wcIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .wc :global(.wc__col li) { animation: none; } }
+
+  .wc__tally { margin-block: 1rem 0; font-size: var(--t-sm); color: var(--ink-muted); }
+  .wc :global(.wc__tally strong) { color: var(--accent-deep); font-size: var(--t-lg); font-weight: 700; }
+  .wc__note {
+    margin-block-start: 0.9rem; padding: 0.85rem 1rem;
+    border: 1px solid var(--rule); border-radius: var(--r-card);
+    font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65;
+  }
+  .wc :global(.wc__note strong) { color: var(--ink-strong); }
+  .wc__note[hidden] { display: none; }
+</style>
