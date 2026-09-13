@@ -4,6 +4,7 @@ import SignupBand from '../components/SignupBand.astro';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import TrackNav from '../components/TrackNav.astro';
+import MadrichMap from '../components/MadrichMap.astro';
 import { getCollection } from 'astro:content';
 import { STAGES } from '../data/track';
 
@@ -60,6 +61,8 @@ const checked = p.checked.toLocaleDateString('he-IL', { day: 'numeric', month: '
       </dl>
       {p.startUrl && <a class="tl__start" href={p.startUrl} rel="noopener nofollow" target="_blank">לעמוד ההרשמה של {p.name}</a>}
     </div>
+
+    <MadrichMap guide={slug} />
 
     {usedIn.length > 0 && (
       <section class="wrap tl__used reveal" aria-labelledby="tl-used">
