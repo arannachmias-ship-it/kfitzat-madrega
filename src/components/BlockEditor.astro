@@ -1,0 +1,160 @@
+---
+/**
+ * "בלוק כתיבה מול שיחה" — לפני/אחרי על אותה בקשת עריכה.
+ *
+ * התזה: ההבדל אינו באיכות הפלט אלא במה שקורה כשמבקשים שינוי קטן.
+ * בשיחה המודל מנסח את הכל מחדש, ולכן דברים שלא ביקשתם לשנות משתנים בדרך.
+ * בבלוק משנים את הקטע המסומן, והשאר נשאר בדיוק כפי שהיה.
+ *
+ * הסתייגות שכתובה בתוך הרכיב: בפלט אמיתי אין תגית "השתנה בלי שביקשתם".
+ * בלי המשפט הזה ההדגמה טוענת שהשינוי סמוי ובו בזמן מסמנת אותו באדום.
+ */
+---
+<div class="be" data-be>
+  <p class="be__label">ההדגמה: אותה בקשת עריכה, בשני מקומות</p>
+
+  <div class="be__src">
+    <p class="be__srcLabel">הטיוטה שיצאה, בשני המקרים זהה:</p>
+    <p class="be__srcText">
+      היי דנה,<br />
+      רציתי לעדכן שסיימנו את מיפוי צורכי ההדרכה במחלקת התפעול.<br />
+      עלו שלושה פערים מרכזיים, ואני מצרפת את הסיכום המלא.<br />
+      נשמח לקבוע פגישה בשבוע הבא.
+    </p>
+  </div>
+
+  <p class="be__ask">מה אתם מבקשים לשנות?</p>
+  <div class="be__opts" role="group" aria-label="בחירת בקשת עריכה">
+    <button type="button" data-be-o="0">רק לקצר את המשפט השני</button>
+    <button type="button" data-be-o="1">רק להחליף "דנה" ב"צוות"</button>
+    <button type="button" data-be-o="2">רק להוסיף תאריך לפגישה</button>
+  </div>
+
+  <div class="be__panes" data-be-panes hidden>
+    <div class="be__pane be__pane--chat">
+      <h4>בשיחה: מבקשים, והמודל כותב הכל מחדש</h4>
+      <p data-be-chat></p>
+      <p class="be__drift" data-be-drift></p>
+    </div>
+    <div class="be__pane be__pane--block">
+      <h4>בבלוק כתיבה: מסמנים את הקטע, ורק הוא משתנה</h4>
+      <p data-be-block></p>
+      <p class="be__ok">שאר השורות לא נגעו בהן. אין מה להשוות, כי אין מה שהשתנה.</p>
+    </div>
+  </div>
+
+  <p class="be__caveat" data-be-caveat hidden>
+    <strong>הסתייגות שחייבת להיות כאן:</strong> סימננו את השינויים הלא מבוקשים באדום כדי שתראו אותם.
+    <strong>בפלט אמיתי אין תגית כזאת.</strong> הטקסט פשוט חוזר שלם ויפה, ואתם קוראים את מה שביקשתם לשנות
+    ולא את מה שלא. זו כל הבעיה.
+  </p>
+</div>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    const root = document.querySelector('[data-be]');
+    if (!root || root.dataset.beReady) return;
+    root.dataset.beReady = '1';
+
+    const M = '<mark class="be__m">';
+    const R = '<mark class="be__r">';
+    const E = '</mark>';
+
+    const CASES = [
+      {
+        chat: 'שלום דנה,<br />' +
+              'סיימנו את מיפוי צורכי ההדרכה בתפעול.<br />' +
+              R + 'זיהינו' + E + ' שלושה פערים מרכזיים, ' + R + 'והסיכום המלא מצורף' + E + '.<br />' +
+              R + 'אשמח' + E + ' לקבוע פגישה בשבוע הבא.',
+        drift: 'שלושה דברים השתנו בלי שביקשתם: הפנייה עברה מ"היי" ל"שלום", "עלו" הפך ל"זיהינו", ו"נשמח" הפך ל"אשמח" — כלומר מרבים ליחיד. את השורה השנייה באמת קיצר.',
+        block: 'היי דנה,<br />' + M + 'סיימנו את מיפוי צורכי ההדרכה בתפעול.' + E + '<br />' +
+               'עלו שלושה פערים מרכזיים, ואני מצרפת את הסיכום המלא.<br />' +
+               'נשמח לקבוע פגישה בשבוע הבא.',
+      },
+      {
+        chat: 'היי ' + M + 'צוות' + E + ',<br />' +
+              'רציתי לעדכן ' + R + 'אתכם' + E + ' שסיימנו את מיפוי צורכי ההדרכה במחלקת התפעול.<br />' +
+              'עלו שלושה פערים מרכזיים, ואני מצרפת את הסיכום המלא.<br />' +
+              R + 'נשמח לקבוע פגישה משותפת בשבוע הבא' + E + '.',
+        drift: 'שני דברים השתנו בלי שביקשתם: נוספה המילה "אתכם", והמילה "משותפת" נכנסה לשורה האחרונה. שניהם סבירים, ושניהם לא ביקשתם.',
+        block: 'היי ' + M + 'צוות' + E + ',<br />' +
+               'רציתי לעדכן שסיימנו את מיפוי צורכי ההדרכה במחלקת התפעול.<br />' +
+               'עלו שלושה פערים מרכזיים, ואני מצרפת את הסיכום המלא.<br />' +
+               'נשמח לקבוע פגישה בשבוע הבא.',
+      },
+      {
+        chat: 'היי דנה,<br />' +
+              'רציתי לעדכן שסיימנו את מיפוי צורכי ההדרכה במחלקת התפעול.<br />' +
+              'עלו שלושה פערים מרכזיים, ' + R + 'ומצורף הסיכום המלא' + E + '.<br />' +
+              'נשמח לקבוע פגישה ' + M + 'ביום שלישי, 22.9, בשעה 10:00' + E + '.',
+        drift: 'דבר אחד השתנה בלי שביקשתם: "ואני מצרפת" הפך ל"ומצורף" — פעיל הפך לסביל, וזו בדיוק הנקודה שבה טקסט מתחיל להישמע כמו מכתב מבנק.',
+        block: 'היי דנה,<br />' +
+               'רציתי לעדכן שסיימנו את מיפוי צורכי ההדרכה במחלקת התפעול.<br />' +
+               'עלו שלושה פערים מרכזיים, ואני מצרפת את הסיכום המלא.<br />' +
+               'נשמח לקבוע פגישה ' + M + 'ביום שלישי, 22.9, בשעה 10:00' + E + '.',
+      },
+    ];
+
+    const panes = root.querySelector('[data-be-panes]');
+    const chat = root.querySelector('[data-be-chat]');
+    const drift = root.querySelector('[data-be-drift]');
+    const block = root.querySelector('[data-be-block]');
+    const caveat = root.querySelector('[data-be-caveat]');
+    const btns = root.querySelectorAll('[data-be-o]');
+
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        const c = CASES[Number(b.dataset.beO)];
+        btns.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        chat.innerHTML = c.chat;
+        drift.innerHTML = c.drift;
+        block.innerHTML = c.block;
+        panes.hidden = false;
+        caveat.hidden = false;
+      });
+    });
+  })();
+</script>
+
+<style>
+  .be {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-card); padding: 1.5rem 1.65rem; margin-block: 2rem;
+  }
+  .be__label { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 0.9rem; }
+
+  .be__src { background: var(--surface-sunk); border-radius: var(--r-card); padding: 1rem 1.15rem; margin-block-end: 1.2rem; }
+  .be__srcLabel { font-size: var(--t-xs); color: var(--ink-faint); margin: 0 0 0.5rem; }
+  .be__srcText { margin: 0; font-size: var(--t-sm); line-height: 1.8; color: var(--ink); }
+
+  .be__ask { font-size: var(--t-sm); font-weight: 600; color: var(--ink-strong); margin: 0 0 0.5rem; }
+  .be__opts { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .be__opts button {
+    font: inherit; font-size: var(--t-sm); cursor: pointer;
+    padding: 0.45rem 0.85rem; border: 1px solid var(--rule-strong); border-radius: var(--r-control);
+    background: transparent; color: var(--ink-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .be__opts button:hover { border-color: var(--accent); color: var(--ink); }
+  .be__opts button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+
+  .be__panes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-block-start: 1.2rem; }
+  @media (max-width: 680px) { .be__panes { grid-template-columns: 1fr; } }
+  .be__panes[hidden] { display: none; }
+  .be__pane { border: 1px solid var(--rule); border-radius: var(--r-card); padding: 1rem 1.15rem; }
+  .be__pane--block { border-inline-start: 3px solid var(--accent); }
+  .be__pane h4 { margin: 0 0 0.7rem; font-size: var(--t-sm); font-family: var(--font-body); color: var(--ink-strong); line-height: 1.45; }
+  .be :global(.be__pane p) { margin: 0; font-size: var(--t-sm); line-height: 1.8; color: var(--ink); }
+  .be :global(.be__m) { background: var(--accent-soft); color: var(--ink-strong); padding: 0.05rem 0.2rem; border-radius: 3px; }
+  .be :global(.be__r) { background: color-mix(in srgb, #C0392B 18%, transparent); color: var(--ink-strong); padding: 0.05rem 0.2rem; border-radius: 3px; }
+  .be__drift { margin-block-start: 0.8rem !important; font-size: var(--t-sm); color: var(--ink-muted) !important; padding-block-start: 0.7rem; border-block-start: 1px solid var(--rule); }
+  .be__ok { margin-block-start: 0.8rem !important; font-size: var(--t-sm); color: var(--ink-faint) !important; padding-block-start: 0.7rem; border-block-start: 1px solid var(--rule); }
+
+  .be__caveat {
+    margin-block-start: 1.2rem; padding: 0.9rem 1.05rem;
+    border: 1px solid var(--rule); border-radius: var(--r-card);
+    font-size: var(--t-sm); color: var(--ink-muted); line-height: 1.65;
+  }
+  .be__caveat strong { color: var(--ink-strong); }
+  .be__caveat[hidden] { display: none; }
+</style>
