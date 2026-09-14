@@ -309,7 +309,8 @@ await page.waitForTimeout(120);
 ok((await page.locator('.hg__card--part').count()) === 1, 'HebrewGaps: סקירת שמע = הסתייגות');
 await page.click('[data-hg-go="chrome"]');
 await page.waitForTimeout(120);
-ok((await page.locator('.hg__card--unknown').count()) === 1, 'HebrewGaps: כרום = לא אומת');
+ok((await page.locator('.hg__card--part').count()) === 1, 'HebrewGaps: כרום = עובד עם הסתייגות');
+ok((await page.locator('.hg__work').count()) === 1, 'HebrewGaps: לכרום יש הסבר על שפת המכשיר');
 ok((await page.locator('.hg__tally').getAttribute('data-tally')) === '4', 'HebrewGaps: מונה ארבע משימות שנבדקו');
 
 // ---------- 12. NotebookBuild ----------
