@@ -67,6 +67,9 @@ ok(r.out.status === 429, 'IP אחד, יותר מחמש בקשות בעשר דק�
 _resetRateLimits(); calls.length = 0;
 r = res(); await subscribe(req({ headers: SAME, body: '{"email":"' + 'a'.repeat(9000) + '@b.co"}' }), r);
 ok(r.out.status === 413 && calls.length === 0, 'גוף גדול מ־8KB: 413');
+// כמו ב־Vercel: הגוף כבר מפוענח לאובייקט, ורק content-length מסגיר את הגודל
+{ const big = req({ headers: SAME, body: '{}' }); big.body = { email: 'a@b.co', consent: true, pad: 'x'.repeat(9000) }; big.headers['content-length'] = '9100'; r = res(); await subscribe(big, r); }
+ok(r.out.status === 413 && calls.length === 0, 'גוף מפוענח מראש גדול מ־8KB: 413');
 r = res(); await subscribe(req({ headers: SAME, body: { email: 'not an email', consent: true } }), r);
 ok(r.out.status === 400 && r.out.body.error === 'invalid_email', 'כתובת לא תקינה: 400');
 r = res(); await subscribe(req({ headers: SAME, body: { email: 'q@w.co', consent: false } }), r);
