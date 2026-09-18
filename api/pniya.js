@@ -8,7 +8,14 @@
  *
  * הפנייה נשלחת מהדומיין המאומת, עם reply_to של הפונה, כדי שתשובה במייל
  * תחזור ישירות אליו.
+ *
+ * הגנות (ראו lib/api-guard.js): רק מהאתר עצמו, הגבלת קצב לכל כתובת IP,
+ * וניקוי תווי בקרה כדי ששורה חדשה בשם לא תגיע לכותרת המייל.
  */
+import {
+  apiHeaders, isSameSite, clientIp, rateLimited, readJson, clean, EMAIL_RE, logEvent,
+} from '../lib/api-guard.js';
+
 const RESEND_API = 'https://api.resend.com';
 const TO = 'nexadapt+contact@gmail.com';
 
@@ -18,15 +25,8 @@ function esc(s) {
   }[c]));
 }
 
-async function readBody(req) {
-  if (req.body && typeof req.body === 'object') return req.body;
-  if (typeof req.body === 'string') { try { return JSON.parse(req.body); } catch { return {}; } }
-  const chunks = [];
-  for await (const c of req) chunks.push(c);
-  try { return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}'); } catch { return {}; }
-}
-
 export default async function handler(req, res) {
+  apiHeaders(res);
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.MAIL_FROM;
 
@@ -38,19 +38,35 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'method_not_allowed' });
   }
 
-  const body = await readBody(req);
+  if (!isSameSite(req)) {
+    logEvent('pniya', 'foreign_origin');
+    return res.status(403).json({ error: 'forbidden', message: 'הטופס עובד רק מתוך האתר' });
+  }
+
+  if (rateLimited(`pniya:ip:${clientIp(req)}`, 5, 10 * 60_000)) {
+    logEvent('pniya', 'rate_limited_ip');
+    return res.status(429).json({ error: 'too_many', message: 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות' });
+  }
+
+  let body;
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    return res.status(err.status || 400).json({ error: 'bad_request', message: 'הבקשה לא תקינה' });
+  }
 
   // מלכודת בוטים: שדה מוסתר שאדם לא רואה ולכן לא ממלא
   if (body.website) return res.status(200).json({ ok: true });
 
-  const name = String(body.name || '').trim().slice(0, 120);
-  const email = String(body.email || '').trim().toLowerCase().slice(0, 200);
-  const message = String(body.message || '').trim().slice(0, 4000);
+  const name = clean(body.name, 120);
+  const email = clean(body.email, 254).toLowerCase();
+  // בהודעה עצמה שורות חדשות לגיטימיות — מסירים רק תווי בקרה אחרים
+  const message = String(body.message ?? '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ' ').trim().slice(0, 4000);
 
   if (!name) {
     return res.status(400).json({ error: 'name_required', message: 'צריך שם כדי שנדע למי לחזור' });
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+  if (!EMAIL_RE.test(email)) {
     return res.status(400).json({ error: 'invalid_email', message: 'כתובת המייל לא נראית תקינה' });
   }
   if (message.length < 10) {
@@ -69,20 +85,25 @@ export default async function handler(req, res) {
   <p style="white-space:pre-wrap">${esc(message)}</p>
 </body></html>`;
 
-  const sent = await fetch(`${RESEND_API}/emails`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from,
-      to: TO,
-      reply_to: email,
-      subject: `פנייה מהאתר — ${name}`,
-      html,
-    }),
-  });
+  try {
+    const sent = await fetch(`${RESEND_API}/emails`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from,
+        to: TO,
+        reply_to: email,
+        subject: `פנייה מהאתר — ${name}`,
+        html,
+      }),
+    });
 
-  if (!sent.ok) {
-    console.error('pniya send failed', sent.status, await sent.text());
+    if (!sent.ok) {
+      logEvent('pniya', 'resend_send_failed', { status: sent.status });
+      return res.status(502).json({ error: 'send_failed', message: 'לא הצלחנו לשלוח. אפשר לכתוב לנו ישירות למייל' });
+    }
+  } catch (err) {
+    logEvent('pniya', 'resend_error', { message: String(err?.message || err) });
     return res.status(502).json({ error: 'send_failed', message: 'לא הצלחנו לשלוח. אפשר לכתוב לנו ישירות למייל' });
   }
 

@@ -112,7 +112,7 @@ const checkedText = checked.toLocaleDateString('he-IL', { day: 'numeric', month:
     window.addEventListener('resize', markScrollable, { passive: true });
     document.querySelectorAll<HTMLElement>('.lsn__body blockquote:not(.reveal)').forEach((q) => {
       q.querySelectorAll('p').forEach((p) => {
-        p.innerHTML = p.textContent!.split(/\s+/).filter(Boolean).map((w, i) => `<span class="w" style="transition-delay:${i * 45}ms">${w}</span>`).join(' ');
+        p.innerHTML = p.textContent!.split(/\s+/).filter(Boolean).map((w, i) => `<span class="w" style="transition-delay:${i * 45}ms">${w.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)}</span>`).join(' ');
       });
       q.classList.add('reveal');
       q.style.opacity = '1'; q.style.transform = 'none';
