@@ -9,17 +9,22 @@ const live = (await getCollection('maslul', (e) => e.data.published))
 const featured = live.slice(0, 4);
 const newest = live.length ? live[live.length - 1] : null;
 const liveCount = live.length;
+
+// מה כבר אפשר: ההדגמות החיות עולות לדף הבית, כדי שהמבקר יראה מה AI עושה ולא רק יקרא עליו
+const demos = (await getCollection('efshar', (e) => e.data.published))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
 ---
 <Base
   title="הכשרות והטמעת AI בארגונים · Nexadapt"
-  description="אחרי שההרצאה נגמרת. מסלול לימוד AI פתוח וחינמי לארגונים, וסדנאות שבהן הצוות עובד בידיים במקום להקשיב. ארן נחמיאס ומתי מצוינים."
+  description="הרצאות, סדנאות וליווי הטמעת AI בארגונים, על העבודה האמיתית של הצוות. ומסלול לימוד AI פתוח וחינמי. ארן נחמיאס ומתי מצוינים."
 >
   <!-- hero -->
   <section class="wrap hero">
     <div class="hero__glow" aria-hidden="true"></div>
     <div class="hero__copy">
-      <h1 class="hero__title rise">לא באנו להתלהב מ־<span class="hero__ai">AI.</span></h1>
-      <p class="hero__sub rise">באנו לוודא שהצוות שלכם עושה איתו משהו ביום שלישי בבוקר.</p>
+      <h1 class="hero__title rise">תראו מה <span class="hero__ai">AI</span> עושה עם העבודה שלכם.</h1>
+      <p class="hero__sub rise">הרצאה שמדליקה את כל הצוות, וסדנאות שהופכות את החשק להרגל. הכול על המסמכים האמיתיים שלכם.</p>
       <div class="hero__actions rise">
         <a class="btn btn--primary" href={live[0] ? `/maslul/${live[0].id}` : '/maslul'}>ללמוד לבד, בחינם <span class="btn__arrow" aria-hidden="true">←</span></a>
         <a class="btn btn--ghost" href="/irgunim">להביא אותנו לארגון</a>
@@ -30,7 +35,7 @@ const liveCount = live.length;
       <img
         class="hero__img"
         src="/hero.webp" width="760" height="568" fetchpriority="high" decoding="async"
-        alt="סדנה בפעולה: משתתפים יושבים סביב שולחן עם מחשבים ניידים, וארן עומד מולם ומדבר, על המסך מאחוריו השקף: לא באנו להתלהב מ־AI"
+        alt="סדנה בפעולה: משתתפים יושבים סביב שולחן עם מחשבים ניידים, וארן עומד מולם ומדבר, על המסך מאחוריו השקף: תראו מה AI עושה עם העבודה שלכם"
     />
       </div>
       {newest && (
@@ -59,6 +64,27 @@ const liveCount = live.length;
     </a>
   </section>
 
+  <!-- what AI already does: the live demos, shown up front -->
+  {demos.length > 0 && (
+    <section class="wrap wow" aria-labelledby="wow-title">
+      <div class="wow__head">
+        <h2 id="wow-title" class="wow__title">מה AI כבר עושה בארגונים</h2>
+        <p class="wow__sub">שלושה דברים שבנינו בפועל, כל אחד בשעה או פחות ובלי פיתוח. אפשר לנסות אותם כאן באתר, עכשיו.</p>
+      </div>
+      <div class="wow__grid" data-stagger="90">
+        {demos.map((d) => (
+          <a class="wow__card reveal" href={`/efshar/${d.id}`}>
+            <span class="wow__tag"><span class="wow__dot" aria-hidden="true"></span>הדגמה חיה · {d.data.built} עבודה</span>
+            <span class="wow__h">{d.data.title}</span>
+            <span class="wow__d">{d.data.after}</span>
+            <span class="wow__cta">לנסות בעצמכם <span aria-hidden="true">←</span></span>
+          </a>
+        ))}
+      </div>
+      <p class="wow__all"><a href="/efshar" class="link-draw">כל ההדגמות ←</a></p>
+    </section>
+  )}
+
   <!-- the track: the anchor of the page -->
   <section class="track band-deep" aria-labelledby="track-title">
     <div class="wrap">
@@ -66,7 +92,7 @@ const liveCount = live.length;
         <div>
           <h2 id="track-title" class="track__title">המסלול <span class="track__free">חינם</span></h2>
           <p class="track__sub">
-            {TOTAL_LESSONS} שיעורים בחמישה שלבים, מהאפס עד הטמעה בארגון. פתוח לכולם, בלי תשלום ובלי הרשמה.
+            {TOTAL_LESSONS} שיעורים בחמישה שלבים, מהאפס עד הטמעה בארגון. פתוח לכולם, בלי תשלום ובלי הרשמה.{' '}
             {live.length} כבר באוויר, שיעור חדש בכל שבוע.
           </p>
           <p class="track__layers"><span>{TOTAL_LESSONS} שיעורים</span><i aria-hidden="true">·</i><span>7 כלים, כל אחד בשלב שלו</span><i aria-hidden="true">·</i><span>הדגמות חיות</span></p>
@@ -128,17 +154,17 @@ const liveCount = live.length;
 
   <!-- the staircase -->
   <section class="wrap stairs" aria-labelledby="stairs-title">
-    <h2 id="stairs-title" class="stairs__title">שלוש מדרגות. רוב הארגונים עומדים על הראשונה.</h2>
+    <h2 id="stairs-title" class="stairs__title">שלוש מדרגות. אפשר להתחיל בכל אחת.</h2>
     <p class="stairs__sub">אחד משלושת המשפטים האלה כנראה נאמר אצלכם בחודש האחרון.</p>
     <div class="stairs__grid" data-stagger="120">
       <article class="step reveal">
         <h3 class="step__q">"צריכים לעשות משהו בנושא AI"</h3>
-        <p class="step__d">לחץ מההנהלה, בלי יעד מוגדר.</p>
+        <p class="step__d">יש רצון, עוד אין כיוון. כאן כולם רואים בפעם הראשונה מה זה יכול לעשות.</p>
         <p class="step__tag">הרצאת התנעה</p>
       </article>
       <article class="step step--mid reveal">
-        <h3 class="step__q">"עשינו הרצאה, לא קרה כלום"</h3>
-        <p class="step__d">יש מודעות, אין מיומנות.</p>
+        <h3 class="step__q">"כולם התלהבו. עכשיו רוצים לעשות"</h3>
+        <p class="step__d">יש חשק, צריך מיומנות. כל אחד בונה משהו על העבודה שלו.</p>
         <p class="step__tag">סדנה מעשית</p>
       </article>
       <article class="step step--top reveal">
@@ -152,7 +178,7 @@ const liveCount = live.length;
   <!-- programs: one sentence and a link. the full table lives on /irgunim -->
   <section class="wrap programs" aria-labelledby="programs-title">
     <h2 id="programs-title" class="programs__title">כשאתם רוצים אותנו בחדר</h2>
-    <p class="programs__p">הרצאת התנעה, סדנה מעשית, סדנת יום מלא, תוכנית הכשרה או ליווי הטמעה. שני מנחים, לא מרצה אחד, ולכל תוכנית אג'נדה מלאה שפתוחה לקריאה לפני שמדברים.</p>
+    <p class="programs__p">הרצאת התנעה, סדנה מעשית, סדנת יום מלא, תוכנית הכשרה או ליווי הטמעה. שני מנחים, לא מרצה אחד, והכול נבנה סביב העבודה האמיתית שלכם.</p>
     <p><a href="/irgunim" class="programs__link link-draw">לכל התוכניות ←</a></p>
   </section>
 
@@ -302,6 +328,24 @@ const liveCount = live.length;
   }
 
   /* staircase */
+  .wow { padding-block: 1rem 3.5rem; }
+  .wow__head { margin-block-end: 1.5rem; }
+  .wow__title { font-size: var(--t-2xl); margin-block-end: 0.5rem; }
+  .wow__sub { color: var(--ink-muted); font-weight: 300; font-size: var(--t-lg); max-inline-size: 58ch; margin: 0; }
+  .wow__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; }
+  .wow__card { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.4rem 1.5rem; border-radius: var(--r-card); text-decoration: none; color: var(--ink); background: var(--deep); color: var(--ink-on-deep); box-shadow: var(--shadow-2); background-image: radial-gradient(380px 200px at 100% -10%, rgba(198,214,63,0.16), transparent 65%); transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+  .wow__card:hover { transform: translateY(-3px); box-shadow: var(--shadow-3); color: var(--ink-on-deep); }
+  .wow__card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .wow__tag { display: inline-flex; align-items: center; gap: 0.45rem; font-size: var(--t-xs); color: var(--accent); font-weight: 500; }
+  .wow__dot { inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(198,214,63,0.18); }
+  .wow__h { font-family: var(--font-display); font-size: var(--t-xl); color: var(--ink-on-deep); line-height: 1.3; }
+  .wow__d { color: var(--ink-on-deep-mute); font-size: var(--t-sm); line-height: 1.65; font-weight: 300; flex: 1; }
+  .wow__cta { font-weight: 500; color: var(--ink-on-deep); margin-block-start: 0.3rem; }
+  .wow__card:hover .wow__cta { color: var(--accent); }
+  .wow__all { margin: 1.1rem 0 0; }
+  .wow__all a { color: var(--ink-strong); text-decoration: none; font-weight: 500; }
+  :root[data-theme="dark"] .wow__card { background-color: var(--surface); border: 1px solid var(--rule-strong); }
+  @media (max-width: 900px) { .wow__grid { grid-template-columns: 1fr; } }
   .stairs { padding-block: 3.75rem 4rem; }
   .stairs__title { font-size: var(--t-3xl); margin-block-end: 0.7rem; }
   .stairs__sub { color: var(--ink-muted); font-weight: 300; font-size: var(--t-lg); max-inline-size: 54ch; margin-block-end: 2.4rem; }
