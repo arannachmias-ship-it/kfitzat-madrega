@@ -3,14 +3,16 @@
 import { chromium } from 'playwright';
 import http from 'node:http'; import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs'; import { join, extname } from 'node:path';
 const ROOT = join(process.cwd(), 'dist');
-const HDRS = JSON.parse(readFileSync('vercel.json', 'utf8')).headers.find(h => h.source === '/(.*)').headers;
+// כמו ב־Vercel: כל כלל שמתאים לנתיב מוסיף את הכותרות שלו, וכלל מאוחר דורס כותרת עם אותו שם (למשל ה־CSP של /live)
+const RULES = JSON.parse(readFileSync('vercel.json', 'utf8')).headers.map(r => ({ re: new RegExp('^' + r.source + '$'), headers: r.headers }));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.xml': 'application/xml' };
 const server = http.createServer((req, res) => {
   let f = join(ROOT, decodeURIComponent(req.url.split('?')[0]));
   if (existsSync(f) && statSync(f).isDirectory()) f = join(f, 'index.html');
   if (!existsSync(f)) { res.writeHead(404); return res.end(); }
   const h = { 'Content-Type': TYPES[extname(f)] || 'application/octet-stream' };
-  for (const { key, value } of HDRS) h[key] = value;
+  const path = req.url.split('?')[0];
+  for (const r of RULES) if (r.re.test(path)) for (const { key, value } of r.headers) h[key] = value;
   res.writeHead(200, h); res.end(readFileSync(f));
 });
 await new Promise(r => server.listen(4324, r));
