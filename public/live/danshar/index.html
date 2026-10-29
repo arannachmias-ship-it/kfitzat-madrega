@@ -348,6 +348,8 @@ html.is-guide .tstage *{animation:none!important;transition:none!important}
   .gv-btns{display:none}
   .gv h1{font-size:20pt}
   .gv-step{background:#fff;border:1px solid #B9C6C8;grid-template-columns:52mm minmax(0,1fr);padding:3.5mm;gap:4.5mm;margin-bottom:3.5mm}
+  /* בהדפסה מכרום הסקריפט מחשב את גודל התמונה הקטנה לפי המסך, לפני שהעמוד עובר לרוחב של דף. לכן הגודל קבוע כאן: 52 מ"מ חלקי 1920 */
+  .gv .thumb .tstage{transform:scale(.10236)!important}
   .gv-kick,.gv-seg>h2,.gd-sec h5{color:#55621A}
   .gd-sec.watch h5{color:#9A3412}
   .gv-sub,.gv-seg>h2 small,.gd-time{color:#4B636A}
