@@ -3513,22 +3513,27 @@ function hms(sec){ const h = Math.floor(sec/3600), m = Math.floor(sec%3600/60), 
 function paintClock(){ const el = stage.querySelector('[data-clock]'); if (el) el.textContent = S.clockStart ? hms(elapsed()) : 'S · מתחילים שעון'; }
 
 /* הגרלת שולחנות */
+/* בתוך שלב אחד שולחן לא עולה פעמיים. בין שלבים, שולחן שעוד לא עלה היום מקבל עדיפות.
+   כשכל השולחנות כבר עלו בשלב הזה, מתחילים סבב חדש ומנקים את הרשימה שעל המסך. */
 function drawTable(){
   const n = L.tables || 6; if (S.draw.rolling) return;
-  let pool = []; for (let k=1; k<=n; k++) if (!S.draw.used.includes(k)) pool.push(k);
-  if (!pool.length){ S.draw.used = []; for (let k=1; k<=n; k++) pool.push(k); }
+  const all = []; for (let k=1; k<=n; k++) all.push(k);
+  if (S.draw.list.length >= n){ S.draw.list = []; S.draw.cur = null; }
+  const free = all.filter(k => !S.draw.list.includes(k));
+  let pool = free.filter(k => !S.draw.used.includes(k));
+  if (!pool.length){ S.draw.used = S.draw.list.slice(); pool = free; }
   const pick = pool[Math.floor(Math.random()*pool.length)];
   if (STEPS[S.i].type !== 'draw'){ S.ov = 'draw'; drawOv(); }
-  S.draw.rolling = true; const t0 = performance.now();
+  S.draw.rolling = true; paintDraw(); const t0 = performance.now();
   (function roll(){
     const el = document.querySelector(S.ov === 'draw' ? '#ov [data-drawnum]' : '#stage [data-drawnum]');
-    if (performance.now() - t0 < 1100){ if (el){ el.textContent = 1 + Math.floor(Math.random()*n); el.classList.add('rolling'); } requestAnimationFrame(roll); return; }
+    if (performance.now() - t0 < 1100){ if (el){ el.textContent = free[Math.floor(Math.random()*free.length)]; el.classList.add('rolling'); } requestAnimationFrame(roll); return; }
     S.draw.rolling = false; S.draw.cur = pick; S.draw.used.push(pick); S.draw.list.push(pick); paintDraw(); push();
   })();
 }
 function paintDraw(){
   document.querySelectorAll('[data-drawnum]').forEach(el => { el.textContent = S.draw.cur == null ? '?' : S.draw.cur; el.classList.remove('rolling'); if (S.draw.cur != null){ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); } });
-  document.querySelectorAll('[data-drawn]').forEach(el => { el.innerHTML = S.draw.list.slice(0, -1).map(x => `<span>שולחן ${x}</span>`).join(''); });
+  document.querySelectorAll('[data-drawn]').forEach(el => { el.innerHTML = (S.draw.rolling ? S.draw.list : S.draw.list.slice(0, -1)).map(x => `<span>שולחן ${x}</span>`).join(''); });
 }
 
 /* שכבות */
