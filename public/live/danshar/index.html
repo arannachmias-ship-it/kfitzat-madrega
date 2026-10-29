@@ -219,7 +219,7 @@ button{font-family:inherit}
 .rv-tabs button[aria-selected="true"]{background:var(--citron);color:var(--deep);border-color:var(--citron)}
 .rv-card{background:var(--card);border-radius:16px;padding:18px 20px;margin-bottom:14px}
 .rv-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px}
-@media (max-width:900px){.rv-grid{grid-template-columns:1fr}}
+@media (max-width:900px){.rv-grid{grid-template-columns:minmax(0,1fr)}}
 .rv ol.guide{margin:0;padding-inline-start:22px}
 .rv ol.guide li{margin-bottom:8px}
 .rv label.cb{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}
@@ -250,6 +250,26 @@ table.rv-t{width:100%;border-collapse:collapse;font-size:15px;min-width:560px}
 .rv-t button{background:none;border:0;color:var(--paper);font:inherit;font-weight:700;cursor:pointer;text-align:right;padding:0;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
 .rv pre{white-space:pre-wrap;background:#0A2129;border-radius:12px;padding:14px 16px;font:inherit;font-size:15px;margin:0 0 12px;max-height:60vh;overflow:auto}
 .rv-miss{background:#3a2a12;border-radius:12px;padding:10px 14px}
+/* בחירה בין בדיקת תוצרים לחזרה מלאה */
+.rv-mode{display:inline-flex;flex-wrap:wrap;border:2px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px;max-width:100%}
+.rv-mode button{min-height:52px;padding:8px 20px;background:transparent;color:var(--paper);border:0;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;text-align:right}
+.rv-mode button small{display:block;font-size:13px;font-weight:500;color:var(--cap)}
+.rv-mode button[aria-pressed="true"]{background:var(--citron);color:var(--deep)}
+.rv-mode button[aria-pressed="true"] small{color:var(--deep)}
+.rv-mode button:focus-visible{outline:3px solid var(--paper);outline-offset:-3px}
+/* בדיקת תוצרים */
+.rv .dev{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
+.rv .dev b{min-width:5.5em}
+.rv-time{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;direction:ltr;min-width:3.4em;display:inline-block;text-align:center}
+.rv-time.over{color:#E2745A}
+.rv ul.good{margin:0 0 12px;padding-inline-start:20px}
+.rv ul.good li{margin-bottom:4px}
+.rv input.tx{width:100%;min-height:44px;background:#0A2129;color:var(--paper);border:2px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;direction:ltr;text-align:left}
+.rv-note{color:var(--ink2);margin-top:8px}
+.rv-btn[disabled]{opacity:.45;cursor:default}
+.rv-t .tm{white-space:nowrap}
+table.rv-t.tt{min-width:0}
+table.rv-t.tt th,table.rv-t.tt td{padding:8px 6px}
 
 /* מסך המנחה */
 .pv{position:fixed;inset:0;overflow:auto;background:var(--deep);color:var(--paper);padding:20px 24px;display:flex;flex-direction:column;gap:16px;font-size:16px}
@@ -305,6 +325,7 @@ const LESSON = {
   /* חזרה בבית: מה עושים, מה מכינים ואיזה תקלות מתרגלים. נפתח במקש Y */
   rehearsal: {
     guide: [
+      'כמה ימים קודם: בדיקת תוצרים (הכפתור למעלה). שם בודקים שכל סבב יוצא בזמן ויוצא טוב, ומתקנים לפני שמריצים הכול.',
       'שעה לפני: עוברים על רשימת ההכנה כאן למטה, ומוודאים שאין במלווה "חסר קישור".',
       'ארן מנחה בקול מלא, בדיוק כמו מול קהל. מתי יושב כמשתתף עם טלפון ועושה כל משימה באמת: מצלם, יוצר שיר, סורק וממלא.',
       'המסך הזה פתוח לידכם. הוא עובר לבד למקטע שעל המקרן ומודד כמה זמן כל מקטע לקח. מתי מסמן בכל מקטע מה עבד ומה לא, וכותב הערה.',
@@ -334,7 +355,78 @@ const LESSON = {
       { what:'שאלת המלכודת עונה נכון', fix:'"הפעם צדקה. איך הייתם יודעים?" ועוברים לשאלת הגיבוי.' },
       { what:'פוסט לא מתאים על הקיר', fix:'מחליטים מראש מי מוחק, ומתרגלים מחיקה מהטלפון.' },
       { what:'נגמר הזמן', fix:'מקצרים את סבב 4. לא מקצרים את "מסתכלים יחד", את רגע הטעות ואת המקטע על העבודה שלנו.' }
-    ]
+    ],
+    /* בדיקת תוצרים: כמה ימים לפני, ולפחות לפני הפעם הראשונה שמעבירים את הסדנה.
+       בודקים כל דבר שנוצר בסדנה: יוצא בזמן שיש למשתתפים, ויוצא טוב.
+       task:[מקטע, שלב] מושך את ההנחיה שעל המסך ואת הזמן שלה. devices: iphone, android, pc. ahead: מכינים מראש, לא בסדנה */
+    tooltest: {
+      when: 'כמה ימים לפני הסדנה, ולפחות לפני הפעם הראשונה שמעבירים אותה. בדנשר: עד 3.11, לפני החזרה המלאה',
+      guide: [
+        'המטרה: לוודא שכל מה שהמשתתפים יוצרים בסדנה יוצא בזמן שיש להם, ויוצא טוב. לא מריצים את הסדנה. עוברים על הסבבים אחד אחד.',
+        'עושים את זה כמה ימים לפני, כדי שיישאר זמן להחליף כלי, לשנות הנחיה או להכין גיבוי.',
+        'בתנאים של הסדנה: מהטלפון, עם חשבון גוגל אישי ובחשבונות חינמיים. ובשעה דומה לשעת הסדנה, אחר הצהריים ביום חול, כי התורים משתנים לפי השעה.',
+        'כל סבב בשני טלפונים, אייפון ואנדרואיד. לוחצים "התחלנו" כשמתחילים לפי ההנחיה, ו"התוצר מוכן" כשהוא מוכן. ההנחיה שעל המסך מופיעה בכל בדיקה, כדי לבדוק בדיוק אותה.',
+        'שופטים כל תוצר לפי "מה נחשב טוב". יצא חלש? מנסים לשפר את ההנחיה, ורושמים בהערה מה עזר.',
+        'כל תוצר טוב שומרים ומדביקים כאן את הקישור. זה הגיבוי לסדנה: אם כלי נופל, מקרינים את מה שיצא כאן.',
+        'בסוף: לשונית הסיכום. מעתיקים ומדביקים בשיחה עם Claude, והוא מתקן את ההנחיות ואת הזמנים, או מחליף כלי.'
+      ],
+      prep: [
+        'שני טלפונים טעונים, אייפון ואנדרואיד, עם חשבון גוגל אישי',
+        'Gemini מותקן בשני הטלפונים',
+        'עדיין בלי חשבון ב-Suno וב-Kling: נרשמים מהטלפון בזמן הבדיקה, כמו שהמשתתפים יעשו',
+        'קיר Padlet לניסיון, שמותר לפרסם בו בלי הרשמה',
+        'תשובות לשאלון, אמיתיות או לדוגמה, בשביל ההמנון',
+        'צילום של הטופס שנבחר לאפליקציה, הלוגו, הצבעים והפרומפט ל-Claude',
+        'כלי הווידאו בתשלום פתוח במחשב, והמנוי פעיל',
+        'תוכנה לעריכת סרט הסיום במחשב',
+        'קבוצת וואטסאפ לניסיון',
+        'רמקול מחובר למחשב'
+      ],
+      items: [
+        { id:'anthem', seg:1, title:'ההמנון לפתיחה', tool:'Suno', devices:['pc'], budget:30, ahead:true,
+          steps:['כותבים מילים מהתשובות בשאלון: במה הצוות הכי טוב, ורגע שבו היו גאים','יוצרים ב-Suno שתי גרסאות ובוחרים אחת','מורידים קובץ mp3, ומשמיעים ברמקול'],
+          good:['שומעים ומבינים את המילים בעברית','שם הצוות נשמע נכון','יש פזמון שנכנס לראש, והשיר עד שתי דקות וחצי'],
+          backup:'שיר כללי על צוות מכירות, בלי פרטים מהשאלון' },
+        { id:'poster', task:[4,0], title:'הפוסטר של הצוות', tool:'Gemini', devices:['iphone','android'],
+          steps:['עובדים בדיוק לפי ההנחיה שעל המסך','בודקים את השם בעברית בתמונה, ומתקנים אם צריך'],
+          good:['מוכן בזמן של הסבב','השם בעברית יוצא נכון, או שתיקון אחד מסדר אותו','נראה טוב גם מוקרן על מסך גדול'],
+          limits:'כמה תמונות אפשר ליצור ביום בחשבון חינמי',
+          backup:'שניים־שלושה פוסטרים טובים מכאן, להקרנה' },
+        { id:'wall', task:[4,1], title:'העלאה לקיר מהטלפון', tool:'Padlet', devices:['iphone','android'], budget:1,
+          steps:['סורקים או פותחים את הקיר','מעלים תמונה, ואחר כך גם קישור','מסתכלים על המקרן (W) שהיא הופיעה'],
+          good:['עולה בפחות מדקה, בלי לבקש הרשמה','מופיע על המקרן תוך כמה שניות'] },
+        { id:'groupimg', task:[4,3], title:'תמונת הקבוצה לוואטסאפ', tool:'Gemini', devices:['iphone','android'],
+          steps:['עובדים לפי ההנחיה שעל המסך','מחליפים את התמונה בקבוצת הניסיון'],
+          good:['מרובעת, וסמל אחד גדול שנשאר שלם כשוואטסאפ חותך לעיגול','בלי פנים, בלי מותגים, ובלי טקסט או רק מילה אחת','נראית טוב גם בעיגול הקטן ברשימת הצ\'אטים'] },
+        { id:'song', task:[5,0], title:'ההמנון של השולחן', tool:'Suno', devices:['iphone','android'],
+          steps:['נרשמים ל-Suno מהטלפון, כמו משתתף חדש','עובדים לפי ההנחיה שעל המסך','מעלים לקיר את קישור השיר ומשמיעים אותו מהמחשב','אם Suno נתקע: מנסים את המוזיקה של Gemini, ורושמים בהערה כמה זמן לקח'],
+          good:['השיר מוכן ועל הקיר בזמן של הסבב, כולל ההרשמה','המילים בעברית מובנות','נשמע טוב מהמחשב דרך הרמקול'],
+          limits:'כמה שירים אפשר ליצור ביום בחשבון חינמי, ואם ההרשמה מבקשת אימות',
+          backup:'שיר אחד טוב מכאן, להשמעה אם Suno נופל' },
+        { id:'trailer', task:[7,0], title:'הטריילר בטלפון', tool:'Kling', devices:['iphone','android'],
+          steps:['נרשמים ל-Kling מהטלפון','מעלים את הפוסטר מהבדיקה הקודמת, ועובדים לפי ההנחיה שעל המסך','"התוצר מוכן" רק כשהסרטון יצא מהתור'],
+          good:['הסרטון מוכן בזמן של הסבב, או שלפחות ידוע כמה זמן התור','התנועה טבעית, והפוסטר לא מתעוות','עולה לקיר ומתנגן'],
+          limits:'כמה זמן התור בחשבון חינמי, וכמה סרטונים אפשר ביום',
+          backup:'שניים־שלושה סרטונים מכאן, להקרנה' },
+        { id:'paidvideo', task:[7,1], title:'שלושה פוסטרים על המסך', tool:'כלי הווידאו בתשלום', devices:['pc'], budget:5,
+          steps:['לוקחים שלושה פוסטרים מהקיר','מחיים כל אחד בכלי בתשלום','עוצרים כשכל השלושה מוכנים'],
+          good:['שלושתם מוכנים לפני שנגמרות 5 דקות היצירה','באיכות שאפשר להקרין על מסך גדול'] },
+        { id:'live', task:[8,0], title:'מדברים עם Gemini דרך המצלמה', tool:'Gemini Live', devices:['iphone','android'],
+          steps:['עובדים לפי ההנחיה שעל המסך','מנסים גם את משחק התפקידים: "את לקוח כועס שההזמנה התעכבה"'],
+          good:['מבין ומדבר עברית בשני הטלפונים','עונה מהר, בלי הפסקות ארוכות','משחק התפקידים מרגיש אמין'] },
+        { id:'trap', seg:9, title:'שאלת המלכודת', tool:'Gemini', devices:['iphone','android'], budget:2,
+          steps:['שואלים בדיוק: "מי ייסד את דנשר, ואיך זה התחיל?"','משווים לתשובה באתר של דנשר','בודקים גם את שאלת הגיבוי','חוזרים על זה גם יום לפני הסדנה'],
+          good:['לפחות טלפון אחד טועה בביטחון, או שהתשובות שונות זו מזו','אם כולם צודקים: שאלת הגיבוי עושה את העבודה'] },
+        { id:'app', seg:11, title:'האפליקציה ש-Claude בונה', tool:'Claude', devices:['pc'], budget:60,
+          steps:['שולחים ל-Claude את הפרומפט, צילום הטופס, הלוגו והצבעים, ולוחצים "התחלנו"','"התוצר מוכן" כשהאפליקציה עולה לכתובת הקבועה','ממלאים אותה משני הטלפונים, כולל הכתבה בעברית','בודקים שהמונה על המקרן עולה עם כל שליחה'],
+          good:['באוויר תוך שעה, כי בסדנה שולחים בדקה 8 ומראים בדקה 72','נפתחת בלי חשבון בשני הטלפונים, וההכתבה בעברית עובדת בספארי ובכרום','בצבעים ובלוגו של הלקוח, ונראית מקצועית'],
+          backup:'הגרסה שיצאה כאן נשמרת ב-Vercel כגרסת הגיבוי' },
+        { id:'film', seg:13, title:'סרט הסיום', tool:'עריכת וידאו', devices:['pc'], budget:25,
+          steps:['לוקחים פוסטרים וטריילרים מהבדיקות כאן, ואת ההמנון','מרכיבים סרט של דקה וחצי','עוצרים כשהסרט מוכן ומתנגן עם קול'],
+          good:['מוכן תוך 25 דקות, כדי שיספיק בזמן הסדנה','הקול והתמונה מסונכרנים','נראה טוב גם עם תוצרים חלשים של משתתפים'],
+          backup:'שלד מוכן מראש, שבו רק מחליפים קטעים' }
+      ]
+    }
   },
   links: {
     companion: '',     // הדף המלווה למשתתפים
@@ -2773,7 +2865,7 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify({ i:S.i, clockSt
 function footer(st){
   const seg = L.segments[st.seg];
   const dots = seg.steps.map((_, k) => `<i class="${k === st.k ? 'on' : ''}"></i>`).join('');
-  const mins = seg.from < 0 ? 'לפני ההתחלה' : `דקות ${seg.from}–${seg.to}`;
+  const mins = seg.from < 0 ? 'לפני ההתחלה' : `דקות <bdi dir="ltr">${seg.from}–${seg.to}</bdi>`;
   return `<div class="foot"><span>${esc(seg.title)} · ${mins}</span><span class="dots">${dots}</span><span class="clock" data-clock>00:00</span></div>`;
 }
 function head(st){
@@ -2948,7 +3040,7 @@ function drawOv(){
     ovLayer.querySelectorAll('button[data-go]').forEach(b => b.onclick = () => go(+b.dataset.go));
     const c = ovLayer.querySelector('.cur'); if (c) c.focus();
   } else if (S.ov === 'help'){
-    const rows = [['→ ← או קליקר','הבא / הקודם'],['T','טיימר: הפעלה ועצירה · R איפוס'],['W','הקיר, מכל מקום'],['Q','הברקוד של הדף המלווה'],['D','הגרלת שולחן'],['O','פתיחה בחלון חדש'],['B','מסך שחור'],['G','כל השלבים'],['P','מסך המנחה בחלון נפרד'],['Y','מצב חזרה: ליווי ומשוב'],['S','הפעלה ועצירה של השעון'],['F','מסך מלא'],['Esc','סגירה']];
+    const rows = [['→ ← או קליקר','הבא / הקודם'],['T','טיימר: הפעלה ועצירה · R איפוס'],['W','הקיר, מכל מקום'],['Q','הברקוד של הדף המלווה'],['D','הגרלת שולחן'],['O','פתיחה בחלון חדש'],['B','מסך שחור'],['G','כל השלבים'],['P','מסך המנחה בחלון נפרד'],['Y','חזרה מלאה ובדיקת תוצרים'],['S','הפעלה ועצירה של השעון'],['F','מסך מלא'],['Esc','סגירה']];
     ovLayer.innerHTML = `<div class="help"><h2>מקשים</h2>${rows.map(r => `<span class="kb">${esc(r[0])}</span><span>${esc(r[1])}</span>`).join('')}</div>`;
   } else if (S.ov === 'draw'){
     ovLayer.innerHTML = `<div class="draw"><div class="lbl">שולחן</div><div class="num" data-drawnum>?</div><div class="drawn" data-drawn></div></div>`;
@@ -2958,7 +3050,7 @@ function drawOv(){
 function agendaHtml(curClass){
   let html = '', idx = 0;
   L.segments.forEach(seg => {
-    html += `<section><h3>${esc(seg.title)}${seg.from >= 0 ? ` · ${seg.from}–${seg.to}` : ''}</h3>`;
+    html += `<section><h3>${esc(seg.title)}${seg.from >= 0 ? ` · <bdi dir="ltr">${seg.from}–${seg.to}</bdi>` : ''}</h3>`;
     seg.steps.forEach(st => { html += `<button type="button" data-go="${idx}" class="${idx === S.i ? curClass : ''}">${esc(stepLabel(st))}</button>`; idx++; });
     html += '</section>';
   });
@@ -2983,7 +3075,7 @@ function openWin(hash, name){
   setTimeout(push, 600);
 }
 const openPresenter = () => openWin('#presenter', 'nx-presenter');
-const openRehearsal = () => openWin('#rehearsal', 'nx-rehearsal');
+const openRehearsal = () => { let m = 'rehearsal'; try { m = localStorage.getItem(KEY + '-mode') || m; } catch(e){} openWin('#' + m, 'nx-rehearsal'); };
 
 /* פקודות. אותן פקודות מגיעות מהמקלדת, מהקליקר וממסך המנחה */
 function cmd(c, arg){
@@ -3067,7 +3159,7 @@ function bootPresenter(){
   addEventListener('message', ev => {
     const d = ev.data || {}; if (d.type !== 'state') return; st = d;
     const cur = STEPS[d.i], nx = STEPS[d.i+1], seg = L.segments[cur.seg];
-    root.querySelector('[data-seg]').innerHTML = `${esc(seg.title)}<small>${seg.from >= 0 ? `דקות ${seg.from}–${seg.to} מתוך 90` : 'לפני ההתחלה'} · שלב ${cur.k+1} מתוך ${seg.steps.length}</small>`;
+    root.querySelector('[data-seg]').innerHTML = `${esc(seg.title)}<small>${seg.from >= 0 ? `דקות <bdi dir="ltr">${seg.from}–${seg.to}</bdi> מתוך 90` : 'לפני ההתחלה'} · שלב ${cur.k+1} מתוך ${seg.steps.length}</small>`;
     const el = d.clockStart ? Math.floor((Date.now() - d.clockStart)/1000) : 0, mins = el/60;
     root.querySelector('[data-pclock]').textContent = d.clockStart ? hms(el) : 'השעון לא רץ';
     const stEl = root.querySelector('[data-status]');
@@ -3092,15 +3184,61 @@ function bootPresenter(){
   });
   function agendaListHtml(curI){
     let html = '', idx = 0;
-    L.segments.forEach(seg => { html += `<section><h5>${esc(seg.title)}${seg.from >= 0 ? ` · ${seg.from}–${seg.to}` : ''}</h5>`; seg.steps.forEach(s => { html += `<button type="button" data-go="${idx}" class="${idx === curI ? 'cur' : ''}">${esc(stepLabel(s))}</button>`; idx++; }); html += '</section>'; });
+    L.segments.forEach(seg => { html += `<section><h5>${esc(seg.title)}${seg.from >= 0 ? ` · <bdi dir="ltr">${seg.from}–${seg.to}</bdi>` : ''}</h5>`; seg.steps.forEach(s => { html += `<button type="button" data-go="${idx}" class="${idx === curI ? 'cur' : ''}">${esc(stepLabel(s))}</button>`; idx++; }); html += '</section>'; });
     return html;
   }
 }
 
 
-/* ---------- מסך החזרה ---------- */
+/* ---------- משותף לחזרה המלאה ולבדיקת התוצרים ---------- */
+const TT = (L.rehearsal || {}).tooltest || { items:[] };
+const TK = KEY + '-tools';
+const DEV = { iphone:'אייפון', android:'אנדרואיד', pc:'מחשב' };
+const QUAL = { good:'טוב', ok:'סביר', bad:'לא טוב' };
+const TTSTAT = { ok:['עבר','ok'], warn:['איטי או סביר','fix'], bad:['לא עבד','late'], part:['באמצע',''], none:['לא נבדק',''] };
+const ttTask = x => x.task ? ((L.segments[x.task[0]] || { steps:[] }).steps[x.task[1]] || null) : null;
+const ttSeg = x => L.segments[x.task ? x.task[0] : x.seg] || { title:'', from:-1, to:0 };
+const ttBudget = x => x.budget || (ttTask(x) || {}).minutes || 0;
+const ttMs = r => !r ? null : r.ms != null ? r.ms : r.start ? Date.now() - r.start : null;
+function ttLoad(){ try { return JSON.parse(localStorage.getItem(TK) || 'null'); } catch(e){ return null; } }
+/* עבר = נמדד בכל המכשירים, עבד, בזמן, ויצא טוב */
+function ttStatus(x, s){
+  if (!s) return 'none';
+  const runs = x.devices.map(d => (s.runs || {})[d] || {}), b = ttBudget(x) * 60000;
+  if (runs.some(r => r.res === 'fail') || s.q === 'bad') return 'bad';
+  if (runs.some(r => r.ms != null && b && r.ms > b) || s.q === 'ok') return 'warn';
+  if (runs.every(r => r.ms != null && r.res === 'ok') && s.q === 'good') return 'ok';
+  if (runs.some(r => r.ms != null || r.start || r.res) || s.q) return 'part';
+  return 'none';
+}
+let switching = false;
+function modeBar(cur){
+  const b = (m, t, s) => `<button type="button" data-mode="${m}" aria-pressed="${cur === m}">${t}<small>${s}</small></button>`;
+  return `<div class="rv-mode" role="group" aria-label="איזו חזרה">${b('tooltest', 'בדיקת תוצרים', 'כמה ימים לפני')}${b('rehearsal', 'חזרה מלאה', 'שעה וחצי, בבית')}</div>`;
+}
+function setMode(m){
+  switching = true;
+  try { localStorage.setItem(KEY + '-mode', m); } catch(e){}
+  location.replace(location.href.split('#')[0] + '#' + m);
+  location.reload();
+}
+/* כשהמסך הראשי פותח את החלון הזה שוב במצב אחר, רק החלק אחרי # משתנה. טוענים מחדש במצב הנכון */
+function watchMode(){ addEventListener('hashchange', () => { if (!switching) location.reload(); }); }
+/* אחרי ציור מחדש, הפוקוס חוזר לכפתור שנלחץ, או לכפתור שבא במקומו */
+function keepFocus(root, paint){
+  const a = document.activeElement, keys = ['start','stop','res','v','q','tab','a','view','mode','rate'];
+  const sel = a && root.contains(a) && a.dataset ? keys.filter(k => a.dataset[k] != null).map(k => `[data-${k}="${a.dataset[k]}"]`).join('') : '';
+  const y = root.scrollTop; paint(); root.scrollTop = y;
+  if (!sel) return;
+  const swap = sel.replace('data-start', 'data-STOP').replace('data-stop', 'data-start').replace('data-STOP', 'data-stop');
+  const el = root.querySelector(sel) || root.querySelector(swap); if (el) el.focus();
+}
+
+/* ---------- מסך החזרה המלאה ---------- */
 function bootRehearsal(){
   document.getElementById('vp').hidden = true;
+  try { localStorage.setItem(KEY + '-mode', 'rehearsal'); } catch(e){}
+  watchMode();
   const RH = L.rehearsal || {}, RK = KEY + '-reh';
   const fresh = () => ({ started:null, ended:null, cur:-1, view:-1, segs:{}, prep:{}, drills:{}, general:'', tab:'before' });
   let R; try { R = JSON.parse(localStorage.getItem(RK) || 'null') || fresh(); } catch(e){ R = fresh(); }
@@ -3136,7 +3274,7 @@ function bootRehearsal(){
       : '<button type="button" class="rv-btn" data-a="start">ריצה חוזרת (המדידה מתאפסת)</button>';
     const tabs = [['before','1 · לפני'],['during','2 · בזמן הריצה'],['drills','3 · תרגול תקלות'],['summary','4 · סיכום ותיקונים']]
       .map(([k, t]) => `<button type="button" role="tab" aria-selected="${R.tab === k}" data-tab="${k}">${t}</button>`).join('');
-    return `<div class="rv-top"><div><h1>חזרה בבית · ${esc(L.title)}</h1><small>${esc(L.client)} · ${esc((L.info || []).join(' · '))} · ארן ומתי</small></div><div class="rv-row">${status}${run}</div></div><div class="rv-tabs" role="tablist">${tabs}</div>`;
+    return `${modeBar('rehearsal')}<div class="rv-top"><div><h1>חזרה מלאה בבית · ${esc(L.title)}</h1><small>${esc(L.client)} · ${esc((L.info || []).join(' · '))} · ארן ומתי</small></div><div class="rv-row">${status}${run}</div></div><div class="rv-tabs" role="tablist">${tabs}</div>`;
   }
   function tabBefore(){
     const guide = (RH.guide || []).map(g => `<li>${esc(g)}</li>`).join('');
@@ -3146,7 +3284,13 @@ function bootRehearsal(){
       <div class="rv-card"><h2>מה בודקים בדרך</h2><p>${L.segments.length} מקטעים, ${STEPS.length} שלבים על המסך ו-${nChecks} בדיקות. בכל מקטע מסמנים כל בדיקה "עבד" או "נכשל", נותנים ציון למקטע, וכותבים מה לתקן.</p>
       <p>המסך הראשי נפתח מקובץ המלווה. מקש Y שם פותח את המסך הזה מחובר אליו. אם המסך הזה פתוח לבד, בוחרים מקטע מהטבלה בלשונית "בזמן הריצה".</p></div></div>
       <div><div class="rv-card"><h2>הכנה, שעה לפני</h2>${prep}</div>
-      ${missing.length ? `<div class="rv-card rv-miss"><b>חסרים קישורים במלווה:</b> ${missing.map(esc).join(' · ')}</div>` : '<div class="rv-card"><span class="rv-chip ok">כל הקישורים במלווה מלאים</span></div>'}</div></div>`;
+      ${missing.length ? `<div class="rv-card rv-miss"><b>חסרים קישורים במלווה:</b> ${missing.map(esc).join(' · ')}</div>` : '<div class="rv-card"><span class="rv-chip ok">כל הקישורים במלווה מלאים</span></div>'}
+      ${toolCard()}</div></div>`;
+  }
+  function toolCounts(){ const t = ttLoad() || { items:{} }, it = TT.items || []; const st = it.map(x => ttStatus(x, (t.items || {})[x.id])); return { n:it.length, ok:st.filter(s => s === 'ok').length, fix:st.filter(s => s === 'bad' || s === 'warn').length }; }
+  function toolCard(){
+    const c = toolCounts(); if (!c.n) return '';
+    return `<div class="rv-card"><h2>בדיקת תוצרים</h2><p>${c.ok === 1 ? `בדיקה אחת מתוך ${c.n} עברה` : `${c.ok} מתוך ${c.n} בדיקות עברו`}${c.fix ? (c.fix === 1 ? ', ובדיקה אחת צריכה תיקון' : `, ו-${c.fix} צריכות תיקון`) : ''}. עושים אותה כמה ימים לפני החזרה הזו, כדי שיהיה זמן לתקן.</p><button type="button" class="rv-btn" data-mode="tooltest">לבדיקת התוצרים</button></div>`;
   }
   function tri(attr, val, opts){ return `<div class="tri">${opts.map(([k, t, cls]) => `<button type="button" ${attr}="${k}" class="${val === k ? cls : ''}" aria-pressed="${val === k}">${t}</button>`).join('')}</div>`; }
   function tabDuring(){
@@ -3163,7 +3307,7 @@ function bootRehearsal(){
       return `<tr class="${i === R.cur ? 'cur' : ''}"><td><button type="button" data-view="${i}">${esc(x.title)}</button></td><td class="n">${x.from >= 0 ? planned(i) : '–'}</td><td class="n" data-act="${i}">${R.started ? mins(ac) : '–'}</td><td>${R.started && x.from >= 0 && ov > 60000 ? `<span class="rv-chip late">+${Math.ceil(ov/60000)}</span>` : ''}</td><td>${st}${fails ? ` <span class="rv-chip late">${fails} נכשלו</span>` : ''}</td></tr>`; }).join('');
     return `<div class="rv-grid"><div>
       <div class="rv-card"><h2>${si === R.cur ? 'עכשיו על המסך' : 'מקטע שבחרתם'}</h2><h3>${esc(g.title)}</h3>
-        <div class="rv-stat"><span>${g.from >= 0 ? `מתוכנן: דקות ${g.from}–${g.to} (${pl} דק')` : 'לפני ההתחלה'}</span><span>בפועל: <span class="rv-big" data-act-big="${si}">${R.started ? mins(a) : '–'}</span> דק'</span>${chip}${live ? '<span class="rv-chip">רץ</span>' : ''}</div>
+        <div class="rv-stat"><span>${g.from >= 0 ? `מתוכנן: דקות <bdi dir="ltr">${g.from}–${g.to}</bdi> (${pl} דק')` : 'לפני ההתחלה'}</span><span>בפועל: <span class="rv-big" data-act-big="${si}">${R.started ? mins(a) : '–'}</span> דק'</span>${chip}${live ? '<span class="rv-chip">רץ</span>' : ''}</div>
         ${nav}</div>
       <div class="rv-card"><h2>מה אמור לקרות</h2><ol class="rv-steps">${steps}</ol></div>
       <div class="rv-card"><h2>בדיקות</h2>${checks}</div>
@@ -3182,6 +3326,7 @@ function bootRehearsal(){
     out.push(`תאריך החזרה: ${d.toLocaleDateString('he-IL')} · הסדנה: ${(L.info || []).join(' · ')}`);
     const runMs = L.segments.reduce((a, g, i) => a + (g.from >= 0 ? actual(i) : 0), 0);
     if (R.started) out.push(`משך בפועל, בלי "לפני שמתחילים": ${mins(runMs)} דקות. מתוכנן: 90.`); else out.push('הריצה עוד לא התחילה, אז אין מדידת זמנים.');
+    const tc = toolCounts(); if (tc.n) out.push(`בדיקת תוצרים: ${tc.ok} מתוך ${tc.n} עברו${tc.fix ? `, ${tc.fix === 1 ? 'אחת צריכה' : tc.fix + ' צריכות'} תיקון (הפירוט בסיכום של בדיקת התוצרים)` : ''}.`);
     L.segments.forEach((g, i) => {
       const s = R.segs[i] || { checks:{} };
       const ov = actual(i) - planned(i) * 60000;
@@ -3218,6 +3363,7 @@ function bootRehearsal(){
 
   root.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.mode){ if (b.dataset.mode !== 'rehearsal') setMode(b.dataset.mode); return; }
     if (b.dataset.tab){ R.tab = b.dataset.tab; saveR(); render(); return; }
     if (b.dataset.view != null){ R.view = +b.dataset.view; if (!linked && R.started && !R.ended) moveTo(+b.dataset.view); saveR(); renderTab(); return; }
     const a = b.dataset.a;
@@ -3258,7 +3404,139 @@ function bootRehearsal(){
   render();
 }
 
-if (IS_PRESENTER) bootPresenter(); else if (location.hash === '#rehearsal') bootRehearsal(); else bootMain();
+/* ---------- בדיקת תוצרים: כמה ימים לפני הסדנה ----------
+   לכל דבר שנוצר בסדנה: ההנחיה שעל המסך, מה עושים בבדיקה, שעון לכל טלפון מול הזמן שיש בסדנה,
+   האם עבד, איך יצא, וקישור לתוצר הכי טוב כגיבוי. בסוף סיכום להדבקה בשיחה עם Claude. */
+function bootToolTest(){
+  document.getElementById('vp').hidden = true;
+  try { localStorage.setItem(KEY + '-mode', 'tooltest'); } catch(e){}
+  watchMode();
+  const items = TT.items || [];
+  const fresh = () => ({ tab:'before', prep:{}, items:{}, general:'', view:0, date:null });
+  let T = ttLoad() || fresh();
+  const saveT = () => { try { localStorage.setItem(TK, JSON.stringify(T)); } catch(e){} };
+  const it = id => (T.items[id] = T.items[id] || { runs:{}, q:null, link:'', note:'' });
+  const root = document.createElement('div'); root.className = 'rv'; document.body.appendChild(root);
+  const mins = ms => Math.round(ms / 6000) / 10;
+  const clock = ms => ms == null ? '0:00' : fmt(ms / 1000);
+  const vi = () => Math.min(Math.max(0, T.view || 0), Math.max(0, items.length - 1));
+  const chipFor = x => { const [t, c] = TTSTAT[ttStatus(x, T.items[x.id])]; return `<span class="rv-chip ${c}">${t}</span>`; };
+  const li = arr => (arr || []).map(t => `<li>${esc(t)}</li>`).join('');
+
+  function header(){
+    const done = items.filter(x => ttStatus(x, T.items[x.id]) === 'ok').length;
+    const tabs = [['before','1 · לפני'],['tests','2 · הבדיקות'],['summary','3 · סיכום ותיקונים']]
+      .map(([k, t]) => `<button type="button" role="tab" aria-selected="${T.tab === k}" data-tab="${k}">${t}</button>`).join('');
+    return `${modeBar('tooltest')}<div class="rv-top"><div><h1>בדיקת תוצרים · ${esc(L.title)}</h1><small>${esc(L.client)} · ${esc(TT.when || 'כמה ימים לפני הסדנה')}</small></div>
+      <div class="rv-row"><span class="rv-chip ${items.length && done === items.length ? 'ok' : ''}">${done} מתוך ${items.length} עברו</span></div></div><div class="rv-tabs" role="tablist">${tabs}</div>`;
+  }
+  function tabBefore(){
+    const prep = (TT.prep || []).map((p, i) => `<label class="cb"><input type="checkbox" data-tprep="${i}" ${T.prep[i] ? 'checked' : ''}><span>${esc(p)}</span></label>`).join('');
+    const list = items.map(x => `<li>${esc(x.title)} <small><bdi>${esc(x.tool || '')}</bdi> · ${ttBudget(x)} דק' ${x.ahead ? 'הכנה מראש' : 'בסדנה'} · ${x.devices.map(d => DEV[d]).join(' ו')}</small></li>`).join('');
+    return `<div class="rv-grid"><div><div class="rv-card"><h2>איך עושים את הבדיקה</h2><ol class="guide">${li(TT.guide)}</ol></div>
+      <div class="rv-card"><h2>מה בודקים</h2><ol class="rv-steps">${list}</ol><button type="button" class="rv-btn pri" data-tab="tests">מתחילים לבדוק</button></div></div>
+      <div><div class="rv-card"><h2>מה מכינים</h2>${prep}</div></div></div>`;
+  }
+  function devRow(x, d){
+    const r = it(x.id).runs[d] || {}, ms = ttMs(r), over = ms != null && ttBudget(x) && ms > ttBudget(x) * 60000;
+    const btn = r.start ? `<button type="button" class="rv-btn pri" data-stop="${d}">התוצר מוכן</button>`
+      : `<button type="button" class="rv-btn" data-start="${d}">${r.ms != null ? 'מדידה חוזרת' : 'התחלנו'}</button>`;
+    const res = [['ok','עבד','on-ok'],['fail','נכשל','on-fail']].map(([v, t, cls]) => `<button type="button" data-res="${d}" data-v="${v}" class="${r.res === v ? cls : ''}" aria-pressed="${r.res === v}">${t}</button>`).join('');
+    return `<div class="dev"><b>${DEV[d]}</b><span class="rv-time${over ? ' over' : ''}" data-run="${d}" aria-label="זמן ב${DEV[d]}">${clock(ms)}</span>${btn}<div class="tri" role="group" aria-label="האם עבד ב${DEV[d]}">${res}</div></div>`;
+  }
+  function tabTests(){
+    if (!items.length) return '<div class="rv-card"><p>אין בדיקות. מוסיפים אותן ב-LESSON, תחת rehearsal.tooltest.items.</p></div>';
+    const i = vi(), x = items[i], s = it(x.id), g = ttSeg(x), task = ttTask(x), b = ttBudget(x);
+    const head = `<div class="rv-card"><h2>${esc(g.title)}${g.from >= 0 ? ` · דקות <bdi dir="ltr">${g.from}–${g.to}</bdi>` : ''}</h2><h3>${esc(x.title)}</h3>
+      <div class="rv-stat"><span>הכלי: <bdi>${esc(x.tool || '')}</bdi></span><span>${x.ahead ? 'זמן הכנה מראש' : 'זמן בסדנה'}: ${b} דק'</span>${chipFor(x)}</div>
+      <div class="rv-row"><button type="button" class="rv-btn" data-a="prevItem" ${i === 0 ? 'disabled' : ''}>הבדיקה הקודמת</button><button type="button" class="rv-btn pri" data-a="nextItem" ${i === items.length - 1 ? 'disabled' : ''}>הבדיקה הבאה</button></div></div>`;
+    const onScreen = task && task.steps ? `<div class="rv-card"><h2>ההנחיה שעל המסך</h2><ol class="rv-steps">${li(task.steps)}</ol></div>` : '';
+    const steps = `<div class="rv-card"><h2>מה עושים בבדיקה</h2><ol class="rv-steps">${li(x.steps)}</ol>${x.limits ? `<p class="rv-note"><b>לבדוק גם:</b> ${esc(x.limits)}</p>` : ''}</div>`;
+    const times = `<div class="rv-card"><h2>זמנים</h2><p>${x.ahead ? `מתכננים ${b} דק' להכנה.` : `בסדנה יש ${b} דק'.`} לוחצים "התחלנו" כשמתחילים, ו"התוצר מוכן" כשהוא מוכן.</p>${x.devices.map(d => devRow(x, d)).join('')}</div>`;
+    const qual = [['good','טוב','on-ok'],['ok','סביר','on-fix'],['bad','לא טוב','on-fail']].map(([v, t, cls]) => `<button type="button" data-q="${v}" class="${s.q === v ? cls : ''}" aria-pressed="${s.q === v}">${t}</button>`).join('');
+    const out = `<div class="rv-card"><h2>איך יצא</h2><p>מה נחשב טוב:</p><ul class="good">${li(x.good)}</ul><div class="tri" role="group" aria-label="איך יצא">${qual}</div>
+      ${x.backup ? `<p class="rv-note"><b>הגיבוי לסדנה:</b> ${esc(x.backup)}</p>` : ''}
+      <p style="margin-top:12px"><label for="link-${x.id}">קישור לתוצר הכי טוב, כגיבוי</label></p><input class="tx" type="url" id="link-${x.id}" data-link value="${esc(s.link)}" placeholder="https://">
+      <p style="margin-top:12px"><label for="tnote-${x.id}">מה לתקן, או מה עזר</label></p><textarea id="tnote-${x.id}" data-tnote placeholder="למשל: באנדרואיד ההרשמה ל-Suno ביקשה קוד בהודעה, וזה לקח שתי דקות">${esc(s.note)}</textarea></div>`;
+    const rows = items.map((y, k) => { const sy = T.items[y.id] || { runs:{} };
+      const tm = y.devices.map(d => { const ms = ttMs((sy.runs || {})[d]); return `<span class="tm">${DEV[d]}: <bdi>${ms == null ? '–' : clock(ms)}</bdi></span>`; }).join('<br>');
+      return `<tr class="${k === i ? 'cur' : ''}"><td><button type="button" data-view="${k}">${esc(y.title)}</button></td><td class="n">${ttBudget(y)}</td><td class="n">${tm}</td><td>${chipFor(y)}</td></tr>`; }).join('');
+    return `<div class="rv-grid"><div>${head}${onScreen}${steps}${times}${out}</div>
+      <div><div class="rv-card"><h2>כל הבדיקות</h2><div class="rv-tw"><table class="rv-t tt"><thead><tr><th>בדיקה</th><th>דקות</th><th>בפועל</th><th>מצב</th></tr></thead><tbody>${rows}</tbody></table></div></div></div></div>`;
+  }
+  function summaryText(){
+    const out = [], fixes = [], backups = [], noBackup = [], todo = [];
+    out.push(`# בדיקת תוצרים · ${L.title} · ${L.client}`);
+    out.push(`תאריך הבדיקה: ${new Date(T.date || Date.now()).toLocaleDateString('he-IL')} · הסדנה: ${(L.info || []).join(' · ')}`);
+    out.push(`עברו ${items.filter(x => ttStatus(x, T.items[x.id]) === 'ok').length} מתוך ${items.length} בדיקות.`);
+    items.forEach(x => {
+      const s = T.items[x.id] || { runs:{} }, b = ttBudget(x);
+      x.devices.forEach(d => { const r = (s.runs || {})[d] || {};
+        if (r.res === 'fail') fixes.push(`- [${x.title}] לא עבד ב${DEV[d]}.`);
+        if (r.ms != null && b && r.ms > b * 60000) fixes.push(`- [${x.title}] ב${DEV[d]} לקח ${mins(r.ms)} דק'. ${x.ahead ? 'תכננו' : 'בסדנה יש'} ${b}.`);
+        if (r.ms == null) todo.push(`- [${x.title}] ${DEV[d]}: לא נמדד זמן`); else if (!r.res) todo.push(`- [${x.title}] ${DEV[d]}: לא סומן אם עבד`);
+      });
+      const note = (s.note || '').trim();
+      if (s.q === 'bad' || s.q === 'ok') fixes.push(`- [${x.title}] יצא ${QUAL[s.q]}${note ? `: ${note}` : '.'}`);
+      else if (note) fixes.push(`- [${x.title}] הערה: ${note}`);
+      if (!s.q) todo.push(`- [${x.title}] לא סומן איך יצא`);
+      if ((s.link || '').trim()) backups.push(`- [${x.title}] ${s.link.trim()}`); else if (x.backup) noBackup.push(`- [${x.title}] ${x.backup}`);
+    });
+    out.push('', '## מה לתקן לפני הסדנה', fixes.length ? fixes.join('\n') : '- לא סומן שום דבר לתיקון.');
+    out.push('', '## גיבויים שנשמרו', backups.length ? backups.join('\n') : '- עוד לא נשמרו קישורים.');
+    if (noBackup.length) out.push('', '## גיבויים שעוד חסרים', noBackup.join('\n'));
+    if (todo.length) out.push('', '## מה עוד לא נבדק', todo.join('\n'));
+    const notPrepped = (TT.prep || []).filter((_, i) => !T.prep[i]).map(p => `- ${p}`);
+    if (notPrepped.length) out.push('', '## הכנה שלא סומנה', notPrepped.join('\n'));
+    out.push('', '## לפי בדיקה (דקות)', '| בדיקה | בסדנה | אייפון | אנדרואיד | מחשב | איך יצא |', '|---|---|---|---|---|---|');
+    items.forEach(x => { const s = T.items[x.id] || { runs:{} };
+      const cell = d => { if (!x.devices.includes(d)) return '–'; const r = (s.runs || {})[d] || {}; return r.ms == null ? 'לא נמדד' : mins(r.ms) + (r.res === 'fail' ? ' (נכשל)' : ''); };
+      out.push(`| ${x.title} | ${ttBudget(x)} | ${cell('iphone')} | ${cell('android')} | ${cell('pc')} | ${s.q ? QUAL[s.q] : ''} |`); });
+    if ((T.general || '').trim()) out.push('', '## הערות כלליות', T.general.trim());
+    out.push('', 'מדביקים את הסיכום הזה בשיחה עם Claude, ומבקשים: לתקן הנחיות וזמנים לפי הרשימה, להחליף כלי שלא עמד בזמן, ולהכניס את הגיבויים למלווה.');
+    return out.join('\n');
+  }
+  function tabSummary(){
+    return `<div class="rv-grid"><div class="rv-card"><h2>הסיכום</h2><pre data-sum>${esc(summaryText())}</pre>
+      <div class="rv-row"><button type="button" class="rv-btn pri" data-a="copy">העתקה</button><button type="button" class="rv-btn" data-a="download">שמירה כקובץ</button><span data-copied class="rv-chip" hidden>הועתק</span></div></div>
+      <div><div class="rv-card"><h2>הערות כלליות</h2><p><label for="tgeneral">מה הפתיע, מה להחליף, מה להכין מראש</label></p><textarea id="tgeneral" data-tgeneral>${esc(T.general)}</textarea></div>
+      <div class="rv-card"><h2>מתחילים מחדש</h2><p>מוחק את כל המדידות והסימונים של בדיקת התוצרים במחשב הזה.</p><button type="button" class="rv-btn" data-a="reset">בדיקה חדשה</button></div></div></div>`;
+  }
+  function render(){ keepFocus(root, () => { root.innerHTML = header() + '<div data-tabbox>' + ({ before:tabBefore, tests:tabTests, summary:tabSummary }[T.tab] || tabBefore)() + '</div>'; }); }
+  function selectSum(){ const pre = root.querySelector('[data-sum]'); if (!pre) return; const r = document.createRange(); r.selectNodeContents(pre); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+  let armReset = false;
+
+  root.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    if (b.dataset.mode){ if (b.dataset.mode !== 'tooltest') setMode(b.dataset.mode); return; }
+    if (b.dataset.tab){ T.tab = b.dataset.tab; saveT(); render(); root.scrollTop = 0; return; }
+    if (b.dataset.view != null){ T.view = +b.dataset.view; saveT(); render(); root.scrollTop = 0; return; }
+    const a = b.dataset.a, x = items[vi()];
+    if (a === 'prevItem' || a === 'nextItem'){ T.view = vi() + (a === 'nextItem' ? 1 : -1); saveT(); render(); root.scrollTop = 0; return; }
+    if (a === 'copy'){ const t = summaryText(); const done = () => { const c = root.querySelector('[data-copied]'); if (c) c.hidden = false; };
+      if (navigator.clipboard) navigator.clipboard.writeText(t).then(done).catch(selectSum); else selectSum(); return; }
+    if (a === 'download'){ const blob = new Blob([summaryText()], { type:'text/markdown;charset=utf-8' }); const u = URL.createObjectURL(blob); const l = document.createElement('a'); l.href = u; l.download = `בדיקת-תוצרים-${L.client}.md`; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(u), 2000); return; }
+    if (a === 'reset'){ if (!armReset){ armReset = true; b.textContent = 'בטוח? לחיצה נוספת מוחקת הכול'; setTimeout(() => { armReset = false; render(); }, 4000); return; } T = fresh(); saveT(); armReset = false; render(); return; }
+    if (!x) return;
+    if (b.dataset.start){ it(x.id).runs[b.dataset.start] = { start:Date.now() }; if (!T.date) T.date = Date.now(); saveT(); render(); return; }
+    if (b.dataset.stop){ const r = it(x.id).runs[b.dataset.stop]; if (r && r.start){ r.ms = Date.now() - r.start; r.start = null; } saveT(); render(); return; }
+    if (b.dataset.res){ const runs = it(x.id).runs, r = (runs[b.dataset.res] = runs[b.dataset.res] || {}); r.res = r.res === b.dataset.v ? undefined : b.dataset.v; saveT(); render(); return; }
+    if (b.dataset.q){ const s = it(x.id); s.q = s.q === b.dataset.q ? null : b.dataset.q; saveT(); render(); return; }
+  });
+  root.addEventListener('change', e => { const t = e.target; if (t.dataset.tprep != null){ T.prep[+t.dataset.tprep] = t.checked; saveT(); } });
+  root.addEventListener('input', e => { const t = e.target, x = items[vi()];
+    if (t.dataset.link != null && x){ it(x.id).link = t.value; saveT(); }
+    if (t.dataset.tnote != null && x){ it(x.id).note = t.value; saveT(); }
+    if (t.dataset.tgeneral != null){ T.general = t.value; saveT(); const pre = root.querySelector('[data-sum]'); if (pre) pre.textContent = summaryText(); } });
+  /* השעון של הבדיקה שרצה עכשיו */
+  setInterval(() => {
+    if (T.tab !== 'tests') return; const x = items[vi()]; if (!x) return; const s = T.items[x.id]; if (!s) return;
+    root.querySelectorAll('[data-run]').forEach(el => { const r = s.runs[el.dataset.run]; if (!r || !r.start) return; const ms = ttMs(r); el.textContent = clock(ms); el.classList.toggle('over', !!ttBudget(x) && ms > ttBudget(x) * 60000); });
+  }, 500);
+  render();
+}
+
+if (IS_PRESENTER) bootPresenter(); else if (location.hash === '#rehearsal') bootRehearsal(); else if (location.hash === '#tooltest') bootToolTest(); else bootMain();
 })();
 </script>
 </body>
