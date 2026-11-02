@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>הדף המלווה · סדנת AI לכל אחד</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
+<style>
+/* דף אחד לטלפון, בצבעים של מצגת הסדנה: רקע טורקיז כהה, ירוק־לימון להדגשה */
+:root{
+  --deep:#0C2831; --bg:#113640; --card:#174652; --line:#2B5F6B; --paper:#F1F4F4; --muted:#B3C5CA;
+  --citron:#C6D63F; --citron-ink:#1A2A0A; --ok:#9BD3A0;
+  --font:'Heebo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--paper)}
+body{font-family:var(--font);font-size:17px;line-height:1.55;padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:var(--citron)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--citron);outline-offset:2px}
+
+header{background:var(--deep);padding-block:22px 18px}
+header .kick{margin:0;font-size:14px;font-weight:700;color:var(--citron)}
+header h1{margin:2px 0 6px;font-size:27px;font-weight:900;line-height:1.2}
+header p{margin:0;color:var(--muted);font-size:15.5px}
+
+nav.toc{display:flex;gap:6px;overflow-x:auto;padding-block:12px;scrollbar-width:none;position:sticky;top:0;z-index:5;background:var(--bg)}
+nav.toc::-webkit-scrollbar{display:none}
+nav.toc a{flex:none;text-decoration:none;color:var(--paper);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:700;white-space:nowrap}
+
+main{display:flex;flex-direction:column;gap:22px;padding-block:8px 20px}
+section{scroll-margin-top:60px}
+section>h2{margin:0 0 4px;font-size:22px;font-weight:900}
+section>.sub{margin:0 0 10px;color:var(--muted);font-size:15px}
+.kicker{display:block;font-size:13px;font-weight:700;color:var(--citron);margin-bottom:2px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.card h3{margin:0;font-size:16.5px;font-weight:800}
+.prompt{margin:0;background:var(--deep);border-radius:10px;padding:12px;font-family:var(--font);font-size:16px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.prompt[dir="ltr"]{text-align:left}
+.prompt .fill{color:var(--citron);font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.copy{border:0;background:var(--citron);color:var(--citron-ink);font-weight:800;border-radius:10px;padding:9px 18px;cursor:pointer}
+.copy.done{background:var(--ok)}
+.go{display:inline-block;text-decoration:none;border:1px solid var(--citron);color:var(--citron);font-weight:800;border-radius:10px;padding:8px 16px}
+.note{margin:0;font-size:15px;color:var(--muted)}
+ul.plain{margin:0;padding-inline-start:20px}
+ul.plain li{margin:3px 0}
+
+.team label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:700;color:var(--muted)}
+.team input{width:100%;border:1px solid var(--line);background:var(--deep);border-radius:10px;padding:10px 12px;font-weight:500;color:var(--paper)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--deep);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:15px}
+.chip[aria-pressed="true"]{background:var(--citron);color:var(--citron-ink);border-color:var(--citron);font-weight:800}
+
+.bar{position:fixed;inset:auto 0 0 0;z-index:10;background:var(--deep);border-top:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.bar .wrap{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:0}
+.bar span{font-size:14px;color:var(--muted)}
+.bar a{text-decoration:none;background:var(--citron);color:var(--citron-ink);font-weight:800;border-radius:10px;padding:9px 18px;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <p class="kick">דנשר · 11.11</p>
+  <h1>סדנת AI לכל אחד</h1>
+  <p>כל ההנחיות של היום. לוחצים "העתק", מדביקים בכלי, וזהו. לא צריך להקליד עברית בטלפון.</p>
+</div></header>
+
+<nav class="toc wrap" aria-label="חלקי הדף">
+  <a href="#start">לפני</a><a href="#poster">סבב 1</a><a href="#song">סבב 2</a><a href="#video">סבב 3</a><a href="#live">סבב 4</a><a href="#question">השאלה</a><a href="#work">העבודה שלנו</a><a href="#end">סיום</a>
+</nav>
+
+<main class="wrap">
+  <section id="start">
+    <h2>לפני שמתחילים</h2>
+    <div class="card">
+      <ul class="plain">
+        <li>פותחים את אפליקציית Gemini, עם <b>חשבון גוגל אישי</b>. חשבון של העבודה עלול לחסום חלק מהדברים.</li>
+        <li>אין אפליקציה? עובדים בדפדפן: <a href="https://gemini.google.com" target="_blank" rel="noopener">gemini.google.com</a></li>
+        <li>לא רוצים להופיע בצילומים? לוקחים מדבקה בכניסה.</li>
+        <li>בכל השולחנות עובדים רק עם פרטים מומצאים. לא מכניסים מידע של העבודה.</li>
+      </ul>
+    </div>
+    <div class="card team">
+      <h3>הצוות שלנו</h3>
+      <p class="note">ממלאים פעם אחת, וכל ההנחיות בדף מתעדכנות לבד.</p>
+      <label for="t-name">שם הצוות<input id="t-name" type="text" placeholder="למשל: סוכני הצפון" autocomplete="off"></label>
+      <label for="t-power">במה אנחנו הכי טובים<input id="t-power" type="text" placeholder="למשל: מסדרים חנות שלמה בחצי שעה" autocomplete="off"></label>
+      <label for="t-word">מילה אחת על הצוות<input id="t-word" type="text" placeholder="למשל: מאוחדים" autocomplete="off"></label>
+    </div>
+  </section>
+
+  <section id="poster">
+    <span class="kicker">סבב 1 · תמונה</span>
+    <h2>הפוסטר של הצוות</h2>
+    <p class="sub">מצלמים את עצמכם או משהו על השולחן, מצרפים את התמונה ב-Gemini, ומדביקים:</p>
+    <div class="card"><pre class="prompt" data-tpl="poster"></pre><div class="row"><button class="copy" type="button">העתק</button></div></div>
+    <div class="card">
+      <h3>לא רוצים פנים בתמונה?</h3>
+      <pre class="prompt" data-tpl="posterArt"></pre><div class="row"><button class="copy" type="button">העתק</button></div>
+    </div>
+    <div class="card">
+      <h3>ניסיון שני: שלושה כללים</h3>
+      <ul class="plain">
+        <li>מפרטים: מי בתמונה, איפה זה קורה, ובאיזה סגנון.</li>
+        <li>לא מוותרים אחרי ניסיון אחד. מדברים איתה: "יפה, עכשיו תעשה את הרקע כהה יותר".</li>
+        <li>בודקים את העברית בתמונה. לפעמים היא יוצאת משובשת, והכלי לא יגיד.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>המועמדת של השולחן לתמונת הקבוצה בוואטסאפ</h3>
+      <pre class="prompt" data-tpl="group"></pre><div class="row"><button class="copy" type="button">העתק</button></div>
+      <p class="note">מרובעת, סמל אחד גדול, בלי פנים ובלי מותגים. מה שיצא, לקיר.</p>
+    </div>
+  </section>
+
+  <section id="song">
+    <span class="kicker">סבב 2 · שיר</span>
+    <h2>ההמנון של השולחן</h2>
+    <p class="sub">אחראי המוזיקה עובד ב-Suno. קודם בוחרים סגנון:</p>
+    <div class="card">
+      <div class="chips" id="styles" role="group" aria-label="סגנון השיר">
+        <button class="chip" type="button" data-style="mizrahi" aria-pressed="true">מזרחית</button>
+        <button class="chip" type="button" data-style="rock" aria-pressed="false">רוק</button>
+        <button class="chip" type="button" data-style="rap" aria-pressed="false">ראפ</button>
+        <button class="chip" type="button" data-style="kids" aria-pressed="false">שיר ילדים</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>1. מבקשים מ-Gemini את המילים</h3>
+      <pre class="prompt" data-tpl="lyrics"></pre><div class="row"><button class="copy" type="button">העתק</button></div>
+    </div>
+    <div class="card">
+      <h3>2. ב-Suno: מדביקים את המילים, ובשדה הסגנון מדביקים את זה</h3>
+      <pre class="prompt" dir="ltr" data-tpl="style"></pre><div class="row"><button class="copy" type="button">העתק</button></div>
+      <p class="note">הסגנון כתוב באנגלית כי ככה Suno מבין אותו הכי טוב. פשוט מעתיקים.</p>
+    </div>
+    <p class="note">צוחקים עם הצוות, לא על אף אחד. כשהשיר מוכן, משתפים את הקישור לקיר.</p>
+  </section>
+
+  <section id="video">
+    <span class="kicker">סבב 3 · וידאו</span>
+    <h2>הטריילר של הצוות</h2>
+    <p class="sub">פותחים את <a href="https://klingai.com" target="_blank" rel="noopener">Kling</a>, מעלים את הפוסטר מסבב 1, ומוסיפים משפט אחד על התנועה. הכלי הזה מבין הכי טוב באנגלית:</p>
+    <div class="card"><h3>הדמות מנופפת למצלמה</h3><pre class="prompt" dir="ltr">The hero smiles and waves at the camera</pre><div class="row"><button class="copy" type="button">העתק</button></div></div>
+    <div class="card"><h3>המצלמה מתקרבת לאט</h3><pre class="prompt" dir="ltr">Slow cinematic camera push in, epic movie trailer mood</pre><div class="row"><button class="copy" type="button">העתק</button></div></div>
+    <div class="card"><h3>הצוות צועד קדימה</h3><pre class="prompt" dir="ltr">The team walks toward the camera in slow motion, wind blowing, heroic light</pre><div class="row"><button class="copy" type="button">העתק</button></div></div>
+    <p class="note">יש תור? לא מחכים. מה שיצא, לקיר. על המסך הגדול נחייה גם שלושה פוסטרים שלכם.</p>
+  </section>
+
+  <section id="live">
+    <span class="kicker">סבב 4 · בזוגות</span>
+    <h2>מדברים עם Gemini דרך המצלמה</h2>
+    <p class="sub">פותחים את Gemini באפליקציה, לוחצים על הכפתור של השיחה החיה, ומדליקים מצלמה. בוחרים אחד:</p>
+    <div class="card"><h3>מכוונים למשהו בחדר</h3><p class="note">ושואלים בקול: "מה זה, ואיך זה עובד?"</p></div>
+    <div class="card"><h3>משחק תפקידים</h3><p class="note">אומרים לה בקול: "את לקוח כועס שההזמנה שלו התעכבה, ואני מנסה להרגיע אותו. תתחילי."</p></div>
+    <p class="note">לא מכוונים את המצלמה למסמכים של העבודה.</p>
+  </section>
+
+  <section id="question">
+    <span class="kicker">כולם, אותה שאלה</span>
+    <h2>שואלים את Gemini</h2>
+    <p class="sub">מעתיקים בדיוק את השאלה הזו, ומעלים לקיר צילום מסך של התשובה:</p>
+    <div class="card"><pre class="prompt">מי ייסד את דנשר, ואיך זה התחיל?</pre><div class="row"><button class="copy" type="button">העתק</button></div></div>
+    <div class="card">
+      <h3>שני כללים לקחת הביתה</h3>
+      <ul class="plain">
+        <li>לפני ששואלים: אני יכול לבדוק את התשובה בשתי דקות?</li>
+        <li>"נשמע טוב" זה לא סימן שזה נכון.</li>
+      </ul>
+      <p class="note">ולא מכניסים לכלים החינמיים מידע של העבודה.</p>
+    </div>
+  </section>
+
+  <section id="work">
+    <span class="kicker">ומה זה עושה לעבודה שלנו?</span>
+    <h2>סקר אנונימי</h2>
+    <p class="sub">שאלה אחת, בלי שם.</p>
+    <div class="card"><div class="row"><a class="go" href="https://docs.google.com/forms/d/e/1FAIpQLSfzGMdAx6LJmNIJxuIKxBwSq1fnbhI0__Ok1PjYtK16WtcnXQ/viewform" target="_blank" rel="noopener">לסקר</a></div></div>
+    <div class="card">
+      <h3>בזוגות: מה לוקח לי שבוע, ומה בו רק אני יודע לבדוק?</h3>
+      <p class="note">כל אחד משלים את המשפט על העבודה שלו, ומספר לבן הזוג.</p>
+    </div>
+  </section>
+
+  <section id="end">
+    <span class="kicker">לפני שהולכים</span>
+    <h2>טופס סיום</h2>
+    <p class="sub">שתי דקות: שורה אחת לשבוע הקרוב, ושוב כמה אתם גאים בצוות.</p>
+    <div class="card"><div class="row"><a class="go" href="https://docs.google.com/forms/d/e/1FAIpQLSeefepKENrhBoRVTQUcw1S4LKSPtxUpVTSRkV9tuXZa9ydU9g/viewform" target="_blank" rel="noopener">לטופס הסיום</a></div></div>
+    <div class="card">
+      <h3>משימה לסוף היום</h3>
+      <p class="note">שולחים דבר אחד שעשיתם היום למישהו: למשפחה, לחבר, או לצוות.</p>
+    </div>
+  </section>
+</main>
+
+<div class="bar"><div class="wrap"><span>כל מה שיוצר, עולה לקיר</span><a href="https://padlet.com/nexadapt/padlet-s0253004ybp5evt1omf6" target="_blank" rel="noopener">לקיר</a></div></div>
+
+<script>
+(function(){
+  const KEY = 'nx-danshar-m';
+  const STYLES = {
+    mizrahi:{ he:'מזרחית', en:'Mizrahi pop, Israeli party song, Hebrew vocals, darbuka, upbeat, catchy chorus' },
+    rock:{ he:'רוק', en:'Israeli rock anthem, Hebrew vocals, electric guitars, energetic, big chorus' },
+    rap:{ he:'ראפ', en:'Hebrew rap, hip hop beat, confident flow, catchy hook' },
+    kids:{ he:'שיר ילדים', en:"Children's song, playful, simple melody, Hebrew vocals, hand claps" }
+  };
+  let st = { name:'', power:'', word:'', style:'mizrahi' };
+  try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch(e){}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e){} };
+
+  const F = (v, ph) => v && v.trim() ? v.trim() : ph;
+  const TPL = {
+    poster: () => `תהפוך את התמונה לפוסטר של סרט גיבורי על. הגיבורים: ${F(st.name,'צוות המכירות של דנשר')}. כוח העל שלנו: ${F(st.power,'[במה אנחנו הכי טובים]')}. שם הסרט בעברית, באותיות גדולות למעלה: "${F(st.name,'[שם הסרט]')}". סגנון של פוסטר קולנוע, תאורה דרמטית, צבעים חזקים.`,
+    posterArt: () => `צור איור של פוסטר לסרט גיבורי על, בלי אנשים אמיתיים. הגיבורים: ${F(st.name,'צוות המכירות של דנשר')}, סוכני שטח שעוברים בין חנויות. כוח העל שלהם: ${F(st.power,'[במה אנחנו הכי טובים]')}. שם הסרט בעברית, באותיות גדולות למעלה: "${F(st.name,'[שם הסרט]')}". סגנון קומיקס צבעוני.`,
+    group: () => `צור תמונה מרובעת שתהיה תמונת הקבוצה בוואטסאפ של ${F(st.name,'[שם הצוות]')}. במרכז סמל אחד גדול שמבטא את ${F(st.power,'[במה הצוות הכי טוב]')}. איור שטוח וצבעוני על רקע אחיד, עם ניגודיות חזקה. בלי טקסט בכלל, או לכל היותר המילה "${F(st.word,'[מילה אחת]')}" באותיות גדולות. בלי פנים של אנשים ובלי לוגואים של מותגים. התמונה צריכה להיראות ברורה גם בעיגול קטן.`,
+    lyrics: () => `כתוב מילים להמנון קצר בעברית, בסגנון ${STYLES[st.style].he}, לצוות ${F(st.name,'[שם הצוות]')} בדנשר. אנחנו סוכני שטח שעוברים בין חנויות. על מה השיר: ${F(st.power,'[במה אנחנו הכי טובים]')}. שני בתים קצרים ופזמון שחוזר ונכנס לראש, שמכיל את "${F(st.name,'[שם הצוות]')}". מילים פשוטות שקל לשיר. מצחיק עם הצוות, לא על אף אחד. סמן את החלקים כך: [Verse] ו-[Chorus].`,
+    style: () => STYLES[st.style].en
+  };
+  const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  function render(){
+    document.querySelectorAll('[data-tpl]').forEach(el => {
+      const t = TPL[el.dataset.tpl]();
+      el.innerHTML = esc(t).replace(/\[[^\]]+\]/g, m => `<span class="fill">${m}</span>`);
+    });
+    document.querySelectorAll('#styles .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.style === st.style));
+  }
+  [['name','t-name'],['power','t-power'],['word','t-word']].forEach(([k,id]) => {
+    const el = document.getElementById(id); el.value = st[k] || '';
+    el.addEventListener('input', () => { st[k] = el.value; save(); render(); });
+  });
+  document.getElementById('styles').addEventListener('click', e => {
+    const b = e.target.closest('[data-style]'); if (!b) return;
+    st.style = b.dataset.style; save(); render();
+  });
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.copy'); if (!b) return;
+    const pre = b.closest('.card').querySelector('.prompt'); const text = pre.textContent;
+    const ok = () => { b.textContent = 'הועתק'; b.classList.add('done'); setTimeout(() => { b.textContent = 'העתק'; b.classList.remove('done'); }, 1800); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); try { document.execCommand('copy'); ok(); } catch(err){ b.textContent = 'סמנו והעתיקו'; } };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
