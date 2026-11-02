@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>סקר אנונימי · סדנת AI לכל אחד</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
+<style>
+:root{--deep:#0C2831;--bg:#113640;--card:#174652;--line:#2B5F6B;--paper:#F1F4F4;--muted:#B3C5CA;--citron:#C6D63F;--citron-ink:#1A2A0A;--warn:#F4A57E;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--paper);font-family:'Heebo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif}
+main{max-width:520px;margin:0 auto;padding:calc(28px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.kick{margin:0;color:var(--citron);font-weight:700;font-size:14px}
+h1{margin:0;font-size:28px;font-weight:900;line-height:1.25}
+.sub{margin:0;color:var(--muted)}
+button.o{width:100%;text-align:start;border:2px solid var(--line);background:var(--card);color:var(--paper);border-radius:14px;padding:16px;font:inherit;font-size:19px;font-weight:700;cursor:pointer}
+button.o:active{border-color:var(--citron)}
+button.o:disabled{opacity:.5}
+.done{background:var(--card);border:2px solid var(--citron);border-radius:14px;padding:18px;font-size:19px;font-weight:700}
+.err{color:var(--warn)}
+:focus-visible{outline:3px solid var(--citron);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+  <p class="kick">סקר אנונימי · בלי שם, בלי טלפון</p>
+  <h1>מה הכי מתאר אתכם מול כל זה?</h1>
+  <p class="sub">בוחרים תשובה אחת. התוצאות יופיעו על המסך.</p>
+  <div id="opts" style="display:flex;flex-direction:column;gap:10px">
+    <button class="o" type="button" data-c="0">כולם כבר שם, ורק אני מאחור</button>
+    <button class="o" type="button" data-c="1">הרבה כלים, לא יודע מאיפה להתחיל</button>
+    <button class="o" type="button" data-c="2">קצת מפחיד מה זה יעשה לעבודה</button>
+    <button class="o" type="button" data-c="3">מתלהב ורוצה עוד</button>
+  </div>
+  <p id="msg" class="sub" role="status"></p>
+</main>
+<script>
+(function(){
+  const KEY = 'nx-danshar-voted-survey', opts = document.getElementById('opts'), msg = document.getElementById('msg');
+  const done = () => { opts.innerHTML = '<div class="done">תודה. ההצבעה נקלטה, והתוצאות יופיעו על המסך.</div>'; msg.textContent = ''; };
+  try { if (localStorage.getItem(KEY)) done(); } catch(e){}
+  opts.addEventListener('click', async e => {
+    const b = e.target.closest('[data-c]'); if (!b) return;
+    opts.querySelectorAll('button').forEach(x => x.disabled = true); msg.textContent = 'שולח…';
+    try {
+      const r = await fetch('/api/live?op=vote', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ poll:'survey', choice: Number(b.dataset.c) }) });
+      if (!r.ok) throw new Error(r.status);
+      try { localStorage.setItem(KEY, '1'); } catch(e){}
+      done();
+    } catch(err){
+      opts.querySelectorAll('button').forEach(x => x.disabled = false);
+      msg.innerHTML = '<span class="err">לא נשלח. בודקים שיש אינטרנט ולוחצים שוב.</span>';
+    }
+  });
+})();
+</script>
+</body>
+</html>

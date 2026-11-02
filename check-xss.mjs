@@ -41,7 +41,7 @@ for (const p of pages) {
   await page.goto(BASE + p + '?status=' + encodeURIComponent(PAYLOAD) + '#' + encodeURIComponent(PAYLOAD), { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(150);
   const n = await page.evaluate(async (PAYLOAD) => {
-    const els = [...document.querySelectorAll('textarea, input:not([type=radio]):not([type=checkbox]):not([type=hidden]):not([type=submit]):not([type=button]):not([type=range])')];
+    const els = [...document.querySelectorAll('textarea, input:not([type=radio]):not([type=checkbox]):not([type=hidden]):not([type=submit]):not([type=button]):not([type=range]):not([type=file])')];
     for (const el of els) {
       const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
       const set = Object.getOwnPropertyDescriptor(proto, 'value').set;
