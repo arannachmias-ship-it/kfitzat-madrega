@@ -1,0 +1,64 @@
+/**
+ * בדיקות מקומיות ל-api/live.js. האחסון מדומה בזיכרון, ושום דבר לא יוצא לרשת.
+ * הרצה: node check-live.mjs
+ */
+import assert from 'node:assert/strict';
+import { Readable } from 'node:stream';
+import { _resetRateLimits } from './lib/api-guard.js';
+import crypto from 'node:crypto';
+
+process.env.LIVE_CODE_SHA = crypto.createHash('sha256').update('test-code-123').digest('hex');
+
+const blobs = new Map();
+let t = 0;
+globalThis.__liveStore = {
+  async put(pathname, body) { const url = 'https://abc.public.blob.vercel-storage.com/' + pathname; blobs.set(pathname, { url, pathname, body: Buffer.from(body), uploadedAt: new Date(1e12 + (t++) * 1000).toISOString() }); return { url, pathname }; },
+  async list({ prefix }) { return { blobs: [...blobs.values()].filter((b) => b.pathname.startsWith(prefix)), hasMore: false }; },
+  async del(urls) { for (const u of [].concat(urls)) for (const [k, b] of blobs) if (b.url === u) blobs.delete(k); },
+};
+globalThis.fetch = async (u) => { const b = [...blobs.values()].find((x) => x.url === String(u)); return b ? { ok: true, json: async () => JSON.parse(b.body.toString()), arrayBuffer: async () => b.body } : { ok: false, status: 404 }; };
+const { default: live } = await import('./api/live.js');
+
+function call({ method = 'GET', url, headers = {}, body, raw }) {
+  const data = raw ? raw : body === undefined ? null : Buffer.from(JSON.stringify(body));
+  const req = Readable.from(data ? [data] : []);
+  req.method = method; req.url = url;
+  req.headers = { origin: 'https://nexadapt.co.il', 'x-forwarded-for': '9.9.9.9', ...(data ? { 'content-length': String(data.length) } : {}), ...headers };
+  if (body !== undefined && !raw) req.body = body;
+  return new Promise((resolve) => {
+    const res = { statusCode: 200, headers: {}, setHeader(k, v) { this.headers[k] = v; }, status(c) { this.statusCode = c; return this; },
+      json(o) { resolve({ status: this.statusCode, body: o }); }, send(b) { resolve({ status: this.statusCode, raw: b }); } };
+    live(req, res);
+  });
+}
+const CODE = { 'x-live-code': 'test-code-123' };
+
+// הסקר
+let r = await call({ url: '/api/live?op=votes&poll=survey' });
+assert.equal(r.status, 200); assert.deepEqual(r.body.counts, [0, 0, 0, 0]);
+for (const c of [0, 2, 2, 3]) { r = await call({ method: 'POST', url: '/api/live?op=vote', body: { poll: 'survey', choice: c } }); assert.equal(r.status, 200); }
+r = await call({ url: '/api/live?op=votes&poll=survey' }); assert.deepEqual(r.body.counts, [1, 0, 2, 1]); assert.equal(r.body.total, 4);
+r = await call({ method: 'POST', url: '/api/live?op=vote', body: { poll: 'survey', choice: 9 } }); assert.equal(r.status, 400);
+r = await call({ method: 'POST', url: '/api/live?op=vote', body: { poll: 'nope', choice: 1 } }); assert.equal(r.status, 400);
+r = await call({ method: 'POST', url: '/api/live?op=vote', headers: { origin: 'https://evil.example' }, body: { poll: 'survey', choice: 1 } }); assert.equal(r.status, 403);
+_resetRateLimits();
+for (let i = 0; i < 150; i++) await call({ method: 'POST', url: '/api/live?op=vote', headers: { 'x-forwarded-for': '7.7.7.7' }, body: { poll: 'survey', choice: 1 } });
+r = await call({ method: 'POST', url: '/api/live?op=vote', headers: { 'x-forwarded-for': '7.7.7.7' }, body: { poll: 'survey', choice: 1 } }); assert.equal(r.status, 429);
+
+// הסרט
+r = await call({ method: 'POST', url: '/api/live?op=part&id=item-abc123&n=0', raw: Buffer.from('hello'), headers: { 'content-type': 'application/octet-stream' } });
+assert.equal(r.status, 401, 'בלי קוד אסור');
+r = await call({ method: 'POST', url: '/api/live?op=part&id=item-abc123&n=0', raw: Buffer.from('hello'), headers: { ...CODE, 'content-type': 'application/octet-stream' } });
+assert.equal(r.status, 200); const partUrl = r.body.url; assert.match(partUrl, /live\/danshar\/film\/items\/item-abc123\/000$/);
+r = await call({ method: 'POST', url: '/api/live?op=part&id=BAD!&n=0', raw: Buffer.from('x'), headers: CODE }); assert.equal(r.status, 400);
+r = await call({ method: 'POST', url: '/api/live?op=part&id=item-big000&n=0', raw: Buffer.alloc(4 * 1024 * 1024), headers: CODE }); assert.equal(r.status, 413);
+r = await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [{ id: 'item-abc123', kind: 'image', mime: 'image/jpeg', name: 'a.jpg', parts: [partUrl, 'https://evil.example/x'] }], settings: { t1: 'א', t2: 'ב', len: 90 } }, headers: CODE });
+assert.equal(r.status, 200); assert.equal(r.body.count, 1);
+for (let i = 0; i < 4; i++) await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [], settings: {} }, headers: CODE });
+await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [{ id: 'item-abc123', kind: 'image', mime: 'image/jpeg', name: 'a.jpg', parts: [partUrl] }], settings: { t1: 'סוף', len: 0 } }, headers: CODE });
+r = await call({ url: '/api/live?op=manifest' }); assert.equal(r.status, 200); assert.equal(r.body.items.length, 1); assert.deepEqual(r.body.items[0].parts, [partUrl]); assert.equal(r.body.settings.t1, 'סוף'); assert.equal(r.body.settings.len, 0);
+assert.ok([...blobs.keys()].filter((k) => k.includes('/manifest/')).length <= 3, 'נשארות רק שלוש רשימות');
+r = await call({ url: '/api/live?op=part&u=' + encodeURIComponent(partUrl) }); assert.equal(r.status, 200); assert.equal(Buffer.from(r.raw).toString(), 'hello');
+r = await call({ url: '/api/live?op=part&u=' + encodeURIComponent('https://evil.example/live/danshar/film/items/x') }); assert.equal(r.status, 400);
+r = await call({ method: 'POST', url: '/api/live?op=clear', headers: CODE }); assert.equal(r.status, 200); assert.equal([...blobs.keys()].length, 0);
+console.log('check-live: כל הבדיקות עברו');
