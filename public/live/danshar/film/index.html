@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>סרט הסיום · דנשר</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
+<style>
+/* כלי למתי, במחשב: גוררים תוצרים אחרי כל סבב, והסרט נבנה לבד על ההמנון */
+:root{
+  --deep:#0C2831; --bg:#113640; --card:#174652; --line:#2B5F6B; --paper:#F1F4F4; --muted:#B3C5CA;
+  --citron:#C6D63F; --citron-ink:#1A2A0A; --warn:#F4A57E; --ok:#9BD3A0;
+  --font:'Heebo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--paper);font-family:var(--font)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--citron);outline-offset:2px}
+header{background:var(--deep);padding:16px 24px;display:flex;flex-wrap:wrap;gap:6px 24px;align-items:baseline}
+header h1{margin:0;font-size:24px;font-weight:900}
+header p{margin:0;color:var(--muted)}
+main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;padding:20px 24px;max-width:1500px;margin:0 auto}
+@media (max-width:1000px){main{grid-template-columns:minmax(0,1fr)}}
+.stagebox{background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;position:relative}
+canvas{width:100%;height:100%;display:block}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 18px;font-weight:800;cursor:pointer}
+.btn.pri{background:var(--citron);color:var(--citron-ink);border-color:var(--citron)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.status{color:var(--muted);font-size:15px}
+.status b{color:var(--paper)}
+.prog{height:6px;background:var(--card);border-radius:3px;margin-top:10px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--citron)}
+aside{display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.panel h2{margin:0 0 8px;font-size:17px;font-weight:800}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;cursor:pointer;color:var(--muted)}
+.drop.on{border-color:var(--citron);color:var(--paper);background:rgba(198,214,63,.08)}
+.drop b{display:block;color:var(--paper);font-size:17px;margin-bottom:4px}
+.list{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow:auto;margin-top:10px}
+.it{display:grid;grid-template-columns:28px 64px minmax(0,1fr) auto;gap:8px;align-items:center;background:var(--deep);border-radius:8px;padding:6px}
+.it .n{font-weight:800;color:var(--muted);text-align:center}
+.it img,.it video{width:64px;height:36px;object-fit:cover;border-radius:4px;background:#000}
+.it .nm{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it .nm small{display:block;color:var(--muted)}
+.it .act{display:flex;gap:2px}
+.it .act button{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:2px 6px;font-size:16px}
+.it .act button:hover{color:var(--paper)}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:700;color:var(--muted);margin-top:8px}
+label.f input,label.f select{border:1px solid var(--line);background:var(--deep);border-radius:8px;padding:8px 10px;font-weight:500;color:var(--paper)}
+.hint{font-size:14px;color:var(--muted);margin:6px 0 0}
+.warn{color:var(--warn)}
+</style>
+</head>
+<body>
+<header>
+  <h1>סרט הסיום</h1>
+  <p>אחרי כל סבב גוררים לכאן את מה שמוכן. הסרט נבנה לבד, על ההמנון.</p>
+</header>
+<main>
+  <section>
+    <div class="stagebox"><canvas id="cv" width="1280" height="720"></canvas></div>
+    <div class="prog"><i id="bar"></i></div>
+    <div class="controls">
+      <button class="btn pri" id="play" type="button">הפעלה</button>
+      <button class="btn" id="full" type="button">מסך מלא</button>
+      <button class="btn" id="save" type="button">שמירה כקובץ</button>
+      <span class="status" id="status">טוען את ההמנון…</span>
+    </div>
+    <p class="hint">"שמירה כקובץ" מקליטה את הסרט בזמן אמת, כך שהיא לוקחת בדיוק את אורך הסרט. בזמן הזה לא עוברים לחלון אחר. את הקובץ מעבירים לארן, והוא גורר אותו לשקף "סרט הצוות" במלווה.</p>
+  </section>
+  <aside>
+    <div class="panel">
+      <div class="drop" id="drop" role="button" tabindex="0"><b>גוררים לכאן תמונות וסרטונים</b>או לוחצים לבחירה מהמחשב</div>
+      <input type="file" id="pick" accept="image/*,video/*" multiple hidden>
+      <div class="list" id="list"></div>
+      <p class="hint" id="count"></p>
+    </div>
+    <div class="panel">
+      <h2>הגדרות</h2>
+      <label class="f" for="t1">כותרת הפתיחה<input id="t1" type="text"></label>
+      <label class="f" for="t2">כותרת הסיום<input id="t2" type="text"></label>
+      <label class="f" for="len">אורך הסרט<select id="len"><option value="90">דקה וחצי, והמוזיקה דועכת בסוף</option><option value="0">כל ההמנון</option></select></label>
+      <label class="f" for="mus">מוזיקה אחרת (לא חובה)<input id="mus" type="file" accept="audio/*"></label>
+      <p class="hint">רק תוצרים של מי שהסכים, ובלי פנים של מי שלקח מדבקה.</p>
+    </div>
+  </aside>
+</main>
+
+<script>
+(function(){
+const cv = document.getElementById('cv'), cx = cv.getContext('2d'), W = cv.width, H = cv.height;
+const C = { deep:'#0C2831', bg:'#113640', paper:'#F1F4F4', citron:'#C6D63F', muted:'#B3C5CA' };
+const statusEl = document.getElementById('status'), bar = document.getElementById('bar');
+const setStatus = h => { statusEl.innerHTML = h; };
+
+/* ---------- שמירה בדפדפן, כדי שרענון לא ימחק את מה שהועלה ---------- */
+const DB = (() => {
+  let db = null;
+  const open = () => new Promise(res => { try { const r = indexedDB.open('danshar-film', 1); r.onupgradeneeded = () => { r.result.createObjectStore('items', { keyPath:'id' }); r.result.createObjectStore('meta'); }; r.onsuccess = () => { db = r.result; res(db); }; r.onerror = () => res(null); } catch(e){ res(null); } });
+  const tx = (store, mode, fn) => new Promise(res => { if (!db) return res(null); try { const t = db.transaction(store, mode); const s = t.objectStore(store); const r = fn(s); t.oncomplete = () => res(r && r.result); t.onerror = () => res(null); } catch(e){ res(null); } });
+  return { open, put: it => tx('items','readwrite', s => s.put(it)), del: id => tx('items','readwrite', s => s.delete(id)), all: () => tx('items','readonly', s => s.getAll()), setMeta: (k,v) => tx('meta','readwrite', s => s.put(v,k)), getMeta: k => tx('meta','readonly', s => s.get(k)) };
+})();
+
+let items = [];          // {id, kind:'image'|'video', name, blob, order, el, dur}
+let settings = { t1:'סוכני השטח של דנשר', t2:'סדנת AI לכל אחד · 11.11', len:90 };
+let music = null, actx = null;
+
+/* ---------- קבצים ---------- */
+async function addFiles(files){
+  for (const f of files){
+    const kind = f.type.startsWith('image/') ? 'image' : f.type.startsWith('video/') ? 'video' : null;
+    if (!kind) continue;
+    const it = { id: Date.now() + '-' + Math.random().toString(36).slice(2,7), kind, name: f.name, blob: f, order: (items.length ? Math.max(...items.map(x => x.order)) + 1 : 1) };
+    await prep(it); items.push(it); DB.put({ id:it.id, kind, name:it.name, blob:f, order:it.order });
+  }
+  renderList();
+}
+function prep(it){
+  return new Promise(res => {
+    const url = URL.createObjectURL(it.blob); it.url = url;
+    if (it.kind === 'image'){ const im = new Image(); im.onload = () => { it.el = im; res(); }; im.onerror = () => res(); im.src = url; }
+    else { const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url; v.onloadedmetadata = () => { it.el = v; it.dur = v.duration || 5; res(); }; v.onerror = () => res(); }
+  });
+}
+const sorted = () => items.filter(x => x.el).sort((a,b) => a.order - b.order);
+function renderList(){
+  const L = document.getElementById('list'), arr = sorted();
+  L.innerHTML = arr.map((it, i) => `<div class="it" data-id="${it.id}"><span class="n">${i+1}</span>${it.kind === 'image' ? `<img src="${it.url}" alt="">` : `<video src="${it.url}" muted></video>`}<span class="nm">${it.name.replace(/[<>&]/g,'')}<small>${it.kind === 'image' ? 'תמונה' : 'סרטון'}</small></span><span class="act"><button type="button" data-mv="-1" title="למעלה">▲</button><button type="button" data-mv="1" title="למטה">▼</button><button type="button" data-rm title="להסיר">✕</button></span></div>`).join('');
+  const plan = buildPlan();
+  document.getElementById('count').innerHTML = arr.length ? `${arr.length} תוצרים · הסרט ייצא באורך <b>${fmt(plan.total)}</b>` + (plan.tight ? ' <span class="warn">· הרבה תוצרים, כל תמונה תוצג קצר</span>' : '') : 'עוד אין תוצרים. אפשר להפעיל, ותראו רק את הפתיחה והסיום.';
+  if (!playing) drawAt(1);
+}
+document.getElementById('list').addEventListener('click', e => {
+  const row = e.target.closest('.it'); if (!row) return;
+  const arr = sorted(), i = arr.findIndex(x => x.id === row.dataset.id); if (i < 0) return;
+  if (e.target.closest('[data-rm]')){ const it = arr[i]; items = items.filter(x => x !== it); DB.del(it.id); URL.revokeObjectURL(it.url); renderList(); return; }
+  const mv = e.target.closest('[data-mv]'); if (!mv) return;
+  const j = i + Number(mv.dataset.mv); if (j < 0 || j >= arr.length) return;
+  const a = arr[i], b = arr[j]; [a.order, b.order] = [b.order, a.order];
+  DB.put({ id:a.id, kind:a.kind, name:a.name, blob:a.blob, order:a.order }); DB.put({ id:b.id, kind:b.kind, name:b.name, blob:b.blob, order:b.order });
+  renderList();
+});
+const drop = document.getElementById('drop'), pick = document.getElementById('pick');
+drop.addEventListener('click', () => pick.click());
+drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick.click(); } });
+pick.addEventListener('change', () => { addFiles([...pick.files]); pick.value = ''; });
+['dragenter','dragover'].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('on'); }));
+['dragleave','drop'].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); if (ev === 'drop' || !e.relatedTarget) drop.classList.remove('on'); }));
+document.addEventListener('drop', e => { if (e.dataTransfer && e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]); });
+
+/* ---------- הגדרות ---------- */
+['t1','t2'].forEach(k => { const el = document.getElementById(k); el.addEventListener('input', () => { settings[k] = el.value; DB.setMeta('settings', settings); if (!playing) drawAt(1); }); });
+document.getElementById('len').addEventListener('change', e => { settings.len = Number(e.target.value); DB.setMeta('settings', settings); renderList(); });
+document.getElementById('mus').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; await loadMusic(await f.arrayBuffer()); setStatus('המוזיקה הוחלפה.'); renderList(); });
+
+/* ---------- מוזיקה ---------- */
+async function loadMusic(buf){
+  actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+  music = await actx.decodeAudioData(buf.slice ? buf.slice(0) : buf);
+}
+
+/* ---------- תכנון הסרט ---------- */
+const INTRO = 4, OUTRO = 5, FADE = .35;
+function buildPlan(){
+  const arr = sorted();
+  const musicLen = music ? music.duration : 136;
+  const target = settings.len ? Math.min(settings.len, musicLen) : musicLen;
+  const vids = arr.filter(x => x.kind === 'video'), imgs = arr.filter(x => x.kind === 'image');
+  const vidDur = v => Math.min(6, Math.max(2, v.dur || 5));
+  const vt = vids.reduce((s,v) => s + vidDur(v), 0);
+  let imgDur = imgs.length ? (target - INTRO - OUTRO - vt) / imgs.length : 0;
+  let tight = false;
+  if (imgs.length){ if (imgDur < 2.5){ imgDur = 2.5; tight = true; } if (imgDur > 6) imgDur = 6; }
+  const segs = [{ type:'title', text:settings.t1, d:INTRO }];
+  arr.forEach((it, i) => segs.push({ type:it.kind, it, d: it.kind === 'image' ? imgDur : vidDur(it), dir: i % 2 ? -1 : 1 }));
+  segs.push({ type:'end', text:settings.t2, d:OUTRO });
+  let t = 0; segs.forEach(s => { s.t0 = t; t += s.d; });
+  return { segs, total:t, tight };
+}
+const fmt = s => Math.floor(s/60) + ':' + String(Math.round(s%60)).padStart(2,'0');
+
+/* ---------- ציור ---------- */
+function cover(el, iw, ih, scale, px, py){
+  const r = Math.max(W/iw, H/ih) * scale, w = iw*r, h = ih*r;
+  cx.drawImage(el, (W-w)/2 + px, (H-h)/2 + py, w, h);
+}
+function titleCard(text, sub, k){
+  cx.fillStyle = C.bg; cx.fillRect(0,0,W,H);
+  cx.save(); cx.translate(W/2, H/2); const z = 1 + k*0.04; cx.scale(z,z);
+  cx.direction = 'rtl'; cx.textAlign = 'center'; cx.fillStyle = C.citron;
+  cx.font = '900 84px Heebo, Arial, sans-serif'; wrapText(text, 0, sub ? -20 : 20, W*0.8, 96);
+  if (sub){ cx.fillStyle = C.paper; cx.font = '500 36px Heebo, Arial, sans-serif'; cx.fillText(sub, 0, 90); }
+  cx.restore();
+}
+function wrapText(text, x, y, maxW, lh){
+  const words = String(text || '').split(' '); const lines = []; let line = '';
+  words.forEach(w => { const t = line ? line + ' ' + w : w; if (cx.measureText(t).width > maxW && line){ lines.push(line); line = w; } else line = t; });
+  if (line) lines.push(line);
+  lines.forEach((l, i) => cx.fillText(l, x, y + (i - (lines.length-1)/2) * lh));
+}
+let curVideo = null;
+function drawAt(t, plan){
+  plan = plan || buildPlan();
+  const seg = plan.segs.find(s => t >= s.t0 && t < s.t0 + s.d) || plan.segs[plan.segs.length-1];
+  const k = Math.min(1, Math.max(0, (t - seg.t0) / seg.d));
+  cx.fillStyle = '#000'; cx.fillRect(0,0,W,H);
+  if (seg.type === 'title') titleCard(seg.text, 'סדנת AI לכל אחד', k);
+  else if (seg.type === 'end') titleCard(seg.text, 'Nexadapt', k);
+  else if (seg.type === 'image'){ const im = seg.it.el; cover(im, im.naturalWidth, im.naturalHeight, 1.02 + k*0.10, seg.dir * (k-.5) * 40, 0); }
+  else if (seg.type === 'video'){ const v = seg.it.el; if (v.readyState >= 2) cover(v, v.videoWidth, v.videoHeight, 1.0, 0, 0); }
+  const inT = t - seg.t0, outT = seg.t0 + seg.d - t;
+  const a = Math.min(1, inT / FADE, outT / FADE);
+  if (a < 1){ cx.fillStyle = `rgba(0,0,0,${1 - Math.max(0,a)})`; cx.fillRect(0,0,W,H); }
+  return seg;
+}
+
+/* ---------- ניגון ---------- */
+let playing = false, raf = 0, src = null, gain = null, t0 = 0, recDest = null, onEnd = null;
+async function start(record){
+  if (playing) return stop();
+  if (!music){ setStatus('<span class="warn">ההמנון עוד לא נטען.</span>'); return; }
+  const plan = buildPlan();
+  await actx.resume();
+  src = actx.createBufferSource(); src.buffer = music; gain = actx.createGain();
+  const now = actx.currentTime, end = plan.total;
+  gain.gain.setValueAtTime(1, now); if (end < music.duration){ gain.gain.setValueAtTime(1, now + Math.max(0, end - 2.5)); gain.gain.linearRampToValueAtTime(0.0001, now + end); }
+  src.connect(gain); gain.connect(actx.destination); if (record && recDest) gain.connect(recDest);
+  t0 = now + 0.05; src.start(t0, 0, Math.min(end, music.duration));
+  playing = true; document.getElementById('play').textContent = 'עצירה'; curVideo = null;
+  const loop = () => {
+    const t = actx.currentTime - t0;
+    if (t >= plan.total){ stop(); if (onEnd) onEnd(); return; }
+    const seg = drawAt(Math.max(0,t), plan);
+    if (seg.type === 'video'){ const v = seg.it.el; if (curVideo !== v){ if (curVideo) curVideo.pause(); curVideo = v; v.currentTime = Math.max(0, Math.min((v.duration || 0) - seg.d, ((v.duration || 0) - seg.d) / 2)); v.play().catch(() => {}); } }
+    else if (curVideo){ curVideo.pause(); curVideo = null; }
+    bar.style.width = (t / plan.total * 100) + '%';
+    raf = requestAnimationFrame(loop);
+  };
+  loop();
+}
+function stop(){
+  playing = false; cancelAnimationFrame(raf); document.getElementById('play').textContent = 'הפעלה';
+  try { src && src.stop(); } catch(e){}
+  if (curVideo){ curVideo.pause(); curVideo = null; }
+}
+document.getElementById('play').addEventListener('click', () => start(false));
+document.getElementById('full').addEventListener('click', () => { const b = document.querySelector('.stagebox'); (b.requestFullscreen ? b.requestFullscreen() : Promise.reject()).catch(() => {}); });
+
+/* ---------- שמירה כקובץ ---------- */
+document.getElementById('save').addEventListener('click', async () => {
+  if (playing || !music) return;
+  const types = ['video/mp4;codecs=avc1,mp4a.40.2','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  const type = types.find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t));
+  if (!type){ setStatus('<span class="warn">הדפדפן הזה לא יודע לשמור וידאו. פותחים את הדף בכרום.</span>'); return; }
+  recDest = actx.createMediaStreamDestination();
+  const stream = new MediaStream([...cv.captureStream(30).getVideoTracks(), ...recDest.stream.getAudioTracks()]);
+  const rec = new MediaRecorder(stream, { mimeType:type, videoBitsPerSecond: 5000000 });
+  const chunks = []; rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  rec.onstop = () => {
+    const ext = type.startsWith('video/mp4') ? 'mp4' : 'webm';
+    const blob = new Blob(chunks, { type: type.split(';')[0] });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'danshar-film.' + ext; document.body.appendChild(a); a.click(); a.remove();
+    setStatus(`<b>הסרט נשמר</b> (${ext}, ${(blob.size/1048576).toFixed(1)}MB). מעבירים את הקובץ לארן.`);
+    ['save','play'].forEach(id => document.getElementById(id).disabled = false); recDest = null; onEnd = null;
+  };
+  ['save','play'].forEach(id => document.getElementById(id).disabled = true);
+  setStatus('<b>מקליט את הסרט…</b> לא עוברים לחלון אחר עד שזה נגמר.');
+  onEnd = () => setTimeout(() => rec.stop(), 300);
+  rec.start(1000); await start(true);
+});
+
+/* ---------- התחלה ---------- */
+(async () => {
+  await DB.open();
+  const s = await DB.getMeta('settings'); if (s) Object.assign(settings, s);
+  document.getElementById('t1').value = settings.t1; document.getElementById('t2').value = settings.t2; document.getElementById('len').value = String(settings.len);
+  const saved = (await DB.all()) || [];
+  for (const r of saved){ const it = { id:r.id, kind:r.kind, name:r.name, blob:r.blob, order:r.order }; await prep(it); items.push(it); }
+  renderList();
+  try { let r = null; for (const u of ['anthem.mp3', '/live/danshar/film/anthem.mp3']){ try { r = await fetch(u); if (r.ok) break; } catch(e){} r = null; } if (!r) throw 0; await loadMusic(await r.arrayBuffer()); setStatus(`ההמנון נטען (${fmt(music.duration)}).`); }
+  catch(e){ setStatus('<span class="warn">ההמנון לא נטען. אפשר לבחור קובץ מוזיקה בהגדרות.</span>'); }
+  renderList();
+})();
+})();
+</script>
+</body>
+</html>
