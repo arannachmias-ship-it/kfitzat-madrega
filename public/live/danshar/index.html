@@ -95,6 +95,13 @@ button{font-family:inherit}
 .lyr .blk h4{margin:0 0 8px;font-size:26px;font-weight:700;color:var(--cap)}
 .lyr .blk p{margin:0;font-size:40px;font-weight:600;line-height:1.34;text-wrap:balance}
 .lyr .blk.ch p{color:var(--citron);font-weight:800}
+.lyr .blk p{transition:opacity .25s ease,color .25s ease}
+.lyr.sing .blk p{opacity:.32}
+.lyr.sing .blk p.now{opacity:1;color:var(--paper);position:relative;font-weight:800;transform:scale(1.04);transform-origin:right center}
+.lyr .blk p{transition:opacity .25s ease,color .25s ease,transform .25s ease}
+.lyr.sing .blk.ch p.now{color:var(--citron)}
+.lyr.sing .blk p.now::after{content:"";position:absolute;inset-inline-start:0;bottom:-2px;height:5px;border-radius:3px;background:var(--citron);width:var(--prog,0%)}
+.lyr.sing .blk p.done{opacity:.6}
 .mediahint{position:absolute;bottom:0;left:0;font-size:32px;color:var(--cap)}
 
 /* מעבר לחלון אחר */
@@ -497,7 +504,7 @@ const LESSON = {
   },
   links: {
     companion: '',     // הדף המלווה למשתתפים
-    wall: '',          // קיר Padlet. מדביקים כאן את הקישור הרגיל או את קישור ההטמעה
+    wall: 'https://padlet.com/nexadapt/padlet-s0253004ybp5evt1omf6', // קיר Padlet (2.11). הקישור הרגיל הופך לבד לקישור הטמעה
     app: '',           // האפליקציה שנבנית בסדנה, למשל https://danshar.nexadapt.co.il
     appScreen: '',     // דף המקרן של האפליקציה, עם המונה
     predict: '',       // טופס הניבוי
@@ -540,7 +547,7 @@ const LESSON = {
           'כאן לא מסבירים כלום על AI. רק לוגיסטיקה, קצר.'] } }
     ]},
     { from:0, to:5, title:'השיר שלכם', checks:['ההמנון מתנגן במקש רווח, והמילים קריאות מקצה החדר', 'סיפור הכישלון של ארן נכנס בדקה אחת'], steps:[
-      { art:'music', type:'song', kicker:'פתיחה', title:'ההמנון', src:'@anthem', lines:['[המילים לא נטענו]'], blocks:[{tag:'בית 1', lines:['עוד בוקר על הכביש, הטלפון ביד','עוד חנות ועוד מדף שמחכים לנו מיד','מהשילוט עד הסטנד, הכול צריך להיות מושלם','מי שנכנס לחנות יודע שהיינו שם']},{tag:'פזמון', chorus:true, lines:['אנחנו דנשר, אנחנו בשטח','בכל חנות, בכל מדף, בכל פינה','אנחנו דנשר, וזה רק מתחיל','סוכני השטח, הצוות שמוביל']},{tag:'בית 2', lines:['עוד דוח החזרות, עוד מוצר פגום','אבל החיוך שלנו נשאר כאן כל יום','כל קטגוריה, כל לקוח, כל הזמנה','אנחנו מסדרים, ועוברים לחנות הבאה']},{tag:'גשר', lines:['טלפון ביד, והראש בעננים','היום לומדים עוד כלי מדהים']}], say:'אורות חלשים, בלי הקדמה. רווח מפעיל את השיר.', do:'רווח מפעיל את השיר, ורווח נוסף עוצר.', g:{
+      { art:'music', type:'song', kicker:'פתיחה', title:'ההמנון', src:'@anthem', lines:['[המילים לא נטענו]'], blocks:[{tag:'בית 1', lines:['עוד בוקר על הכביש, הטלפון ביד','עוד חנות ועוד מדף שמחכים לנו מיד','מהשילוט עד הסטנד, הכול צריך להיות מושלם','מי שנכנס לחנות יודע שהיינו שם']},{tag:'פזמון', chorus:true, lines:['אנחנו דנשר, אנחנו בשטח','בכל חנות, בכל מדף, בכל פינה','אנחנו דנשר, וזה רק מתחיל','סוכני השטח, הצוות שמוביל']},{tag:'בית 2', lines:['עוד דוח החזרות, עוד מוצר פגום','אבל החיוך שלנו נשאר כאן כל יום','כל קטגוריה, כל לקוח, כל הזמנה','אנחנו מסדרים, ועוברים לחנות הבאה']},{tag:'גשר', lines:['טלפון ביד, והראש בעננים','היום לומדים עוד כלי מדהים']}], cues:[[16.63,0,0],[20.55,0,1],[24.19,0,2],[28.09,0,3],[33.57,1,0],[37.27,1,1],[41.21,1,2],[44.69,1,3],[58.93,2,0],[62.49,2,1],[66.07,2,2],[70.01,2,3],[75.31,1,0],[79.19,1,1],[82.85,1,2],[86.27,1,3],[93.13,3,0],[96.51,3,1],[103.47,1,0],[107.09,1,1],[110.97,1,2],[114.43,1,3]], cueEnd:121, say:'אורות חלשים, בלי הקדמה. רווח מפעיל את השיר.', do:'רווח מפעיל את השיר, ורווח נוסף עוצר.', g:{
         why:'פתיחה בלי שובר קרח: שיר על הצוות שלהם, שנכתב מהתשובות שלהם בשאלון. כל שורה בו מוכרת למישהו בחדר.',
         time:'2–3 דקות',
         say:[
@@ -3427,7 +3434,7 @@ function renderStep(st, thumb){
   if (t === 'song'){
     const src = link(st.src);
     const lines = st.blocks
-      ? `<div class="lyr">${st.blocks.map((b, n) => `<div class="blk${b.chorus ? ' ch' : ''}" style="--n:${n}"><h4>${esc(b.tag)}${b.chorus ? ' · שלוש פעמים' : ''}</h4>${b.lines.map(x => `<p>${esc(x)}</p>`).join('')}</div>`).join('')}</div>`
+      ? `<div class="lyr">${st.blocks.map((b, n) => `<div class="blk${b.chorus ? ' ch' : ''}" style="--n:${n}"><h4>${esc(b.tag)}${b.chorus ? ' · שלוש פעמים' : ''}</h4>${b.lines.map((x, k) => `<p data-bl="${n}-${k}">${esc(x)}</p>`).join('')}</div>`).join('')}</div>`
       : st.lines.map((x, n) => `<p class="${/^\[/.test(x) ? 'ph' : ''}" style="--n:${n}">${esc(x)}</p>`).join('');
     const audio = (!thumb && src) ? `<audio data-media src="${esc(src)}" preload="auto"></audio>` : '';
     return `<div class="slide${hcls}">${hart}${head(st)}<div class="content"><div class="lyrics${st.blocks ? ' has-blocks' : ''}">${lines}</div>${audio}<p class="mediahint">${src ? '<span class="kb">רווח</span>מנגנים / עוצרים' : 'חסר קובץ השיר'}</p></div>${footer(st)}</div>`;
@@ -3464,9 +3471,35 @@ function fit(){
   const w = innerWidth, h = innerHeight, s = Math.min(w/1920, h/1080);
   stage.style.transform = `translate(${(w - 1920*s)/2}px, ${(h - 1080*s)/2}px) scale(${s})`;
 }
+/* קריוקי: בזמן שהשיר מתנגן, השורה ששרים עכשיו מודגשת ופס מתחתיה מתמלא.
+   cues הם זמני ההתחלה של כל שורה בשניות, לפי הסדר שבו היא מושרת: [שנייה, חלק, שורה] */
+function bindKaraoke(st){
+  const audio = stage.querySelector('#slide audio[data-media]'), box = stage.querySelector('#slide .lyr');
+  if (!audio || !box || !st.cues || !st.cues.length) return;
+  const cues = st.cues, lineEls = {};
+  box.querySelectorAll('[data-bl]').forEach(el => { lineEls[el.dataset.bl] = el; });
+  let cur = -2, raf = 0;
+  const paint = () => {
+    const t = audio.currentTime;
+    let i = -1; for (let k = 0; k < cues.length; k++){ if (t >= cues[k][0]) i = k; else break; }
+    const end = i >= 0 ? (cues[i + 1] ? cues[i + 1][0] : (st.cueEnd || audio.duration || cues[i][0] + 6)) : 0;
+    if (i !== cur){
+      box.querySelectorAll('p.now').forEach(el => el.classList.remove('now'));
+      if (i >= 0){ const el = lineEls[cues[i][1] + '-' + cues[i][2]]; if (el) el.classList.add('now'); }
+      cur = i;
+    }
+    if (i >= 0){ const el = lineEls[cues[i][1] + '-' + cues[i][2]]; if (el) el.style.setProperty('--prog', Math.min(100, Math.max(0, (t - cues[i][0]) / Math.max(.5, end - cues[i][0]) * 100)) + '%'); }
+  };
+  const loop = () => { paint(); if (!audio.paused) raf = requestAnimationFrame(loop); };
+  audio.addEventListener('play', () => { box.classList.add('sing'); cancelAnimationFrame(raf); loop(); });
+  audio.addEventListener('pause', () => { cancelAnimationFrame(raf); paint(); });
+  audio.addEventListener('seeked', paint);
+  audio.addEventListener('ended', () => { cancelAnimationFrame(raf); box.classList.remove('sing'); box.querySelectorAll('p.now').forEach(el => el.classList.remove('now')); cur = -2; });
+}
 function enter(){
   const st = STEPS[S.i];
   stage.querySelector('#slide').innerHTML = renderStep(st, false);
+  bindKaraoke(st);
   // טיימר חדש לכל שלב
   S.timer = { total: (st.minutes||0)*60, left: (st.minutes||0)*60, running: !!st.autostart, last: performance.now(), done:false };
   S.draw.cur = null; S.draw.list = [];
