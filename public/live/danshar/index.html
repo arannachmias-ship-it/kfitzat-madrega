@@ -541,14 +541,14 @@ const LESSON = {
     gemini: 'https://gemini.google.com'
   },
   segments: [
-    { from:-10, to:0, title:'לפני שמתחילים', checks:['המלווה במסך מלא על המסך השני (F), ומסך המנחה על המחשב (P)', 'הקליקר מעביר שקפים קדימה ואחורה', 'הרמקול מחובר, והשיר נשמע ברור'], steps:[
+    { from:-10, to:0, title:'לפני שמתחילים', checks:['המלווה במסך מלא של כרום על המסך השני (⌃⌘F במק), ומסך המנחה על המחשב (P)', 'לשונית Claude פתוחה מיד אחרי לשונית המלווה, ו-Ctrl+Tab ו-Ctrl+Shift+Tab עוברים ביניהן', 'הקליקר מעביר שקפים קדימה ואחורה', 'הרמקול מחובר, והשיר נשמע ברור'], steps:[
       { type:'cover', do:'עומד על המסך כשנכנסים. לבדוק: מקרן, רמקול, Wi-Fi, נקודה חמה בגיבוי, Claude פתוח בחלון אחר.', g:{
         why:'זה מה שעומד על המסך כשאנשים נכנסים ומתיישבים. הוא אומר להם שהגיעו למקום הנכון, ומה עומד לקרות.',
         time:'עד שכולם מתיישבים',
         say:[
           'מהבמה לא אומרים כלום. מקבלים אנשים בכניסה, אחד אחד: "היי, תתיישבו ליד אחד השולחנות ותוציאו טלפון."'],
         do:[
-          'שעה לפני: מחברים את המחשב למקרן במצב מסך מורחב. המלווה במסך מלא (F) על המקרן, ומסך המנחה (P) על המחשב.',
+          'שעה לפני: מחברים את המחשב למקרן במצב מסך מורחב. המלווה במסך מלא של כרום על המקרן (⌃⌘F במק, F11 בחלונות), ומסך המנחה (P) על המחשב. מסך מלא של F נסגר כשעוברים ללשונית אחרת, ושל כרום נשאר.',
           'בודקים את הרמקול עם ההמנון, בעוצמה שתתאים לחדר מלא.',
           'בודקים את ה-Wi-Fi מהטלפון, ומכינים נקודה חמה מהטלפון כגיבוי.',
           'פותחים את Claude בחלון נפרד. צילום הטופס, הלוגו, הצבעים והפרומפט מוכנים על שולחן העבודה.',
@@ -619,10 +619,10 @@ const LESSON = {
           '"אני מעלה לו עכשיו צילום של הטופס שבחרתם, את הלוגו ואת הצבעים של דנשר, ונותן לו הוראות. לוחץ שליחה, וזהו. נחזור אליו באמצע."',
           '"על השולחן יש ברקוד שני: \'האפליקציה שלכם\'. מי שסורק אותו עכשיו יראה \'בבנייה\'. נחזור אליו."'],
         do:[
-          'Alt+Tab עוברים לחלון של Claude שכבר פתוח. אם הוא סגור, O פותח אותו.',
+          'Ctrl+Tab עוברים ללשונית של Claude, שפתוחה מיד אחרי המלווה. אם היא סגורה, O פותח אותה.',
           'מעלים את צילום הטופס, הלוגו והצבעים, מדביקים את הפרומפט ושולחים.',
           'רושמים את השעה שבה שלחתם. בדקה 72 אומרים כמה זמן זה לקח.',
-          'Alt+Tab חוזרים למלווה.'],
+          'Ctrl+Shift+Tab חוזרים למלווה.'],
         watch:[
           'בודקים שהעליתם את הטופס שנבחר, ולא את השני.',
           'הפרומפט מבקש מ-Claude לא לעצור כדי לשאול שאלות. אם הוא בכל זאת שואל, עונים במשפט אחד וממשיכים.'] } },
@@ -775,7 +775,7 @@ const LESSON = {
         watch:[
           'מי שלא רוצה לשלוח, לא חייב. לא מעירים לאף אחד.'] } }
     ]},
-    { from:39, to:42, title:'הצצה', checks:['Claude באמצע הבנייה, ויש מה להראות', 'המעבר ל-Claude וחזרה (O, ואז Alt+Tab) חלק'], steps:[
+    { from:39, to:42, title:'הצצה', checks:['Claude באמצע הבנייה, ויש מה להראות', 'המעבר ל-Claude וחזרה (Ctrl+Tab, ואז Ctrl+Shift+Tab) חלק'], steps:[
       { art:'app', type:'external', kicker:'הצצה', tool:'Claude', title:'בזמן ששרנו, הוא כתב את זה', url:'@claude', say:'אם הוא נתקע, לא מראים. "נחזור בסוף", ועוברים הלאה.', g:{
         why:'הצצה ראשונה לאפליקציה שנבנית ברקע. הם רואים שבזמן ששרו, המחשב עבד בשבילם.',
         time:'3 דקות',
@@ -784,9 +784,9 @@ const LESSON = {
           'מצביעים על משהו אחד שמבינים גם בלי לדעת לתכנת: שם של שדה מהטופס, הלוגו או הצבעים.',
           '"הוא עוד לא סיים. נחזור אליו בסוף."'],
         do:[
-          'Alt+Tab עוברים לחלון של Claude. אם הוא סגור, O פותח אותו.',
+          'Ctrl+Tab עוברים ללשונית של Claude. אם היא סגורה, O פותח אותה.',
           'גוללים לאט, ולא מסבירים את הקוד.',
-          'Alt+Tab חוזרים למלווה.'],
+          'Ctrl+Shift+Tab חוזרים למלווה.'],
         watch:[
           'אם Claude נתקע או שהופיעה שגיאה, לא מראים. אומרים "נחזור אליו בסוף", ועוברים לסבב הבא.',
           'אם הוא צריך עזרה, מתי מטפל בזה בשקט בזמן הסבב הבא.'] } }
@@ -814,7 +814,7 @@ const LESSON = {
           'אחרי כל סרטון: "של מי זה?" ומחיאות כפיים.'],
         do:[
           'O פותח את כלי הווידאו. מעלים שלושה פוסטרים של שלושה שולחנות שונים ומחיים אותם, כבר בזמן שהם עובדים.',
-          'Alt+Tab חוזרים למלווה.',
+          'Ctrl+Shift+Tab חוזרים למלווה.',
           'את הסרטונים הטובים שומרים לסרט הסיום.'],
         watch:[
           'בוחרים פוסטרים משלושה שולחנות שונים.',
@@ -3483,7 +3483,7 @@ function renderStep(st, thumb){
   }
   if (t === 'external'){
     const url = link(st.url);
-    return `<div class="slide"><div class="ext">${st.art ? artHtml(st.art, 'eart') : ''}${st.kicker ? `<p class="kicker">${esc(st.kicker)}</p>` : ''}<div class="tool">${esc(st.tool)}</div><div class="what">${esc(st.title)}</div>${st.sub ? `<div class="what2">${esc(st.sub)}</div>` : ''}<div class="keys">${url ? '<span><span class="kb">O</span>פותחים בחלון חדש</span>' : '<span>חסר קישור</span>'}<span><span class="kb">Alt+Tab</span>חוזרים לכאן</span></div></div>${footer(st)}</div>`;
+    return `<div class="slide"><div class="ext">${st.art ? artHtml(st.art, 'eart') : ''}${st.kicker ? `<p class="kicker">${esc(st.kicker)}</p>` : ''}<div class="tool">${esc(st.tool)}</div><div class="what">${esc(st.title)}</div>${st.sub ? `<div class="what2">${esc(st.sub)}</div>` : ''}<div class="keys">${url ? '<span><span class="kb">O</span>פותחים בלשונית חדשה</span>' : '<span>חסר קישור</span>'}<span><span class="kb">Ctrl+Shift+Tab</span>חוזרים לכאן</span></div></div>${footer(st)}</div>`;
   }
   if (t === 'draw'){
     return `<div class="slide${hcls}">${hart}${head(st)}<div class="content"><div class="draw"><div class="lbl">שולחן</div><div class="num" data-drawnum>?</div><div class="drawn" data-drawn></div><p class="tlabel"><span class="kb">D</span>מגרילים</p></div></div>${footer(st)}</div>`;
@@ -3507,7 +3507,7 @@ function embedHtml(st, thumb){
   else if (!url) inner = `<div class="fallback"><b>חסר קישור</b><span>${esc(NAMES[linkName(t === 'video' ? st.src : st.url)] || '')}</span></div>`;
   else if (thumb) inner = `<div class="fallback"><b>${t === 'wall' ? 'הקיר' : t === 'video' ? 'סרטון' : 'תוכן מוטמע'}</b><span>${esc(shortUrl(raw))}</span></div>`;
   else if (t === 'video') inner = `<video data-media src="${esc(url)}" playsinline></video>`;
-  else inner = `<div class="fallback"><b>הדף לא נטען כאן?</b><span><span class="kb">O</span>פותחים אותו בחלון חדש</span></div><iframe src="${esc(url)}" title="${esc(st.title || '')}" allow="autoplay; clipboard-write; fullscreen" loading="eager"></iframe>`;
+  else inner = `<div class="fallback"><b>הדף לא נטען כאן?</b><span><span class="kb">O</span>פותחים אותו בלשונית חדשה</span></div><iframe src="${esc(url)}" title="${esc(st.title || '')}" allow="autoplay; clipboard-write; fullscreen" loading="eager"></iframe>`;
   return `<div class="embed"><div class="bar"><h2>${esc(st.title || '')}</h2>${q}</div><div class="frame">${inner}</div></div>`;
 }
 
@@ -3796,7 +3796,7 @@ function drawOv(){
     ovLayer.querySelectorAll('button[data-go]').forEach(b => b.onclick = () => go(+b.dataset.go));
     const c = ovLayer.querySelector('.cur'); if (c) c.focus();
   } else if (S.ov === 'help'){
-    const rows = [['→ ← או קליקר','הבא / הקודם'],['T','טיימר: הפעלה ועצירה · R איפוס'],['W','הקיר, מכל מקום'],['Q','הברקוד של הדף המלווה'],['D','הגרלת שולחן'],['O','פתיחה בחלון חדש'],['B','מסך שחור'],['G','כל השלבים'],['P','מסך המנחה בחלון נפרד'],['Y','חזרה מלאה ובדיקת תוצרים'],['M','מדריך המנחה: הסבר מלא לכל שקף'],['S','הפעלה ועצירה של השעון'],['F','מסך מלא'],['Esc','סגירה']];
+    const rows = [['→ ← או קליקר','הבא / הקודם'],['T','טיימר: הפעלה ועצירה · R איפוס'],['W','הקיר, מכל מקום'],['Q','הברקוד של הדף המלווה'],['D','הגרלת שולחן'],['O','פתיחה בלשונית חדשה'],['Ctrl+Tab','ללשונית הבאה · Ctrl+Shift+Tab חזרה'],['B','מסך שחור'],['G','כל השלבים'],['P','מסך המנחה בחלון נפרד'],['Y','חזרה מלאה ובדיקת תוצרים'],['M','מדריך המנחה: הסבר מלא לכל שקף'],['S','הפעלה ועצירה של השעון'],['F','מסך מלא. עדיף של כרום: ⌃⌘F במק, F11 בחלונות'],['Esc','סגירה']];
     ovLayer.innerHTML = `<div class="help"><h2>מקשים</h2>${rows.map(r => `<span class="kb">${esc(r[0])}</span><span>${esc(r[1])}</span>`).join('')}</div>`;
   } else if (S.ov === 'draw'){
     ovLayer.innerHTML = `<div class="draw"><div class="lbl">שולחן</div><div class="num" data-drawnum>?</div><div class="drawn" data-drawn></div></div>`;
@@ -3831,8 +3831,14 @@ function setBlack(v){ S.black = v; blackLayer.hidden = !S.black; push(); }
 function openExternal(){
   const st = STEPS[S.i];
   const u = st.type === 'external' || st.type === 'qr' || st.type === 'poll' || st.type === 'embed' || st.type === 'wall' ? link(st.url) : link('@wall');
-  if (u) window.open(u, 'nx-ext');
+  if (!u) return;
+  // לכל אתר לשונית משלו: O על Gemini לא ידרוס את הלשונית של Claude. ואם הלשונית עדיין פתוחה, רק עוברים אליה
+  let host = 'x'; try { host = new URL(u, location.href).hostname.replace(/[^a-z0-9]/gi, '-'); } catch(e){}
+  const name = 'nx-ext-' + host, w = EXT[name];
+  if (w && !w.closed){ try { w.focus(); return; } catch(e){} }
+  EXT[name] = window.open(u, name);
 }
+const EXT = {};
 function media(){ if (stage.querySelector('[data-filmcanvas]')){ filmToggle(); return true; } const m = stage.querySelector('[data-media]'); if (!m) return false; if (m.paused) m.play().catch(() => {}); else m.pause(); return true; }
 function fullscreen(){ if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen().catch(() => {}); }
 function openWin(hash, name){
