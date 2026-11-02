@@ -103,6 +103,7 @@ button{font-family:inherit}
 .lyr.sing .blk p.now::after{content:"";position:absolute;inset-inline-start:0;bottom:-2px;height:5px;border-radius:3px;background:var(--citron);width:var(--prog,0%)}
 .lyr.sing .blk p.done{opacity:.6}
 .mediahint{position:absolute;bottom:0;left:0;font-size:32px;color:var(--cap)}
+.filmpick{margin-top:18px;font-size:30px;color:var(--citron);text-decoration:underline;cursor:pointer}
 
 /* מעבר לחלון אחר */
 .ext{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;flex:1 1 auto;gap:26px}
@@ -499,7 +500,7 @@ const LESSON = {
           good:['באוויר תוך שעה, כי בסדנה שולחים בדקה 8 ומראים בדקה 72','נפתחת בלי חשבון בשני הטלפונים, וההכתבה בעברית עובדת בספארי ובכרום','בצבעים ובלוגו של הלקוח, ונראית מקצועית'],
           backup:'הגרסה שיצאה כאן נשמרת ב-Vercel כגרסת הגיבוי' },
         { id:'film', seg:13, title:'סרט הסיום', tool:'עריכת וידאו', devices:['pc'], budget:25,
-          steps:['לוקחים פוסטרים וטריילרים מהבדיקות כאן, ואת ההמנון','מרכיבים סרט של דקה וחצי','עוצרים כשהסרט מוכן ומתנגן עם קול'],
+          steps:['פותחים במחשב של מתי את הכלי של סרט הסיום: nexadapt.co.il/live/danshar/film','גוררים אליו פוסטרים וטריילרים מהבדיקות כאן. ההמנון נטען לבד','לוחצים "שמירה כקובץ", מעבירים את הקובץ למחשב של ארן, וגוררים אותו לשקף "סרט הצוות" במלווה'],
           good:['מוכן תוך 25 דקות, כדי שיספיק בזמן הסדנה','הקול והתמונה מסונכרנים','נראה טוב גם עם תוצרים חלשים של משתתפים'],
           backup:'שלד מוכן מראש, שבו רק מחליפים קטעים' }
       ]
@@ -1015,7 +1016,8 @@ const LESSON = {
           'אחרי: שנייה של שקט, ומחיאות כפיים.'],
         do:[
           'מחלישים אורות, ורווח מפעיל את הסרט.',
-          'מתי מרכיב את הסרט מדקה 52 בערך, מהתוצרים שעלו לקיר ומהכלי בתשלום. השלד מוכן מראש, ומחליפים בו רק קטעים.'],
+          'מתי עובד בכלי של סרט הסיום, במחשב שלו: nexadapt.co.il/live/danshar/film. אחרי כל סבב הוא גורר אליו את מה שמוכן, והסרט נבנה לבד על ההמנון.',
+          'בדקה 84 מתי לוחץ "שמירה כקובץ". זה לוקח בדיוק את אורך הסרט. הוא מעביר לך את הקובץ, ואתה גורר אותו לשקף הזה (או "בוחרים קובץ"). רווח מפעיל.'],
         watch:[
           'בודקים שהסרט נשמע ברמקול, לא רק נראה.',
           'רק תוצרים של מי שהסכים, ובלי פנים של מי שלקח מדבקה.'] } },
@@ -3462,17 +3464,27 @@ function renderStep(st, thumb){
 }
 function embedHtml(st, thumb){
   const t = st.type;
-  const raw = t === 'video' ? link(st.src) : link(st.url);
+  const raw = t === 'video' ? ((st.src === '@film' && FILM.url) || link(st.src)) : link(st.url);
   const url = t === 'wall' && raw ? padletEmbed(raw) : raw;
   const q = (t !== 'video' && raw) ? `<div class="mini"><span>${esc(shortUrl(link(st.url)))}</span><div class="q">${qrSvg(link(st.url))}</div></div>` : '';
   let inner;
-  if (!url) inner = `<div class="fallback"><b>חסר קישור</b><span>${esc(NAMES[linkName(t === 'video' ? st.src : st.url)] || '')}</span></div>`;
+  if (!url && st.src === '@film') inner = `<div class="fallback"><b>גוררים לכאן את קובץ הסרט</b><span>הקובץ שמתי שמר בכלי של סרט הסיום</span>${thumb ? '' : '<label class="filmpick">או בוחרים קובץ<input type="file" accept="video/*" data-filmpick hidden></label>'}</div>`;
+  else if (!url) inner = `<div class="fallback"><b>חסר קישור</b><span>${esc(NAMES[linkName(t === 'video' ? st.src : st.url)] || '')}</span></div>`;
   else if (thumb) inner = `<div class="fallback"><b>${t === 'wall' ? 'הקיר' : t === 'video' ? 'סרטון' : 'תוכן מוטמע'}</b><span>${esc(shortUrl(raw))}</span></div>`;
   else if (t === 'video') inner = `<video data-media src="${esc(url)}" playsinline></video>`;
   else inner = `<div class="fallback"><b>הדף לא נטען כאן?</b><span><span class="kb">O</span>פותחים אותו בחלון חדש</span></div><iframe src="${esc(url)}" title="${esc(st.title || '')}" allow="autoplay; clipboard-write; fullscreen" loading="eager"></iframe>`;
   return `<div class="embed"><div class="bar"><h2>${esc(st.title || '')}</h2>${q}</div><div class="frame">${inner}</div></div>`;
 }
 
+/* סרט הסיום: מתי שומר קובץ בכלי של הסרט, וגוררים אותו לכאן. הקובץ נשאר רק בחלון הזה */
+const FILM = { url:'' };
+function setFilm(file){
+  if (!file || !/^video\//.test(file.type)) return false;
+  if (FILM.url) URL.revokeObjectURL(FILM.url);
+  FILM.url = URL.createObjectURL(file);
+  const st = STEPS[S.i]; if (st && st.type === 'video' && st.src === '@film') enter();
+  return true;
+}
 /* ---------- המסך הראשי ---------- */
 let stage, wallLayer, ovLayer, blackLayer; const subs = new Set();
 function fit(){
@@ -3689,6 +3701,9 @@ function bootMain(){
   addEventListener('keydown', onKey);
   addEventListener('message', ev => { const d = ev.data || {}; if (d.type === 'hello'){ subs.add(ev.source); push(); } else if (d.type === 'cmd') cmd(d.cmd, d.arg); });
   stage.addEventListener('click', e => { if (e.target.closest('iframe,video,button')) return; if (S.ov){ return; } });
+  addEventListener('dragover', e => { e.preventDefault(); });
+  addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files[0]; setFilm(f); });
+  stage.addEventListener('change', e => { const inp = e.target.closest('[data-filmpick]'); if (inp && inp.files[0]) setFilm(inp.files[0]); });
   enter();
   setInterval(() => { tick(); }, 250);
   setInterval(push, 1000);
