@@ -3474,6 +3474,18 @@ const L = LESSON;
 const STEPS = [];
 L.segments.forEach((seg, si) => seg.steps.forEach((st, k) => STEPS.push(Object.assign({}, st, { seg: si, k }))));
 const KEY = 'nx-live-' + L.id;
+// הקישור האישי של ארן למלווה: בסוף הכתובת #k= והקוד של הכלי של מתי. הדפדפן זוכר את הקוד, והוא נמחק מהכתובת מיד.
+// כך המלווה יכול לשמור את המשפטים מהחדר ואת הקישור ל-Gem, בלי לפתוח קודם את הכלי של מתי
+function takeCode(){
+  if (!/^#k=/.test(location.hash)) return false;
+  const k = decodeURIComponent(location.hash.slice(3)).trim();
+  try { if (k) localStorage.setItem('nx-film-code', k); } catch(e){}
+  try { history.replaceState(null, '', location.pathname + location.search); } catch(e){ location.hash = ''; }
+  return true;
+}
+takeCode();
+// הדביקו את הקישור בלשונית שהמלווה כבר פתוח בה: הדף לא נטען מחדש, אז קוראים את הקוד וטוענים מחדש
+addEventListener('hashchange', () => { if (takeCode()) location.reload(); });
 const IS_PRESENTER = location.hash === '#presenter';
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
