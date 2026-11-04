@@ -41,7 +41,7 @@ button.o:disabled{opacity:.5}
 (function(){
   // שני סקרים באותו דף: הסקר (ברירת המחדל) והניבוי (?p=predict)
   const POLLS = {
-    predict: { kick:'ניבוי · 30 שניות, בלי שם', q:'כמה עסקאות ייסגרו בחדר מול המנהל הכי קשה בישראל, עד סוף הסדנה?', sub:'מנחשים פעם אחת. בסוף הסדנה נראה מי צדק.', opts:['פחות מ-5','5 עד 10','11 עד 20','יותר מ-20'] }
+    predict: { kick:'ניבוי · 30 שניות, בלי שם', q:'כמה עסקאות ייסגרו בחדר מול המנהל הכי קשה בישראל, עד סוף הסדנה?', sub:'מנחשים פעם אחת. בסוף הסדנה נראה מי צדק.', opts:['פחות מ-5','5 עד 10','11 עד 15','יותר מ-15'] }
   };
   const poll = POLLS[new URLSearchParams(location.search).get('p')] ? new URLSearchParams(location.search).get('p') : 'survey';
   const KEY = 'nx-danshar-voted-' + poll, opts = document.getElementById('opts'), msg = document.getElementById('msg');

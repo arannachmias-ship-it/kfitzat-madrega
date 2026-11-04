@@ -671,7 +671,7 @@ const LESSON = {
           'בלי שמות של סניפים, רשתות או אנשים. אם נאמר שם, מקלידים בלעדיו.',
           'משפט גס או פוגע לא נכנס. מחייכים ומבקשים עוד אחד.',
           'אם עולים יותר משלושה, בוחרים את השלושה שהחדר הכי הגיב אליהם.'] } },
-      { art:'predict', type:'poll', live:'predict', kicker:'ניבוי · 30 שניות', title:'כמה עסקאות ייסגרו בחדר מול המנהל, עד סוף הסדנה?', options:['פחות מ-5','5 עד 10','11 עד 20','יותר מ-20'], url:'@predict', g:{
+      { art:'predict', type:'poll', live:'predict', kicker:'ניבוי · 30 שניות', title:'כמה עסקאות ייסגרו בחדר מול המנהל, עד סוף הסדנה?', options:['פחות מ-5','5 עד 10','11 עד 15','יותר מ-15'], url:'@predict', g:{
         why:'הניבוי הופך את היעד המשותף של דקה 72 לאישי: כולם רוצים לראות אם צדקו.',
         time:'חצי דקה',
         say:[
@@ -1027,11 +1027,11 @@ const LESSON = {
           'עוברים מהר לשקף הבא.'],
         watch:[
           'המנהל קשוח בכוונה, אבל לא גס. אם מישהו מספר שהוא נעלב, בודקים את השיחה.'] } },
-      { art:'deal', type:'goal', live:'deal', goal:20, minutes:7, kicker:'יעד משותף', title:'עסקאות שנסגרו בחדר', g:{
+      { art:'deal', type:'goal', live:'deal', goal:15, minutes:7, kicker:'יעד משותף', title:'עסקאות שנסגרו בחדר', g:{
         why:'יעד משותף לכל החדר, בלי תחרות בין שולחנות. כל עסקה מקפיצה את המספר עם פרץ קטן של קונפטי. וכשמגיעים ליעד: גביע, "זכיתם!", זיקוקים, קונפטי וההמנון.',
         time:'7 דקות',
         say:[
-          '"היעד: 20 עסקאות. כשמגיעים, משהו יקרה."',
+          '"היעד: 15 עסקאות. כשמגיעים, משהו יקרה."',
           'כשמתקרבים: "עוד חמש!"',
           'כשמגיעים: נותנים להמנון להתנגן, ומוחאים כפיים.'],
         do:[
@@ -3618,7 +3618,7 @@ function setGoal(d){
   else { if (POLL.total < GOAL.target) GOAL.fired = false; GOAL.prev = ok ? POLL.total : null; paintGoal(); }
   push(); setTimeout(push, 4100);
 }
-function goalDefault(){ let g = 0; try { g = Number(localStorage.getItem(KEY + '-goal')) || 0; } catch(e){} if (g) return g; const st = STEPS.find(x => x.type === 'goal'); return (st && st.goal) || 20; }
+function goalDefault(){ let g = 0; try { g = Number(localStorage.getItem(KEY + '-goal')) || 0; } catch(e){} if (g) return g; const st = STEPS.find(x => x.type === 'goal'); return (st && st.goal) || 15; }
 
 /* ---------- החגיגה: קונפטי, זיקוקים, גביע וההמנון ---------- */
 const PCOL = ['#C6D63F', '#F1F4F4', '#EC1A78', '#FB6427', '#FFD166', '#7FB3BF'];
