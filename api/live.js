@@ -2,7 +2,8 @@
  * /api/live — הכלים החיים של הסדנאות (כרגע: דנשר, 11.11.2026).
  *
  * שני דברים:
- * 1. סקר אנונימי שהתוצאות שלו מופיעות על המקרן.
+ * 1. סקרים אנונימיים שהתוצאות שלהם מופיעות על המקרן: הסקר (survey), הניבוי (predict),
+ *    ומונה העסקאות שנסגרו מול הסוכן (deal, אפשרות אחת שסופרים).
  *    POST ?op=vote {poll, choice} — הצבעה אחת. GET ?op=votes&poll= — הספירה.
  *    כל הצבעה נשמרת כקובץ ריק בנתיב votes/<poll>/<choice>/<uuid>, וסופרים לפי הנתיב.
  *    בלי שם, בלי טלפון, בלי כתובת IP שנשמרת.
@@ -11,6 +12,10 @@
  *    POST ?op=manifest {items, settings} — הרשימה והסדר. GET ?op=manifest — הרשימה האחרונה.
  *    GET ?op=part&u=<כתובת> — מעביר חלק למלווה (שם מותר לפנות רק לאתר עצמו).
  *    POST ?op=clear — מוחק את כל הקבצים של הסדנה. לאחר הסדנה.
+ * 3. הסוכן שנבנה בסדנה: GET ?op=agent — {url, room}. POST ?op=agent {url, room} — עם קוד.
+ *    url: הקישור לשיתוף של ה-Gem (רק של Gemini). room: עד שלושה משפטים קשים ששמענו בחדר.
+ *    הברקוד על המקרן מפנה תמיד ל-/live/danshar/a, והדף הזה פותח את הקישור ששמור כאן,
+ *    ומוסיף את המשפטים מהחדר להוראות שמעתיקים.
  *    הכתיבה לסרט דורשת קוד (x-live-code). כאן נשמר רק ה-SHA-256 שלו.
  *
  * ההגנות מ-lib/api-guard.js: רק מהאתר עצמו, הגבלת קצב, תקרת גודל.
@@ -20,7 +25,7 @@ import { apiHeaders, isSameSite, clientIp, rateLimited, readJson, clean, logEven
 import { store } from '../lib/live-store.js';
 
 const ROOT = 'live/danshar';
-const POLLS = { survey: 4 };
+const POLLS = { survey: 4, predict: 4, deal: 1 };
 // ה-SHA-256 של קוד ההעלאה. הקוד עצמו לא נמצא בקוד. בבדיקות מחליפים אותו במשתנה סביבה.
 const CODE_SHA = process.env.LIVE_CODE_SHA || '195c04267395655a97f7688568978f5029f3ff3bf8ff77997592b0ddc77bdde1';
 const PART_MAX = 3.5 * 1024 * 1024;
@@ -60,6 +65,20 @@ async function listAll(prefix) {
   return out;
 }
 
+/** קישור לסוכן: רק https, ורק של Gemini */
+function isAgentUrl(u) {
+  try {
+    const x = new URL(u);
+    return u.length <= 300 && x.protocol === 'https:' && !x.username && !x.password && !x.port &&
+      ['gemini.google.com', 'g.co', 'share.gemini.google'].includes(x.hostname);
+  } catch { return false; }
+}
+
+/** המשפטים מהחדר: עד שלושה, כל אחד עד 160 תווים, בלי שורות ריקות */
+function cleanRoom(v) {
+  return (Array.isArray(v) ? v : []).map((x) => clean(String(x ?? ''), 160).replace(/[\r\n]+/g, ' ').trim()).filter(Boolean).slice(0, 3);
+}
+
 /** כתובת של קובץ מהאחסון שלנו, ורק מתחת לתיקיית הסרט */
 function isOurPart(u) {
   try {
@@ -92,13 +111,42 @@ export default async function handler(req, res) {
     if (op === 'vote' && req.method === 'POST') {
       if (!isSameSite(req)) return res.status(403).json({ error: 'forbidden' });
       // תקרה גבוהה: כל החדר עשוי לצאת מאותה כתובת של ה-Wi-Fi באולם
-      if (rateLimited(`vote:${ip}`, 150, 10 * 60_000)) return res.status(429).json({ error: 'rate_limited' });
+      if (rateLimited(`vote:${ip}`, 300, 10 * 60_000)) return res.status(429).json({ error: 'rate_limited' });
       const body = await readJson(req, 1024);
       const poll = clean(body.poll, 20);
       const choice = Number(body.choice);
       if (!POLLS[poll] || !Number.isInteger(choice) || choice < 0 || choice >= POLLS[poll]) return res.status(400).json({ error: 'bad_vote' });
       await store().put(`${ROOT}/votes/${poll}/${choice}/${crypto.randomUUID()}`, '1', { ...PUB, contentType: 'text/plain' });
       return res.status(200).json({ ok: true });
+    }
+
+    // ---------- הקישור לסוכן ----------
+    if (op === 'agent' && req.method === 'GET') {
+      if (rateLimited(`agent:${ip}`, 300, 60_000)) return res.status(429).json({ error: 'rate_limited' });
+      const all = await listAll(`${ROOT}/agent/`);
+      if (!all.length) return res.status(200).json({ url: null, room: [] });
+      all.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+      const r = await fetch(all[0].url, { cache: 'no-store' });
+      if (!r.ok) return res.status(502).json({ error: 'store_error' });
+      const m = await r.json();
+      return res.status(200).json({ url: isAgentUrl(String(m.url || '')) ? m.url : null, room: cleanRoom(m.room), updatedAt: all[0].uploadedAt });
+    }
+    if (op === 'agent' && req.method === 'POST') {
+      if (!isSameSite(req)) return res.status(403).json({ error: 'forbidden' });
+      if (!okCode(req)) { logEvent('live', 'bad_code'); return res.status(401).json({ error: 'bad_code' }); }
+      const body = await readJson(req, 4096);
+      const u = String(body.url || '').trim();
+      const room = cleanRoom(body.room);
+      if (u !== '' && !isAgentUrl(u)) return res.status(400).json({ error: 'bad_url' });
+      const old = await listAll(`${ROOT}/agent/`);
+      if (u === '' && !room.length) {
+        if (old.length) await store().del(old.map((b) => b.url));
+        return res.status(200).json({ ok: true, url: null, room: [] });
+      }
+      const b = await store().put(`${ROOT}/agent/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.json`, JSON.stringify({ url: u || null, room }), { ...PUB, contentType: 'application/json' });
+      const stale = old.filter((x) => x.url !== b.url);
+      if (stale.length) await store().del(stale.map((x) => x.url));
+      return res.status(200).json({ ok: true, url: u || null, room });
     }
 
     // ---------- סרט הסיום ----------
@@ -155,8 +203,9 @@ export default async function handler(req, res) {
     if (op === 'clear' && req.method === 'POST') {
       if (!isSameSite(req)) return res.status(403).json({ error: 'forbidden' });
       if (!okCode(req)) return res.status(401).json({ error: 'bad_code' });
-      const what = url.searchParams.get('what') === 'votes' ? 'votes' : url.searchParams.get('what') === 'film' ? 'film' : 'all';
-      const prefixes = what === 'all' ? [`${ROOT}/votes/`, `${ROOT}/film/`] : [`${ROOT}/${what}/`];
+      const w = url.searchParams.get('what');
+      const what = ['votes', 'film', 'agent'].includes(w) ? w : 'all';
+      const prefixes = what === 'all' ? [`${ROOT}/votes/`, `${ROOT}/film/`, `${ROOT}/agent/`] : [`${ROOT}/${what}/`];
       let n = 0;
       for (const p of prefixes) {
         const all = await listAll(p);

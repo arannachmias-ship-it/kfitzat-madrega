@@ -50,7 +50,7 @@ aside{display:flex;flex-direction:column;gap:14px;min-width:0}
 .it .act button{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:2px 6px;font-size:16px}
 .it .act button:hover{color:var(--paper)}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:700;color:var(--muted);margin-top:8px}
-label.f input,label.f select{border:1px solid var(--line);background:var(--deep);border-radius:8px;padding:8px 10px;font-weight:500;color:var(--paper)}
+label.f input,label.f select,label.f textarea{border:1px solid var(--line);background:var(--deep);border-radius:8px;padding:8px 10px;font-weight:500;color:var(--paper)}
 .hint{font-size:14px;color:var(--muted);margin:6px 0 0}
 label.chk span{display:flex;gap:8px;align-items:center;color:var(--paper);font-weight:700}
 label.chk input{width:18px;height:18px;accent-color:var(--citron)}
@@ -60,6 +60,8 @@ label.chk input{width:18px;height:18px;accent-color:var(--citron)}
 .sync{display:flex;gap:10px;align-items:center;background:var(--deep);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14.5px}
 .sync i{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}
 .sync.ok i{background:var(--ok)} .sync.go i{background:var(--citron)} .sync.err i{background:var(--warn)}
+label.f textarea{font:inherit;font-weight:500;resize:vertical;min-height:84px;line-height:1.5}
+.agentbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
 .danger{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
 .danger .btn{font-size:14px;padding:6px 12px;font-weight:700}
 .danger .btn.arm{background:var(--warn);color:#2a0f00;border-color:var(--warn)}
@@ -101,11 +103,20 @@ label.chk input{width:18px;height:18px;accent-color:var(--citron)}
       <p class="hint">מוזיקה אחרת משנה רק את מה שרואים כאן. במצגת תמיד מתנגן ההמנון.</p>
     </div>
     <div class="panel">
+      <h2>המנהל הכי קשה בישראל</h2>
+      <p class="hint">בדקה 5: רושמים כאן את המשפטים מהחדר. הם נכנסים לבד להוראות ש"העתק הוראות" מעתיק בדף של הסוכן.</p>
+      <label class="f" for="room">המשפטים מהחדר (אחד בכל שורה, עד שלושה)<textarea id="room" rows="3" placeholder="אין לי מקום, תחזור בחודש הבא"></textarea></label>
+      <label class="f" for="agentUrl">הקישור לשיתוף של ה-Gem<input id="agentUrl" type="url" dir="ltr" inputmode="url" placeholder="https://gemini.google.com/gem/…"></label>
+      <div class="agentbar"><button class="btn pri" id="agentSave" type="button">שמירה</button><a class="btn" href="/live/danshar/a" target="_blank" rel="noopener">הדף של הסוכן</a></div>
+      <p class="hint" id="agentMsg" role="status">בלי שמות של סניפים, רשתות או אנשים.</p>
+    </div>
+    <div class="panel">
       <h2>לפני הסדנה</h2>
       <p class="hint">אחרי החזרה מנקים את מה שהועלה לניסיון. לוחצים פעמיים לאישור.</p>
       <div class="danger">
         <button class="btn" type="button" data-clear="film">מחיקת כל התוצרים</button>
-        <button class="btn" type="button" data-clear="votes">איפוס הסקר</button>
+        <button class="btn" type="button" data-clear="votes">איפוס הסקרים והעסקאות</button>
+        <button class="btn" type="button" data-clear="agent">מחיקת הקישור והמשפטים</button>
       </div>
       <p class="hint" id="clearMsg" role="status"></p>
     </div>
@@ -391,7 +402,11 @@ const SYNC = (() => {
     if (!code) throw new Error('no_code');
     return post(`?op=clear&what=${what}`, '{}', 'application/json');
   }
-  return { get code(){ return code; }, kick, manifest, start, paint, clear };
+  async function agent(body){
+    if (!code) throw new Error('no_code');
+    return post('?op=agent', JSON.stringify(body), 'application/json');
+  }
+  return { get code(){ return code; }, kick, manifest, start, paint, clear, agent };
 })();
 
 /* ---------- ניקוי לפני הסדנה (שתי לחיצות) ---------- */
@@ -405,11 +420,31 @@ document.querySelectorAll('[data-clear]').forEach(b => {
     try {
       const d = await SYNC.clear(what);
       if (what === 'film'){ for (const it of items){ DB.del(it.id); URL.revokeObjectURL(it.url); } items = []; renderList(); }
-      msg.textContent = what === 'film' ? `נמחק. גם כאן וגם במצגת (${d.deleted} קבצים).` : `הסקר אופס (${d.deleted} הצבעות נמחקו).`;
+      if (what === 'agent'){ document.getElementById('room').value = ''; document.getElementById('agentUrl').value = ''; }
+      msg.textContent = what === 'film' ? `נמחק. גם כאן וגם במצגת (${d.deleted} קבצים).` : what === 'agent' ? 'הקישור והמשפטים נמחקו.' : `הסקרים והעסקאות אופסו (${d.deleted} הצבעות נמחקו).`;
     } catch(e){ msg.textContent = 'לא הצליח. צריך את הקישור עם הקוד, ואינטרנט.'; }
     SYNC.paint();
   });
 });
+
+/* ---------- המנהל הכי קשה בישראל: המשפטים מהחדר והקישור ל-Gem ---------- */
+(() => {
+  const room = document.getElementById('room'), url = document.getElementById('agentUrl'), msg = document.getElementById('agentMsg'), btn = document.getElementById('agentSave');
+  fetch('/api/live?op=agent', { cache:'no-store' }).then(r => r.ok ? r.json() : null).then(d => {
+    if (!d) return; if (d.url && !url.value) url.value = d.url; if (d.room && d.room.length && !room.value) room.value = d.room.join('\n');
+  }).catch(() => {});
+  btn.addEventListener('click', async () => {
+    const lines = room.value.split('\n').map(x => x.trim()).filter(Boolean);
+    if (lines.length > 3){ msg.textContent = 'עד שלושה משפטים. לילך בוחרת.'; return; }
+    msg.textContent = 'שומר…';
+    try {
+      const d = await SYNC.agent({ url: url.value.trim(), room: lines });
+      msg.textContent = d.url ? 'נשמר. הברקוד במצגת פותח עכשיו את ה-Gem.' : 'המשפטים נשמרו. כשה-Gem מוכן, מדביקים כאן את הקישור ושומרים שוב.';
+    } catch(e){
+      msg.textContent = String(e.message) === 'http_400' ? 'הקישור לא נראה כמו קישור של Gemini. מעתיקים אותו שוב מ"שיתוף".' : 'לא נשמר. צריך את הקישור עם הקוד, ואינטרנט.';
+    }
+  });
+})();
 
 /* ---------- התחלה ---------- */
 (async () => {

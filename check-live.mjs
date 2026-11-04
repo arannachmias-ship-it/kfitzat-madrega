@@ -42,8 +42,38 @@ r = await call({ method: 'POST', url: '/api/live?op=vote', body: { poll: 'survey
 r = await call({ method: 'POST', url: '/api/live?op=vote', body: { poll: 'nope', choice: 1 } }); assert.equal(r.status, 400);
 r = await call({ method: 'POST', url: '/api/live?op=vote', headers: { origin: 'https://evil.example' }, body: { poll: 'survey', choice: 1 } }); assert.equal(r.status, 403);
 _resetRateLimits();
-for (let i = 0; i < 150; i++) await call({ method: 'POST', url: '/api/live?op=vote', headers: { 'x-forwarded-for': '7.7.7.7' }, body: { poll: 'survey', choice: 1 } });
+for (let i = 0; i < 300; i++) await call({ method: 'POST', url: '/api/live?op=vote', headers: { 'x-forwarded-for': '7.7.7.7' }, body: { poll: 'survey', choice: 1 } });
 r = await call({ method: 'POST', url: '/api/live?op=vote', headers: { 'x-forwarded-for': '7.7.7.7' }, body: { poll: 'survey', choice: 1 } }); assert.equal(r.status, 429);
+
+// הניבוי ומונה העסקאות
+_resetRateLimits();
+r = await call({ url: '/api/live?op=votes&poll=deal' }); assert.equal(r.status, 200); assert.deepEqual(r.body.counts, [0]);
+for (let i = 0; i < 3; i++) { r = await call({ method: 'POST', url: '/api/live?op=vote', body: { poll: 'deal', choice: 0 } }); assert.equal(r.status, 200); }
+r = await call({ method: 'POST', url: '/api/live?op=vote', body: { poll: 'deal', choice: 1 } }); assert.equal(r.status, 400);
+r = await call({ url: '/api/live?op=votes&poll=deal' }); assert.equal(r.body.total, 3);
+r = await call({ method: 'POST', url: '/api/live?op=vote', body: { poll: 'predict', choice: 3 } }); assert.equal(r.status, 200);
+r = await call({ url: '/api/live?op=votes&poll=predict' }); assert.deepEqual(r.body.counts, [0, 0, 0, 1]);
+
+// הקישור לסוכן
+r = await call({ url: '/api/live?op=agent' }); assert.equal(r.status, 200); assert.equal(r.body.url, null); assert.deepEqual(r.body.room, []);
+r = await call({ method: 'POST', url: '/api/live?op=agent', body: { room: ['אין לי מקום', '', 'תשאיר קטלוג', 'רביעי', 'חמישי'] }, headers: CODE }); assert.equal(r.status, 200);
+r = await call({ url: '/api/live?op=agent' }); assert.equal(r.body.url, null); assert.deepEqual(r.body.room, ['אין לי מקום', 'תשאיר קטלוג', 'רביעי']);
+r = await call({ method: 'POST', url: '/api/live?op=agent', body: { url: 'https://gemini.google.com/gem/zzz', room: ['<b>שורה\nשנייה</b>'] }, headers: CODE }); assert.equal(r.status, 200);
+r = await call({ url: '/api/live?op=agent' }); assert.equal(r.body.room.length, 1); assert.ok(!/[\n]/.test(r.body.room[0]));
+r = await call({ method: 'POST', url: '/api/live?op=agent', body: { url: 'https://gemini.google.com/gem/abc123?usp=sharing' } }); assert.equal(r.status, 401, 'בלי קוד אסור');
+for (const bad of ['http://gemini.google.com/gem/x', 'https://evil.example/gem', 'https://gemini.google.com.evil.example/x', 'javascript:alert(1)', 'https://user:pw@gemini.google.com/x', 'https://gemini.google.com/' + 'a'.repeat(400)]) {
+  r = await call({ method: 'POST', url: '/api/live?op=agent', body: { url: bad }, headers: CODE }); assert.equal(r.status, 400, bad);
+}
+r = await call({ method: 'POST', url: '/api/live?op=agent', body: { url: 'https://gemini.google.com/gem/abc123?usp=sharing' }, headers: { ...CODE, origin: 'https://evil.example' } }); assert.equal(r.status, 403);
+r = await call({ method: 'POST', url: '/api/live?op=agent', body: { url: 'https://gemini.google.com/gem/abc123?usp=sharing' }, headers: CODE }); assert.equal(r.status, 200);
+r = await call({ method: 'POST', url: '/api/live?op=agent', body: { url: 'https://gemini.google.com/gem/def456?usp=sharing' }, headers: CODE }); assert.equal(r.status, 200);
+r = await call({ url: '/api/live?op=agent' }); assert.equal(r.body.url, 'https://gemini.google.com/gem/def456?usp=sharing');
+assert.equal([...blobs.keys()].filter((k) => k.includes('/agent/')).length, 1, 'נשאר רק הקישור האחרון');
+r = await call({ method: 'POST', url: '/api/live?op=agent', body: { url: '' }, headers: CODE }); assert.equal(r.status, 200);
+r = await call({ url: '/api/live?op=agent' }); assert.equal(r.body.url, null);
+r = await call({ method: 'POST', url: '/api/live?op=clear&what=agent', headers: CODE }); assert.equal(r.status, 200);
+r = await call({ url: '/api/live?op=agent' }); assert.equal(r.body.url, null);
+await call({ method: 'POST', url: '/api/live?op=agent', body: { url: 'https://g.co/gemini/share/abc' }, headers: CODE });
 
 // הסרט
 r = await call({ method: 'POST', url: '/api/live?op=part&id=item-abc123&n=0', raw: Buffer.from('hello'), headers: { 'content-type': 'application/octet-stream' } });
