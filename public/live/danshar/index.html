@@ -156,7 +156,7 @@ button{font-family:inherit}
 .ext .what{font-size:64px;font-weight:700;line-height:1.25;max-width:1500px;text-wrap:balance}
 .ext .what2{font-size:44px;color:var(--ink2);max-width:1400px}
 .keys{display:flex;gap:40px;margin-top:20px;font-size:34px;color:var(--ink2);align-items:center}
-.kb{display:inline-block;min-width:64px;padding:6px 16px;border:2px solid var(--cap);border-bottom-width:5px;border-radius:12px;font-weight:800;color:var(--paper);text-align:center;direction:ltr;margin-inline-end:12px}
+.kb{display:inline-block;min-width:64px;padding:6px 16px;border:2px solid var(--cap);border-bottom-width:5px;border-radius:12px;font-weight:800;color:var(--paper);text-align:center;direction:ltr;margin-left:12px}
 
 /* פתיחה */
 .cover{display:grid;grid-template-columns:minmax(0,1fr) 600px;gap:96px;align-items:center;flex:1 1 auto}
@@ -216,6 +216,34 @@ button{font-family:inherit}
 .agenda button.cur{background:var(--citron);color:var(--deep);font-weight:800}
 .agenda button:hover{background:var(--card)}
 .help{display:grid;grid-template-columns:auto auto auto auto;gap:26px 36px;font-size:38px;align-items:center;max-width:1600px}
+/* המשפטים מהחדר והקישור ל-Gem: מקלידים בשקף, מול כולם */
+.roomslide .h{font-size:68px}
+.roomslide .sub{margin-top:16px;font-size:38px}
+.roomslide .content{margin-top:40px}
+.room{display:flex;flex-direction:column;gap:18px;max-width:1696px}
+.room .rl{display:flex;gap:24px;align-items:center}
+.room .n{flex:0 0 72px;height:72px;border-radius:50%;background:var(--citron);color:var(--deep);font-size:38px;font-weight:900;display:grid;place-items:center}
+.room input{flex:1 1 auto;min-width:0;height:88px;background:var(--card);color:var(--paper);border:3px solid var(--line);border-radius:22px;padding:0 30px;font:inherit;font-size:44px;font-weight:600}
+.room input:focus{outline:none;border-color:var(--citron)}
+.room input::placeholder{color:#6F8D95}
+.room input:disabled{opacity:1}
+.room .acts{display:flex;gap:24px;align-items:center;margin-top:4px}
+.room .lnk{margin-top:10px}
+.room .lnk .lt{flex:0 0 auto;font-size:32px;font-weight:700;color:var(--ink2)}
+.room .lnk input{height:80px;font-size:30px;font-weight:500;text-align:left}
+.room .agcode{flex:0 0 220px;height:80px;font-size:34px}
+.agbtn{flex:0 0 auto;height:80px;padding:0 40px;border:0;border-radius:20px;background:var(--citron);color:var(--deep);font:inherit;font-size:36px;font-weight:900;cursor:pointer}
+.agbtn.sec{background:transparent;color:var(--paper);border:3px solid var(--line)}
+.agbtn:disabled{cursor:default}
+.agbtn:focus-visible{outline:4px solid var(--paper);outline-offset:4px}
+.agmsg{margin:0;font-size:32px;line-height:1.35;color:var(--ink2)}
+.agmsg.ok{color:var(--citron)}
+.agmsg.err{color:#F4A57E}
+.agov{width:1700px;display:flex;flex-direction:column;gap:22px}
+.agov .h{font-size:64px;margin:0}
+.agesc{margin:6px 0 0;font-size:30px;color:var(--cap)}
+.gd-copy{margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.gd-copy .agmsg{font-size:15px}
 .help h2{grid-column:1/-1;margin:0 0 10px;font-size:64px}
 
 /* איורים ותנועה: אותו סגנון איור כמו ב-PDF ובפלייר, ותנועה עדינה שלא מתחרה בדיבור */
@@ -501,7 +529,7 @@ const LESSON = {
         'עדיין בלי חשבון ב-Suno וב-Kling: נרשמים מהטלפון בזמן הבדיקה, כמו שהמשתתפים יעשו',
         'קיר Padlet לניסיון, שמותר לפרסם בו בלי הרשמה',
         'תשובות לשאלון, אמיתיות או לדוגמה, בשביל ההמנון',
-        'חשבון גוגל במחשב שבו בונים את ה-Gem, והכלי של מתי עם הקוד (לשמירת המשפטים מהחדר והקישור)',
+        'חשבון גוגל במחשב שבו בונים את ה-Gem. באותו דפדפן, המלווה פתוח מהאתר, והקישור של הכלי של מתי (עם הקוד) נפתח בו פעם אחת, כדי שהמלווה יוכל לשמור את המשפטים והקישור',
         'כלי הווידאו בתשלום פתוח במחשב, והמנוי פעיל',
         'תוכנה לעריכת סרט הסיום במחשב',
         'קבוצת וואטסאפ לניסיון',
@@ -543,7 +571,7 @@ const LESSON = {
           steps:['מראים במלווה את שקף המדף (לא את הקובץ: שם של קובץ יכול לגלות את התשובה)','מצלמים את המסך משני טלפונים, ושואלים: "כמה מוצרים יש על המדף בתמונה? תן מספר מדויק."','התשובה הנכונה: 121 (31, 35, 27, 28, מלמעלה למטה)'],
           good:['כל טלפון עונה מספר אחר','התשובות מדויקות ובטוחות, בלי "בערך"'] },
         { id:'agent', seg:10, title:'המנהל הכי קשה בישראל', tool:'Gemini', devices:['pc','iphone','android'], budget:5,
-          steps:['במחשב: בדף של הסוכן (nexadapt.co.il/live/danshar/a) "העתק הוראות" ← gemini.google.com ← Gems ← Gem חדש. שם: "המנהל הכי קשה בישראל". מדביקים, כמו בדקה 5','מקלידים בסוף, בחלק "מהחדר", שני משפטים לדוגמה, ושומרים. בודקים שההוראות לא נחתכו','בכלי של מתי, בחלק "המנהל הכי קשה בישראל": אותם שני משפטים, ושמירה','שומרים, ואז שיתוף: "כל מי שיש לו את הקישור". מעתיקים את הקישור, מדביקים בכלי של מתי ושומרים','מכל טלפון: סורקים את הברקוד של דקה 72, פותחים, כותבים 1 ומשחקים סבב שלם ברמה 1. פעם אחת בהקלדה, ופעם בהכתבה','אחרי "סגרת!": לוחצים "סגרתי עסקה", ובודקים שהמונה במלווה עולה','מנסים גם 4 (תמונה של המדף מהמסך) ו-5 (הכנה לביקור)','בודקים את הגיבוי: "העתק הוראות" בטלפון, מדביקים בשיחה חדשה ב-Gemini, ובודקים שזה אותו מנהל'],
+          steps:['במלווה, בשקף "ככה מכניסים הדרכה לתוך Gemini": "העתק הוראות" ← gemini.google.com ← Gems ← Gem חדש. שם: "המנהל הכי קשה בישראל". מדביקים, כמו בדקה 5','בשקף הבא במלווה: שני משפטים לדוגמה, ו"שמירה והעתקת ההוראות". ב-Gem: Ctrl+A ואז Ctrl+V. בודקים שהמשפטים בסוף ושההוראות לא נחתכו, ושומרים','שיתוף: "כל מי שיש לו את הקישור". מעתיקים, מדביקים במלווה בתיבה של הקישור, ו"שמירת הקישור"','מנסים גם את A משקף אחר: אותן תיבות נפתחות מעל השקף, ו-Esc סוגר','מכל טלפון: סורקים את הברקוד של דקה 72, פותחים, כותבים 1 ומשחקים סבב שלם ברמה 1. פעם אחת בהקלדה, ופעם בהכתבה','אחרי "סגרת!": לוחצים "סגרתי עסקה", ובודקים שהמונה במלווה עולה','מנסים גם 4 (תמונה של המדף מהמסך) ו-5 (הכנה לביקור)','בודקים את הגיבוי: "העתק הוראות" בטלפון, מדביקים בשיחה חדשה ב-Gemini, ובודקים שזה אותו מנהל'],
           good:['הבנייה לוקחת עד 5 דקות','הקישור נפתח בשני הטלפונים, באפליקציה או בדפדפן, עם חשבון גוגל אישי','סבב ברמה 1 נגמר בפחות מ-5 דקות, עם ציון ומשוב','המונה במלווה עולה תוך כמה שניות'],
           limits:'מה קורה בטלפון בלי אפליקציית Gemini, או בלי חשבון מחובר. Gems לא עובדים עם Gemini Live, אז מדברים דרך המיקרופון במקלדת. מ-17.11 גוגל מחליפים את ה-Gems ב"סקילים", וה-Gem עובר לקריאה בלבד',
           backup:'"העתק הוראות" בדף של הסוכן: אותו מנהל, בשיחה רגילה ב-Gemini' },
@@ -557,7 +585,7 @@ const LESSON = {
   links: {
     companion: 'https://nexadapt.co.il/live/danshar/m', // הדף המלווה למשתתפים (2.11)
     wall: 'https://padlet.com/nexadapt/padlet-s0253004ybp5evt1omf6', // קיר Padlet (2.11). הקישור הרגיל הופך לבד לקישור הטמעה
-    agent: 'https://nexadapt.co.il/live/danshar/a', // הדף של הסוכן: פותח את ה-Gem שנבנה בסדנה (הקישור נשמר בכלי של מתי), "סגרתי עסקה", והעתקת ההוראות
+    agent: 'https://nexadapt.co.il/live/danshar/a', // הדף של הסוכן: פותח את ה-Gem שנבנה בסדנה (הקישור נשמר מהמלווה, או מהכלי של מתי), "סגרתי עסקה", והעתקת ההוראות
     predict: 'https://nexadapt.co.il/live/danshar/v?p=predict', // הניבוי: כמה עסקאות ייסגרו. התוצאות בשקף (V)
     survey: 'https://nexadapt.co.il/live/danshar/v', // הסקר האנונימי, באתר שלנו. התוצאות מופיעות בשקף (V)
     closing: 'https://docs.google.com/forms/d/e/1FAIpQLSeefepKENrhBoRVTQUcw1S4LKSPtxUpVTSRkV9tuXZa9ydU9g/viewform', // טופס הסיום (2.11)
@@ -628,7 +656,7 @@ const LESSON = {
           'הסיפור לא נועד לצחוק על הכלי. המסר שלו: גם לי זה לא עבד בהתחלה, וזה בסדר.',
           'לא מסבירים כאן מה זה AI ואיך הוא עובד. עוברים ישר לעשייה.'] } }
     ]},
-    { from:5, to:10, title:'המנהל הכי קשה בישראל', checks:['ה-Gem נפתח מול כולם, וההוראות הודבקו עד הסוף', 'שלושה משפטים מהחדר הוקלדו לחלק "מהחדר", וה-Gem נשמר', 'מתי שמר את אותם משפטים בכלי שלו', 'הניבוי נפתח בטלפון, והספירה עולה מתחת לברקוד'], steps:[
+    { from:5, to:10, title:'המנהל הכי קשה בישראל', checks:['ה-Gem נפתח מול כולם, וההוראות הודבקו עד הסוף', 'שלושה משפטים הוקלדו בשקף ונשמרו, הודבקו ל-Gem, וה-Gem נשמר', 'הקישור ל-Gem נשמר במלווה, עכשיו או בסבב 1', 'הניבוי נפתח בטלפון, והספירה עולה מתחת לברקוד'], steps:[
       { art:'manager', type:'principle', tone:'citron', kicker:'מה נבנה היום', title:'המנהל הכי קשה בישראל', sub:'מאמן מכירות בטלפון. נבנה עכשיו, מולכם, מההדרכה של מחלקת המכירות ומהמשפטים שלכם. בסוף הסדנה הוא שלכם.', g:{
         why:'במקום האפליקציה שה-IT לא אישר. מכריזים מה נבנה, ובונים אותו מולם בשתי דקות. את הסוכן עצמו הם פוגשים רק בסוף, כולם יחד.',
         time:'חצי דקה',
@@ -639,7 +667,7 @@ const LESSON = {
           'אם לילך בחדר, מודים לה על ההדרכה במשפט אחד. בלי להעלות אותה.'],
         watch:[
           'לא מציגים אותו כתחליף להדרכה או למנהל המרחב. זה מגרש אימונים.'] } },
-      { art:'manager', type:'external', kicker:'בונים מולכם · 2 דקות', tool:'Gemini', title:'ככה מכניסים הדרכה לתוך Gemini', sub:'Gem חדש, שם, ההוראות. בלי קוד.', url:'@gemini', g:{
+      { art:'manager', type:'external', kicker:'בונים מולכם · 2 דקות', tool:'Gemini', title:'ככה מכניסים הדרכה לתוך Gemini', sub:'Gem חדש, שם, ההוראות. בלי קוד.', url:'@gemini', copy:'agent', g:{
         why:'הם רואים שהסוכן הוא לא קסם: הוראות כתובות בעברית, שמודבקות לתוך Gemini. זה משהו שהם יוכלו לעשות בעצמם.',
         time:'2 דקות',
         say:[
@@ -648,7 +676,7 @@ const LESSON = {
           '"ואלה ההוראות שלו. אין כאן קוד, רק עברית: מי הוא, איך הוא מדבר, מה הסיבה האמיתית מאחורי כל התנגדות, ואיך הוא נותן ציון. הבסיס הוא ההדרכה של לילך."',
           '"ובסוף יש חלק ריק: \'מהחדר\'. אותו אתם ממלאים עכשיו."'],
         do:[
-          'לפני הסדנה: בלשונית של הדף של הסוכן (nexadapt.co.il/live/danshar/a) לוחצים "העתק הוראות".',
+          'לוחצים "העתק הוראות" בשקף (או במסך המנחה). ההוראות נטענות מהאתר.',
           'Ctrl+Tab ללשונית Gemini, מחוברת לחשבון של ארן ← Gems ← Gem חדש ← שם: המנהל הכי קשה בישראל.',
           'מדביקים את ההוראות בתיבה, וגוללים לאט: הרמות, התרחישים, המשוב, ובסוף "מהחדר". עוד לא שומרים.',
           'Ctrl+Shift+Tab חוזרים למלווה, לשקף הבא.'],
@@ -656,18 +684,20 @@ const LESSON = {
           'לא קוראים את ההוראות. מראים רק כותרות.',
           'לא מנסים אותו עכשיו. הפעם הראשונה שהם רואים אותו עובד היא בסוף, כולם יחד.',
           'אם Gemini לא נטען: ממשיכים לשקף הבא, ובונים ברקע בסבב 1.'] } },
-      { art:'talk', type:'principle', kicker:'שתי דקות, בקול', title:'מה המשפט הכי קשה ששמעתם החודש ממנהל סניף?', sub:'שלושה משפטים מהחדר נכנסים למנהל. רק המשפט, בלי שם של סניף או רשת.', g:{
+      { type:'room', kicker:'שתי דקות, בקול', title:'מה המשפט הכי קשה ששמעתם החודש ממנהל סניף?', sub:'שלושה משפטים מהחדר נכנסים למנהל. רק המשפט, בלי שם של סניף או רשת.', g:{
         why:'הסוכן נבנה מהמילים שלהם, מול העיניים שלהם. זה מה שיגרום להם להרגיש בסוף שהוא שלהם, ולא עוד כלי שמישהו הביא.',
-        time:'2 דקות',
+        time:'3 דקות',
         say:[
           '"מה המשפט הכי קשה ששמעתם החודש ממנהל סניף? רק את המשפט, בלי שם של הסניף."',
-          '"שלושה משפטים. אני מקליד אותם עכשיו פנימה."'],
+          '"שלושה משפטים. אני מקליד אותם עכשיו, מולכם."'],
         do:[
-          'Ctrl+Tab ל-Gem. בסוף ההוראות, בחלק "מהחדר", מחליפים את הקו בשלושה משפטים, כל אחד בשורה שמתחילה במקף.',
-          'שומרים (Save). מראים לחדר את המשפטים שלהם בתוך ההוראות.',
-          'מתי מקליד את אותם משפטים בכלי של סרט הסיום, בחלק "המנהל הכי קשה בישראל", ולוחץ שמירה. כך גם "העתק הוראות" בדף של הסוכן נותן את אותו מנהל.',
-          'Ctrl+Shift+Tab חוזרים למלווה.'],
+          'מקלידים את שלושת המשפטים בשקף, מול כולם. Enter עובר לשורה הבאה.',
+          'לוחצים "שמירה והעתקת ההוראות". המשפטים נשמרים באתר, וההוראות המלאות, עם המשפטים בסוף, מועתקות.',
+          'Ctrl+Tab ל-Gem. לוחצים בתוך ההוראות, Ctrl+A ואז Ctrl+V. גוללים לסוף ומראים לחדר את המשפטים שלהם בחלק "מהחדר". שומרים (Save).',
+          'שיתוף ← "כל מי שיש לו את הקישור" ← מעתיקים. Ctrl+Shift+Tab חוזרים למלווה, מדביקים בתיבה של הקישור ולוחצים "שמירת הקישור".',
+          'אין זמן לשתף עכשיו? עושים את זה בסבב 1: A פותח את אותן תיבות מכל שקף, ו-Esc סוגר.'],
         watch:[
+          'מופיעה תיבה "קוד"? הדפדפן הזה עוד לא קיבל את הקוד. לפני הסדנה פותחים בו פעם אחת את הקישור של הכלי של מתי, או מקלידים את הקוד בתיבה (התווים מוסתרים).',
           'בלי שמות של סניפים, רשתות או אנשים. אם נאמר שם, מקלידים בלעדיו.',
           'משפט גס או פוגע לא נכנס. מחייכים ומבקשים עוד אחד.',
           'אם עולים יותר משלושה, בוחרים את השלושה שהחדר הכי הגיב אליהם.'] } },
@@ -705,7 +735,7 @@ const LESSON = {
           'אם יותר משני שולחנות עדיין תקועים, לא ממשיכים. עדיף עוד דקה כאן מאשר חצי חדר שלא יכול להתחיל את הסבב.',
           'מי שעובד במחשב פותח את Gemini בדפדפן, בכתובת gemini.google.com.'] } }
     ]},
-    { from:12, to:27, title:'סבב 1 · תמונה', checks:['Gemini משנה תמונה מהמצלמה', 'העברית בפוסטר יוצאת תקינה, או שיודעים לתקן אותה', 'ההעלאה לקיר עובדת בלי הרשמה', 'הקיר מופיע על המסך (W) ומתעדכן', 'ברקע: ה-Gem שותף, והקישור נשמר בכלי של מתי'], steps:[
+    { from:12, to:27, title:'סבב 1 · תמונה', checks:['Gemini משנה תמונה מהמצלמה', 'העברית בפוסטר יוצאת תקינה, או שיודעים לתקן אותה', 'ההעלאה לקיר עובדת בלי הרשמה', 'הקיר מופיע על המסך (W) ומתעדכן', 'ה-Gem שותף, והקישור נשמר במלווה'], steps:[
       { art:'film', type:'task', kicker:'סבב 1 · תמונה', backup:'@backupPoster', title:'הפוסטר של הצוות', tools:['Gemini'], minutes:4, steps:['מצלמים את עצמכם או משהו על השולחן','מבקשים פוסטר לסרט או לגיבורי על','עם כוח העל של הצוות, ושם הסרט בעברית','לא רוצים פנים? מבקשים איור'], say:'בלי הסבר. ננסה קודם לבד.', do:'T מפעיל את הטיימר. בסוף מעלים לקיר.', g:{
         why:'ניסיון ראשון, בלי הסבר. כל אחד מגלה בעצמו מה עובד, ובשקף הכללים הכללים יוצאים מהדוגמאות שלהם.',
         time:'4 דקות עבודה, ועוד דקה להעלות לקיר',
@@ -718,7 +748,7 @@ const LESSON = {
           'כשמסיימים להסביר, T מפעיל את הטיימר.',
           'עוברים בין השולחנות. מי שתקוע מקבל שאלה, לא תשובה: "מה כוח העל שלכם?"',
           'בדקה האחרונה: "מי שיש לו משהו, מעלה לקיר עכשיו."',
-          'ברקע, במסך של המחשב (לא על המקרן): ב-Gem שבנינו, שיתוף ← "כל מי שיש לו את הקישור" ← מעתיקים. בכלי של סרט הסיום מדביקים בתיבה "הקישור לשיתוף של ה-Gem" ולוחצים שמירה. או ששולחים את הקישור למתי, והוא שומר.'],
+          'אם הקישור ל-Gem עוד לא נשמר: ב-Gem שיתוף ← "כל מי שיש לו את הקישור" ← מעתיקים. במלווה A, מדביקים בתיבה של הקישור, "שמירת הקישור", ו-Esc.'],
         watch:[
           'לא נותנים טיפים בשלב הזה, גם אם רואים טעויות. הטעויות הן החומר לשקף הכללים.',
           'מי שמסיים מהר, מקבל אתגר: לנסות סגנון אחר.',
@@ -3537,9 +3567,13 @@ function renderStep(st, thumb){
     const audio = (!thumb && src) ? `<audio data-media src="${esc(src)}" preload="auto"></audio>` : '';
     return `<div class="slide${hcls}">${hart}${head(st)}<div class="content"><div class="lyrics${st.blocks ? ' has-blocks' : ''}">${lines}</div>${audio}<p class="mediahint">${src ? '<span class="kb">רווח</span>מנגנים / עוצרים' : 'חסר קובץ השיר'}</p></div>${footer(st)}</div>`;
   }
+  if (t === 'room'){
+    return `<div class="slide roomslide">${head(st)}${st.sub ? `<p class="sub">${esc(st.sub)}</p>` : ''}<div class="content">${agRoomHtml(thumb)}</div>${footer(st)}</div>`;
+  }
   if (t === 'external'){
     const url = link(st.url);
-    return `<div class="slide"><div class="ext">${st.art ? artHtml(st.art, 'eart') : ''}${st.kicker ? `<p class="kicker">${esc(st.kicker)}</p>` : ''}<div class="tool">${esc(st.tool)}</div><div class="what">${esc(st.title)}</div>${st.sub ? `<div class="what2">${esc(st.sub)}</div>` : ''}<div class="keys">${url ? '<span><span class="kb">O</span>פותחים בלשונית חדשה</span>' : '<span>חסר קישור</span>'}<span><span class="kb">Ctrl+Shift+Tab</span>חוזרים לכאן</span></div></div>${footer(st)}</div>`;
+    const cp = st.copy === 'agent' ? `<button type="button" class="agbtn"${thumb ? ' disabled' : ' data-agcopy'}>העתק הוראות</button>` : '';
+    return `<div class="slide"><div class="ext">${st.art ? artHtml(st.art, 'eart') : ''}${st.kicker ? `<p class="kicker">${esc(st.kicker)}</p>` : ''}<div class="tool">${esc(st.tool)}</div><div class="what">${esc(st.title)}</div>${st.sub ? `<div class="what2">${esc(st.sub)}</div>` : ''}<div class="keys"${cp && !thumb ? ' data-agbox' : ''}>${cp}${url ? '<span><span class="kb">O</span>פותחים בלשונית חדשה</span>' : '<span>חסר קישור</span>'}<span><span class="kb">Ctrl+Shift+Tab</span>חוזרים לכאן</span></div></div>${footer(st)}</div>`;
   }
   if (t === 'draw'){
     return `<div class="slide${hcls}">${hart}${head(st)}<div class="content"><div class="draw"><div class="lbl">שולחן</div><div class="num" data-drawnum>?</div><div class="drawn" data-drawn></div><p class="tlabel"><span class="kb">D</span>מגרילים</p></div></div>${footer(st)}</div>`;
@@ -3712,6 +3746,97 @@ function paintPoll(){
     o.querySelector('.cnt').textContent = POLL.show && POLL.counts ? pct + '%' : '';
   });
 }
+/* ---------- המנהל הכי קשה בישראל: המשפטים מהחדר, הקישור ל-Gem, והעתקת ההוראות ----------
+   נשמר באתר, באותו מקום שהכלי של מתי שומר בו, ומשם נמשך לדף של הסוכן בטלפונים.
+   הקוד: אותו קוד של הכלי של מתי. באותו דפדפן הוא כבר שמור, ואחרת מקלידים אותו פעם אחת בתיבה המוסתרת. */
+const AG = { room:[], url:'', base:'', baseP:null };
+const AG_ON_SITE = /^https?:$/.test(location.protocol);
+const AG_TXT = (() => { const u = link('@agent'); if (!u) return ''; try { const x = new URL(u); x.pathname = x.pathname.replace(/\/a\/?$/, '/agent.txt'); return AG_ON_SITE && x.host === location.host ? x.pathname : x.href; } catch(e){ return ''; } })();
+const agCode = () => { try { return localStorage.getItem('nx-film-code') || ''; } catch(e){ return ''; } };
+function agBase(){ if (!AG.baseP && AG_TXT) AG.baseP = fetch(AG_TXT, { cache:'no-store' }).then(r => r.ok ? r.text() : '').then(t => { AG.base = t; return t; }).catch(() => { AG.baseP = null; return ''; }); return AG.baseP || Promise.resolve(''); }
+async function agGet(){
+  if (!AG_ON_SITE) return null;
+  try { const r = await fetch('/api/live?op=agent', { cache:'no-store' }); if (!r.ok) return null; const d = await r.json(); return { url: d.url || '', room: Array.isArray(d.room) ? d.room : [] }; } catch(e){ return null; }
+}
+// ההוראות, ובחלק האחרון המשפטים מהחדר (כמו "העתק הוראות" בדף של הסוכן)
+const agFull = room => room.length ? AG.base.replace(/\n—\s*$/, '\n' + room.map(x => '- "' + x + '"').join('\n') + '\n') : AG.base;
+function agRoomHtml(thumb){
+  const nth = ['הראשון', 'השני', 'השלישי'];
+  const lines = [0, 1, 2].map(i => `<label class="rl"><span class="n">${i+1}</span><input type="text" dir="rtl" maxlength="160" autocomplete="off" spellcheck="false" aria-label="המשפט ${nth[i]}"${thumb ? ' disabled' : ` data-agline="${i}"`} value="${esc(AG.room[i] || '')}" placeholder="המשפט ${nth[i]}"></label>`).join('');
+  const code = !thumb && AG_ON_SITE && !agCode() ? '<input type="password" class="agcode" data-agcode autocomplete="off" aria-label="הקוד של הכלי של מתי" placeholder="קוד">' : '';
+  return `<div class="room"${thumb ? '' : ' data-agbox'}>${lines}
+    <div class="acts">${code}<button type="button" class="agbtn"${thumb ? ' disabled' : ' data-agsave="room"'}>שמירה והעתקת ההוראות</button><p class="agmsg" data-agmsg role="status"></p></div>
+    <div class="rl lnk"><span class="lt">הקישור לשיתוף של ה-Gem</span><input type="url" dir="ltr" maxlength="300" autocomplete="off" spellcheck="false" aria-label="הקישור לשיתוף של ה-Gem"${thumb ? ' disabled' : ' data-agurl'} value="${esc(AG.url)}" placeholder="https://gemini.google.com/gem/…"><button type="button" class="agbtn sec"${thumb ? ' disabled' : ' data-agsave="url"'}>שמירת הקישור</button></div></div>`;
+}
+// טוענים מהאתר את מה שכבר נשמר, וממלאים רק תיבות ריקות שלא מקלידים בהן עכשיו
+async function agRefresh(){
+  agBase();
+  const d = await agGet(); if (!d) return;
+  AG.room = d.room; AG.url = d.url;
+  document.querySelectorAll('[data-agbox]').forEach(box => {
+    box.querySelectorAll('[data-agline]').forEach((inp, i) => { if (!inp.value && document.activeElement !== inp && d.room[i]) inp.value = d.room[i]; });
+    const u = box.querySelector('[data-agurl]'); if (u && !u.value && document.activeElement !== u && d.url) u.value = d.url;
+  });
+}
+function agSay(box, cls, text){ const m = box && box.querySelector('[data-agmsg]'); if (m){ m.className = 'agmsg' + (cls ? ' ' + cls : ''); m.textContent = text; } }
+// מעתיקים מיד, בתוך הלחיצה, כדי שהדפדפן יאשר. בלי המתנה לרשת
+function agCopyNow(text){
+  return new Promise(res => {
+    const fallback = () => { const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, text.length); let ok = false; try { ok = document.execCommand('copy'); } catch(e){} ta.remove(); res(ok); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => res(true), fallback); else fallback();
+  });
+}
+async function agCopyClick(btn){
+  const box = btn.closest('[data-agbox]');
+  if (!AG.base){ agSay(box, '', 'טוען את ההוראות…'); await agBase(); if (!AG.base) return agSay(box, 'err', 'ההוראות לא נטענו. בודקים שיש אינטרנט ולוחצים שוב.'); agSay(box, '', 'נטען. לוחצים שוב על "העתק הוראות".'); return; }
+  const ok = await agCopyNow(agFull(AG.room));
+  if (!btn.dataset.lbl){ btn.dataset.lbl = btn.textContent; setTimeout(() => { btn.textContent = btn.dataset.lbl; delete btn.dataset.lbl; }, 2500); }
+  btn.textContent = ok ? 'הועתק' : 'לא הועתק. שוב';
+  agSay(box, ok ? 'ok' : 'err', ok ? (AG.room.length ? `הועתק, עם ${AG.room.length === 1 ? 'משפט אחד' : AG.room.length + ' משפטים'} מהחדר. מדביקים ב-Gem.` : 'הועתק. מדביקים ב-Gem.') : 'ההעתקה לא הצליחה. לוחצים שוב.');
+  agRefresh();
+}
+async function agSaveClick(btn){
+  const box = btn.closest('[data-agbox]'), what = btn.dataset.agsave;
+  const typed = [...box.querySelectorAll('[data-agline]')].map(x => x.value.trim().replace(/\s+/g, ' ')).filter(Boolean);
+  const urlIn = box.querySelector('[data-agurl]'), u = urlIn ? urlIn.value.trim() : '';
+  // קודם מעתיקים (בתוך הלחיצה), ואחר כך שומרים
+  let copied = null;
+  if (what === 'room'){
+    if (!typed.length) return agSay(box, 'err', 'עוד אין משפטים. מקלידים לפחות משפט אחד.');
+    copied = AG.base ? await agCopyNow(agFull(typed)) : false;
+  }
+  if (what === 'url' && !u) return agSay(box, 'err', 'מדביקים את הקישור לשיתוף של ה-Gem, ואז שומרים.');
+  if (!AG_ON_SITE) return agSay(box, 'err', 'אפשר לשמור רק כשהמלווה פתוח מהאתר.' + (copied ? ' ההוראות הועתקו.' : ''));
+  const ci = box.querySelector('[data-agcode]');
+  if (ci && ci.value.trim()){ try { localStorage.setItem('nx-film-code', ci.value.trim()); } catch(e){} }
+  const code = agCode();
+  if (!code) return agSay(box, 'err', 'חסר הקוד של הכלי של מתי. מקלידים אותו בתיבה "קוד" ושומרים שוב.' + (copied ? ' ההוראות כבר הועתקו.' : ''));
+  btn.disabled = true; agSay(box, '', 'שומר…');
+  try {
+    // מה שלא מולא כאן נשאר כמו שהוא באתר
+    const cur = await agGet() || { url:'', room:[] };
+    const room = typed.length ? typed : cur.room, url = u || cur.url || '';
+    const r = await fetch('/api/live?op=agent', { method:'POST', headers:{ 'content-type':'application/json', 'x-live-code': code }, body: JSON.stringify({ url, room }) });
+    if (r.status === 401){ try { localStorage.removeItem('nx-film-code'); } catch(e){} throw new Error('bad_code'); }
+    if (r.status === 400) throw new Error('bad_url');
+    if (!r.ok) throw new Error('http');
+    const d = await r.json(); AG.room = d.room || room; AG.url = d.url || '';
+    if (ci) ci.remove();
+    if (what === 'room') agSay(box, copied ? 'ok' : 'err', copied ? 'נשמר והועתק. ב-Gem: לוחצים בתוך ההוראות, Ctrl+A ואז Ctrl+V.' : 'נשמר, אבל ההוראות לא הועתקו. לוחצים שוב על הכפתור.');
+    else agSay(box, 'ok', 'הקישור נשמר. הכפתור בדף של הסוכן נדלק לבד בטלפונים.');
+  } catch(e){
+    const m = e.message;
+    agSay(box, 'err', m === 'bad_code' ? 'הקוד לא נכון. מקלידים אותו שוב בתיבה "קוד" ושומרים.' : m === 'bad_url' ? 'זה לא נראה כמו קישור של Gemini. מעתיקים אותו שוב מ"שיתוף".' : 'לא נשמר: השרת לא ענה. בודקים שיש אינטרנט ולוחצים שוב.' + (copied ? ' ההוראות כבר הועתקו.' : ''));
+    if (m === 'bad_code' && !box.querySelector('[data-agcode]')){ const acts = box.querySelector('.acts'); if (acts) acts.insertAdjacentHTML('afterbegin', '<input type="password" class="agcode" data-agcode autocomplete="off" aria-label="הקוד של הכלי של מתי" placeholder="קוד">'); }
+  } finally { btn.disabled = false; }
+}
+document.addEventListener('click', e => {
+  // אחרי הלחיצה מחזירים את הפוקוס לדף, כדי שהקליקר ימשיך להעביר שקפים
+  const c = e.target.closest && e.target.closest('[data-agcopy]'); if (c){ agCopyClick(c); if (e.detail) c.blur(); return; }
+  const s = e.target.closest && e.target.closest('[data-agsave]'); if (s){ agSaveClick(s); if (e.detail) s.blur(); }
+});
+if (AG_ON_SITE && STEPS.some(x => x.type === 'room' || x.copy === 'agent')){ agBase(); agGet().then(d => { if (d){ AG.room = d.room; AG.url = d.url; } }); }
+
 function liveLine(){
   const st = STEPS[S.i];
   if (GOAL.flash && Date.now() < GOAL.flash && !(st && st.type === 'goal')) return `יעד העסקאות: ${GOAL.target}`;
@@ -3882,6 +4007,7 @@ function enter(){
   stage.querySelector('#slide').innerHTML = renderStep(st, false);
   bindKaraoke(st);
   partyStop(); bindPoll(st); filmStop(); filmIdle();
+  if (st.type === 'room' || st.copy === 'agent') agRefresh();
   if (st.type === 'video' && st.src === '@film' && /^https?:$/.test(location.protocol)) pollFilm();
   // טיימר חדש לכל שלב
   S.timer = { total: (st.minutes||0)*60, left: (st.minutes||0)*60, running: !!st.autostart, last: performance.now(), done:false };
@@ -3970,12 +4096,15 @@ function drawOv(){
   if (S.ov === 'qr'){
     const u = link('@companion');
     ovLayer.innerHTML = `<div class="ovqr"><h2>הדף המלווה</h2>${qrTile('@companion')}${u ? `<p class="qrurl" style="text-align:center">${esc(shortUrl(u))}</p>` : ''}</div>`;
+  } else if (S.ov === 'agent'){
+    ovLayer.innerHTML = `<div class="agov"><p class="kicker">המנהל הכי קשה בישראל</p><h2 class="h">המשפטים מהחדר והקישור ל-Gem</h2>${agRoomHtml(false)}<p class="agesc"><span class="kb">Esc</span>סוגרים</p></div>`;
+    agRefresh();
   } else if (S.ov === 'agenda'){
     ovLayer.innerHTML = `<div class="agenda">${agendaHtml('cur')}</div>`;
     ovLayer.querySelectorAll('button[data-go]').forEach(b => b.onclick = () => go(+b.dataset.go));
     const c = ovLayer.querySelector('.cur'); if (c) c.focus();
   } else if (S.ov === 'help'){
-    const rows = [['→ ← או קליקר','הבא / הקודם'],['T','טיימר: הפעלה ועצירה · R איפוס'],['W','הקיר, מכל מקום'],['Q','הברקוד של הדף המלווה'],['D','הגרלת שולחן'],['O','פתיחה בלשונית חדשה'],['Ctrl+Tab','ללשונית הבאה · Ctrl+Shift+Tab חזרה'],['B','מסך שחור'],['G','כל השלבים'],['P','מסך המנחה בחלון נפרד'],['Y','חזרה מלאה ובדיקת תוצרים'],['M','מדריך המנחה: הסבר מלא לכל שקף'],['S','הפעלה ועצירה של השעון'],['+ −','יעד העסקאות, מכל שקף'],['C','החגיגה: קונפטי, זיקוקים, גביע וההמנון'],['F','מסך מלא. עדיף של כרום: ⌃⌘F במק, F11 בחלונות'],['Esc','סגירה']];
+    const rows = [['→ ← או קליקר','הבא / הקודם'],['T','טיימר: הפעלה ועצירה · R איפוס'],['W','הקיר, מכל מקום'],['Q','הברקוד של הדף המלווה'],['D','הגרלת שולחן'],['O','פתיחה בלשונית חדשה'],['Ctrl+Tab','ללשונית הבאה · Ctrl+Shift+Tab חזרה'],['B','מסך שחור'],['G','כל השלבים'],['P','מסך המנחה בחלון נפרד'],['Y','חזרה מלאה ובדיקת תוצרים'],['M','מדריך המנחה: הסבר מלא לכל שקף'],['S','הפעלה ועצירה של השעון'],['+ −','יעד העסקאות, מכל שקף'],['C','החגיגה: קונפטי, זיקוקים, גביע וההמנון'],['A','המנהל: המשפטים מהחדר והקישור ל-Gem'],['F','מסך מלא. עדיף של כרום: ⌃⌘F במק, F11 בחלונות'],['Esc','סגירה']];
     ovLayer.innerHTML = `<div class="help"><h2>מקשים</h2>${rows.map(r => `<span class="kb">${esc(r[0])}</span><span>${esc(r[1])}</span>`).join('')}</div>`;
   } else if (S.ov === 'draw'){
     ovLayer.innerHTML = `<div class="draw"><div class="lbl">שולחן</div><div class="num" data-drawnum>?</div><div class="drawn" data-drawn></div></div>`;
@@ -3998,11 +4127,12 @@ function notesHtml(st){
   const list = (arr, cls, title) => arr && arr.length ? `<div class="gd-sec ${cls}"><h5>${title}</h5><ul>${arr.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
   const say = g.say || (st.say ? [st.say] : []), act = g.do || (st.do ? [st.do] : []);
   if (!g.why && !say.length && !act.length && !(g.watch || []).length) return '<p class="gd-why">אין הסבר לשקף הזה.</p>';
-  return `<div class="gd">${g.why ? `<p class="gd-why">${esc(g.why)}</p>` : ''}${g.time ? `<p class="gd-time">זמן: ${esc(g.time)}</p>` : ''}
+  const cp = st.copy === 'agent' || st.type === 'room' ? `<p class="gd-copy" data-agbox><button type="button" class="rv-btn pri" data-agcopy>העתק הוראות${st.type === 'room' ? ' (עם המשפטים שנשמרו)' : ''}</button><span class="agmsg" data-agmsg role="status"></span></p>` : '';
+  return `<div class="gd">${g.why ? `<p class="gd-why">${esc(g.why)}</p>` : ''}${g.time ? `<p class="gd-time">זמן: ${esc(g.time)}</p>` : ''}${cp}
     ${list(say, 'say', 'מה אומרים')}${list(act, 'do', 'מה עושים')}${list(g.watch, 'watch', 'למה לשים לב')}${st.backup && link(st.backup) ? `<p class="gd-backup"><b>גיבוי מוכן מבדיקת התוצרים:</b> <a href="${esc(link(st.backup))}" target="_blank" rel="noopener">פותחים</a></p>` : ''}</div>`;
 }
 function stepLabel(st){
-  const kind = { cover:'פתיחה', principle:'עיקרון', points:'נקודות', task:'משימה', qr:'ברקוד', poll:'סקר', examples:'דוגמאות', song:'שיר', external:'חלון אחר', draw:'הגרלה', wall:'קיר', embed:'מוטמע', video:'סרטון' }[st.type] || st.type;
+  const kind = { room:'משפטים מהחדר', cover:'פתיחה', principle:'עיקרון', points:'נקודות', task:'משימה', qr:'ברקוד', poll:'סקר', examples:'דוגמאות', song:'שיר', external:'חלון אחר', draw:'הגרלה', wall:'קיר', embed:'מוטמע', video:'סרטון' }[st.type] || st.type;
   return kind + ': ' + (st.type === 'cover' ? L.title : (st.title || st.tool || ''));
 }
 function toggle(name){ S.ov = S.ov === name ? null : name; drawOv(); push(); }
@@ -4045,16 +4175,29 @@ function cmd(c, arg){
     case 'goalUp': setGoal(1); break;
     case 'goalDown': setGoal(-1); break;
     case 'party': if (PARTY.on) partyStop(); else party(); push(); break;
+    case 'agent': toggle('agent'); if (S.ov === 'agent'){ const f = ovLayer.querySelector('[data-agline]'); if (f) setTimeout(() => f.focus(), 50); } break;
     case 'close': if (PARTY.on){ partyStop(); } else if (S.ov){ S.ov = null; drawOv(); } else if (S.wallOv){ S.wallOv = false; updateWall(); } else if (S.black) setBlack(false); push(); break;
   }
 }
 function onKey(e){
+  const tg = e.target && e.target.closest ? e.target.closest('input,textarea,select,[contenteditable="true"]') : null;
+  if (tg){
+    if (e.code === 'Escape'){ tg.blur(); if (S.ov) cmd('close'); return; }
+    if (e.key === 'Enter' && tg.matches('[data-agline]')){ e.preventDefault(); const box = tg.closest('[data-agbox]'), all = [...box.querySelectorAll('[data-agline]')], k = all.indexOf(tg); if (all[k+1]) all[k+1].focus(); else { const sv = box.querySelector('[data-agsave="room"]'); if (sv) sv.focus(); } return; }
+    if (e.key === 'Enter' && tg.matches('[data-agurl]')){ e.preventDefault(); const sv = tg.closest('[data-agbox]').querySelector('[data-agsave="url"]'); if (sv) sv.click(); return; }
+    // הקליקר (PageDown / PageUp) עובד גם כשהסמן בתיבה
+    if (e.code !== 'PageDown' && e.code !== 'PageUp') return;
+    tg.blur();
+  }
+  // Enter או רווח על כפתור בתיבות של המנהל: רק לוחצים עליו, בלי לעבור שקף
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('[data-agbox] button')) return;
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const st = STEPS[S.i], c = e.code;
   const map = { PageDown:'next', ArrowLeft:'next', ArrowDown:'next', Enter:'next', KeyN:'next', PageUp:'prev', ArrowRight:'prev', ArrowUp:'prev', Backspace:'prev',
     KeyT:'timer', KeyR:'reset', KeyW:'wall', KeyQ:'qr', KeyG:'agenda', KeyH:'help', Slash:'help', KeyD:'draw', KeyO:'open', KeyB:'black', Period:'black', KeyS:'clock', KeyV:'results', Escape:'close' };
   if (c === 'Space'){ e.preventDefault(); if ((st.type === 'song' || st.type === 'video' || st.type === 'goal') && media()) return; cmd('next'); return; }
   if (c === 'KeyC'){ e.preventDefault(); cmd('party'); return; }
+  if (c === 'KeyA'){ e.preventDefault(); cmd('agent'); return; }
   if (c === 'Equal' || c === 'NumpadAdd'){ e.preventDefault(); cmd('goalUp'); return; }
   if (c === 'Minus' || c === 'NumpadSubtract'){ e.preventDefault(); cmd('goalDown'); return; }
   if (c === 'KeyF'){ fullscreen(); return; }
@@ -4105,7 +4248,7 @@ function bootPresenter(){
       <button type="button" data-c="prev">הקודם</button><button type="button" class="big" data-c="next">הבא</button>
       <button type="button" data-c="timer">טיימר</button><span class="pv-timer" data-ptimer>–</span><button type="button" data-c="reset">איפוס</button>
       <button type="button" data-c="wall">הקיר</button><button type="button" data-c="qr">ברקוד הדף המלווה</button><button type="button" data-c="draw">הגרלה</button>
-      <button type="button" data-c="open">פתיחה בחלון</button><button type="button" data-c="media">נגן / עצור</button><button type="button" data-c="results">תוצאות הסקר</button><button type="button" data-c="goalDown">יעד −</button><button type="button" data-c="goalUp">יעד +</button><button type="button" data-c="party">חגיגה</button><button type="button" data-c="black">מסך שחור</button><button type="button" data-c="clock">שעון</button><button type="button" data-c="rehearsal">חזרה ובדיקות</button><button type="button" data-c="guide">מדריך המנחה</button>
+      <button type="button" data-c="open">פתיחה בחלון</button><button type="button" data-c="media">נגן / עצור</button><button type="button" data-c="results">תוצאות הסקר</button><button type="button" data-c="goalDown">יעד −</button><button type="button" data-c="goalUp">יעד +</button><button type="button" data-c="party">חגיגה</button><button type="button" data-c="agent">המנהל (A)</button><button type="button" data-c="black">מסך שחור</button><button type="button" data-c="clock">שעון</button><button type="button" data-c="rehearsal">חזרה ובדיקות</button><button type="button" data-c="guide">מדריך המנחה</button>
     </div>
     <div class="pv-grid">
       <div class="pv-card pv-notes"><h4>עכשיו</h4><div class="tt" data-ttl></div><p class="pv-live" data-live></p><div data-gd></div></div>
@@ -4120,7 +4263,7 @@ function bootPresenter(){
   addEventListener('resize', () => root.querySelectorAll('.thumb').forEach(fitThumb));
   addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
-    const map = { PageDown:'next', ArrowLeft:'next', Space:'next', KeyN:'next', PageUp:'prev', ArrowRight:'prev', KeyT:'timer', KeyR:'reset', KeyW:'wall', KeyQ:'qr', KeyD:'draw', KeyO:'open', KeyB:'black', Period:'black', KeyS:'clock', KeyM:'guide', KeyV:'results', Escape:'close', Equal:'goalUp', NumpadAdd:'goalUp', Minus:'goalDown', NumpadSubtract:'goalDown', KeyC:'party' };
+    const map = { PageDown:'next', ArrowLeft:'next', Space:'next', KeyN:'next', PageUp:'prev', ArrowRight:'prev', KeyT:'timer', KeyR:'reset', KeyW:'wall', KeyQ:'qr', KeyD:'draw', KeyO:'open', KeyB:'black', Period:'black', KeyS:'clock', KeyM:'guide', KeyV:'results', Escape:'close', Equal:'goalUp', NumpadAdd:'goalUp', Minus:'goalDown', NumpadSubtract:'goalDown', KeyC:'party', KeyA:'agent' };
     if (map[e.code]){ e.preventDefault(); send(map[e.code]); }
   });
   let lastI = -1;
@@ -4144,6 +4287,7 @@ function bootPresenter(){
       root.querySelectorAll('.thumb').forEach(fitThumb);
       root.querySelector('[data-ttl]').textContent = stepLabel(cur);
       root.querySelector('[data-gd]').innerHTML = notesHtml(cur);
+      if (cur.type === 'room' || cur.copy === 'agent') agRefresh();
       root.querySelector('[data-gd]').scrollTop = 0;
       root.querySelector('[data-ntl]').textContent = nx ? stepLabel(nx) : '';
       const nxt = nx ? ((nx.g && nx.g.why) || nx.say || nx.do) : '';
@@ -4530,7 +4674,7 @@ function bootGuide(){
   root.querySelector('[data-print]').onclick = () => window.print();
 }
 
-if (/[?&]e2e\b/.test(location.search)) window.__nx = { STEPS, go, FP, FL, pollFilm, filmStatus };
+if (/[?&]e2e\b/.test(location.search)) window.__nx = { STEPS, go, FP, FL, pollFilm, filmStatus, S, AG };
 if (IS_PRESENTER) bootPresenter(); else if (location.hash === '#rehearsal') bootRehearsal(); else if (location.hash === '#tooltest') bootToolTest(); else if (location.hash === '#guide') bootGuide(); else bootMain();
 })();
 </script>
