@@ -216,6 +216,14 @@ button{font-family:inherit}
 .agenda button.cur{background:var(--citron);color:var(--deep);font-weight:800}
 .agenda button:hover{background:var(--card)}
 .help{display:grid;grid-template-columns:auto auto auto auto;gap:26px 36px;font-size:38px;align-items:center;max-width:1600px}
+/* שלוש השאלות של המנהל */
+.gmap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}
+.gmcard{background:var(--card);border:2px solid #2B5562;border-radius:28px;padding:28px 30px;display:flex;flex-direction:column;gap:18px}
+.gmcard h3{margin:0;font-size:44px;font-weight:800;color:var(--citron);line-height:1.2;display:flex;gap:18px;align-items:center}
+.gmn{flex:0 0 64px;height:64px;border-radius:50%;background:var(--citron);color:var(--deep);font-size:36px;font-weight:900;display:grid;place-items:center}
+.gmcard ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.gmcard li{display:flex;gap:16px;align-items:center;font-size:32px;line-height:1.3}
+.gmcard li b{flex:0 0 48px;height:48px;border-radius:12px;border:2px solid var(--cap);display:grid;place-items:center;font-size:28px;font-weight:800}
 /* המשפטים מהחדר והקישור ל-Gem: מקלידים בשקף, מול כולם */
 .roomslide .h{font-size:68px}
 .roomslide .sub{margin-top:16px;font-size:38px}
@@ -565,13 +573,13 @@ const LESSON = {
           steps:['לוקחים שלושה פוסטרים מהקיר','מחיים כל אחד בכלי בתשלום','עוצרים כשכל השלושה מוכנים'],
           good:['שלושתם מוכנים לפני שנגמרות 5 דקות היצירה','באיכות שאפשר להקרין על מסך גדול'] },
         { id:'live', task:[7,0], title:'מדברים עם Gemini דרך המצלמה', tool:'Gemini Live', devices:['iphone','android'],
-          steps:['עובדים לפי ההנחיה שעל המסך','מנסים גם את משחק התפקידים: "את לקוח כועס שההזמנה התעכבה"'],
-          good:['מבין ומדבר עברית בשני הטלפונים','עונה מהר, בלי הפסקות ארוכות','משחק התפקידים מרגיש אמין'] },
+          steps:['עובדים לפי ההנחיה שעל המסך','מנסים גם מתורגמן: "מה שאני אומר בעברית, תגידי ברוסית" (או ערבית), ומשפט אחד בכל כיוון'],
+          good:['מבין ומדבר עברית בשני הטלפונים','עונה מהר, בלי הפסקות ארוכות','התרגום מהיר וברור, בשני הכיוונים'] },
         { id:'trap', seg:8, title:'שאלת המלכודת', tool:'Gemini', devices:['iphone','android'], budget:2,
           steps:['מראים במלווה את שקף המדף (לא את הקובץ: שם של קובץ יכול לגלות את התשובה)','מצלמים את המסך משני טלפונים, ושואלים: "כמה מוצרים יש על המדף בתמונה? תן מספר מדויק."','התשובה הנכונה: 121 (31, 35, 27, 28, מלמעלה למטה)'],
           good:['כל טלפון עונה מספר אחר','התשובות מדויקות ובטוחות, בלי "בערך"'] },
         { id:'agent', seg:10, title:'המנהל הכי קשה בישראל', tool:'Gemini', devices:['pc','iphone','android'], budget:5,
-          steps:['במלווה, בשקף "ככה מכניסים הדרכה לתוך Gemini": "העתק הוראות" ← gemini.google.com ← Gems ← Gem חדש. שם: "המנהל הכי קשה בישראל". מדביקים, כמו בדקה 5','בשקף הבא במלווה: שני משפטים לדוגמה, ו"שמירה והעתקת ההוראות". ב-Gem: Ctrl+A ואז Ctrl+V. בודקים שהמשפטים בסוף ושההוראות לא נחתכו, ושומרים','שיתוף: "כל מי שיש לו את הקישור". מעתיקים, מדביקים במלווה בתיבה של הקישור, ו"שמירת הקישור"','מנסים גם את A משקף אחר: אותן תיבות נפתחות מעל השקף, ו-Esc סוגר','מכל טלפון: סורקים את הברקוד של דקה 72, פותחים, כותבים 1 ומשחקים סבב שלם ברמה 1. פעם אחת בהקלדה, ופעם בהכתבה','אחרי "סגרת!": לוחצים "סגרתי עסקה", ובודקים שהמונה במלווה עולה','מנסים גם 4 (תמונה של המדף מהמסך) ו-5 (הכנה לביקור)','בודקים את הגיבוי: "העתק הוראות" בטלפון, מדביקים בשיחה חדשה ב-Gemini, ובודקים שזה אותו מנהל'],
+          steps:['במלווה, בשקף "ככה מכניסים הדרכה לתוך Gemini": "העתק הוראות" ← gemini.google.com ← Gems ← Gem חדש. שם: "המנהל הכי קשה בישראל". מדביקים, כמו בדקה 5','בשקף הבא במלווה: שני משפטים לדוגמה, ו"שמירה והעתקת ההוראות". ב-Gem: Ctrl+A ואז Ctrl+V. בודקים שהמשפטים בסוף ושההוראות לא נחתכו, ושומרים','שיתוף: "כל מי שיש לו את הקישור". מעתיקים, מדביקים במלווה בתיבה של הקישור, ו"שמירת הקישור"','מנסים גם את A משקף אחר: אותן תיבות נפתחות מעל השקף, ו-Esc סוגר','מכל טלפון: סורקים את הברקוד של דקה 72, פותחים, כותבים "שלום" ומשחקים סבב שלם ברמה 1. פעם אחת בהקלדה, ופעם בהכתבה. בודקים שכל שאלה ברורה בלי הסבר','אחרי "סגרת!": לוחצים "סגרתי עסקה", ובודקים שהמונה במלווה עולה','מנסים גם 4 (תמונה של המדף מהמסך) ו-5 (הכנה לביקור)','בודקים את הגיבוי: "העתק הוראות" בטלפון, מדביקים בשיחה חדשה ב-Gemini, ובודקים שזה אותו מנהל'],
           good:['הבנייה לוקחת עד 5 דקות','הקישור נפתח בשני הטלפונים, באפליקציה או בדפדפן, עם חשבון גוגל אישי','סבב ברמה 1 נגמר בפחות מ-5 דקות, עם ציון ומשוב','המונה במלווה עולה תוך כמה שניות'],
           limits:'מה קורה בטלפון בלי אפליקציית Gemini, או בלי חשבון מחובר. Gems לא עובדים עם Gemini Live, אז מדברים דרך המיקרופון במקלדת. מ-17.11 גוגל מחליפים את ה-Gems ב"סקילים", וה-Gem עובר לקריאה בלבד',
           backup:'"העתק הוראות" בדף של הסוכן: אותו מנהל, בשיחה רגילה ב-Gemini' },
@@ -899,12 +907,13 @@ const LESSON = {
           'אם עוד לא עלה אף סרטון, לא מחכים. ממשיכים לסבב 4, וחוזרים לקיר בסוף אם יש זמן.'] } }
     ]},
     { from:52, to:59, title:'סבב 4 · מדברים איתה', checks:['Gemini Live מדבר עברית באייפון', 'Gemini Live מדבר עברית באנדרואיד'], steps:[
-      { art:'talk', type:'task', kicker:'סבב 4 · בזוגות', title:'מדברים עם Gemini דרך המצלמה', tools:['Gemini Live'], minutes:4, steps:['פותחים את Gemini Live ומדליקים מצלמה','מכוונים למשהו בחדר: מה זה ואיך זה עובד?','או משחק תפקידים עם לקוח כועס','לא מצלמים מסמכים של העבודה'], g:{
+      { art:'talk', type:'task', kicker:'סבב 4 · בזוגות', title:'מדברים עם Gemini דרך המצלמה', tools:['Gemini Live'], minutes:4, steps:['פותחים את Gemini Live ומדליקים מצלמה','מכוונים למשהו בחדר: מה זה ואיך זה עובד?','או מתורגמן: עברית ↔ רוסית או ערבית','לא מצלמים מסמכים של העבודה'], g:{
         why:'הטלפון רואה, שומע ועונה בקול. זה רגע שמפתיע גם את מי שכבר משתמש ב-AI.',
         time:'4 דקות',
         say:[
           '"בזוגות. פותחים את Gemini, לוחצים על הכפתור של השיחה החיה, ומדליקים מצלמה."',
-          '"יש שתי אפשרויות. אחת: מכוונים את המצלמה למשהו בחדר ושואלים מה זה ואיך זה עובד. שתיים: משחק תפקידים. אומרים לה: \'את לקוח כועס שההזמנה שלו התעכבה, ואני מנסה להרגיע אותו.\'"',
+          '"יש שתי אפשרויות. אחת: מכוונים את המצלמה למשהו בחדר ושואלים מה זה ואיך זה עובד. שתיים: מתורגמן. אומרים לה: \'מעכשיו את מתורגמנית. מה שאני אומר בעברית, תגידי ברוסית. ומה שעונים לך ברוסית, תגידי לי בעברית.\' אפשר גם ערבית."',
+          '"מי פוגש בשטח מנהל או עובד שמעדיף רוסית או ערבית? זה בשבילו."',
           '"ודבר אחד שלא עושים: לא מכוונים את המצלמה למסמך של העבודה, כמו הצעת מחיר או רשימת לקוחות. זה חשבון אישי וחינמי, ומידע של העבודה לא נכנס אליו."',
           '"4 דקות."'],
         do:[
@@ -1035,7 +1044,7 @@ const LESSON = {
           'לא מבטיחים ששום משרה לא תיפגע. את זה אי אפשר להבטיח.'] } }
     ]},
     { from:72, to:82, title:'החשיפה', checks:['הברקוד מוביל לדף של הסוכן, והכפתור פותח את המנהל בשני הטלפונים', 'הכפתור "סגרתי עסקה" עובד, והמונה בשקף עולה', 'כשמגיעים ליעד, ההמנון מתנגן', 'הגיבוי עובד: "העתק הוראות" ושיחה חדשה ב-Gemini'], steps:[
-      { art:'manager', type:'qr', kicker:'הברקוד השני מתעורר', title:'המנהל הכי קשה בישראל', sub:'פותחים, כותבים 1, ובוחרים רמה ותרחיש. אפשר לדבר: המיקרופון במקלדת.', url:'@agent', g:{
+      { art:'manager', type:'qr', kicker:'הברקוד השני מתעורר', title:'המנהל הכי קשה בישראל', sub:'פותחים, כותבים "שלום", ועונים במספרים. אפשר לדבר: המיקרופון במקלדת.', url:'@agent', g:{
         why:'החשיפה: המנהל שבנינו בהתחלה, עם המשפטים שלהם, עובר לטלפונים של כולם. זו הפעם הראשונה שמישהו מנסה אותו, וכולם יחד.',
         time:'2 דקות',
         say:[
@@ -1043,11 +1052,28 @@ const LESSON = {
           '"מי שיודע מה עובד מול מנהל סניף, זה אתם. המחשב רק משחק את המנהל."',
           '"רמה 1 לחימום. רמה 3 למי שאמיץ."'],
         do:[
-          'מתי עובר בין השולחנות. מי שהקישור לא נפתח לו: בדף של הסוכן "העתק הוראות", ומדביקים בשיחה חדשה ב-Gemini.'],
+          'מתי עובר בין השולחנות. מי שהקישור לא נפתח לו: בדף של הסוכן "העתק הוראות", ומדביקים בשיחה חדשה ב-Gemini.',
+          'אחרי שרוב החדר סרק, עוברים לשקף הבא: שלוש השאלות שהמנהל שואל.'],
         watch:[
           'צריך חשבון גוגל אישי. מי שאין לו, עובד בזוג עם מי שיש לו.',
           'שמות בדיוניים בלבד. בלי שמות של סניפים, רשתות ולקוחות אמיתיים.'] } },
-      { art:'pairs', type:'task', kicker:'סבב 5 · מול המנהל', title:'סוגרים עסקה', tools:['Gemini'], steps:['לבד או בזוג: רמה ותרחיש, למשל "2 ב"','ממצא, שאלה, הצעה עם כמות ומועד, וסיכום','המנהל כתב "סגרת!"? לוחצים "סגרתי עסקה" בדף של הסוכן','קיבלתם משוב? מעלים לקיר את "המשפט שעבד הכי טוב"'], g:{
+      { type:'gemmap', kicker:'ככה מדברים עם המנהל', title:'שלוש שאלות, ועונים במספר',
+        cols:[
+          { h:'מה עושים?', items:['שיחת מכירה מולו (מומלץ)', 'ספרינט: חמישה משפטים קשים', 'לראות איך עושים את זה', 'תמונה של מדף', 'הכנה לביקור של מחר'] },
+          { h:'כמה קשה?', items:['עסוק (מומלץ לפעם הראשונה)', 'קשוח', 'הכי קשה בישראל'] },
+          { h:'על איזה מצב?', items:['"יש לי מספיק סחורה"', '"אין לי מקום"', 'השקה: שישה מוצרים חדשים', 'חנות קטנה: "אין לי רצפה"', 'תפתיע אותי'] }],
+        foot:'"משוב" עוצר באמצע · "תפריט" חוזר להתחלה', g:{
+        why:'המנהל שואל שלוש שאלות לפני שהשיחה מתחילה, ועונים עליהן במספר. כשהן על המסך, אף אחד לא הולך לאיבוד, גם מי שלא מרגיש בנוח עם טכנולוגיה.',
+        time:'דקה',
+        say:[
+          '"כותבים לו שלום, והוא שואל שלוש שאלות. עונים רק במספר."',
+          '"מה עושים: 1, שיחת מכירה. כמה קשה: 1 לחימום. ועל איזה מצב: מה שהכי מוכר לכם מהשטח."',
+          '"באמצע רוצים לעצור? כותבים משוב. הלכתם לאיבוד? כותבים תפריט."'],
+        do:[
+          'משאירים את השקף על המסך עד שרוב החדר עבר את שלוש השאלות, ואז עוברים לשקף הבא.'],
+        watch:[
+          'מי שכתב משהו אחר ולא מספר: המנהל שואל שוב את אותה שאלה. לא צריך להתערב.'] } },
+      { art:'pairs', type:'task', kicker:'סבב 5 · מול המנהל', title:'סוגרים עסקה', tools:['Gemini'], steps:['לבד או בזוג: כותבים "שלום", ובוחרים במספרים','ממצא, שאלה, הצעה עם כמות ומועד, וסיכום','המנהל כתב "סגרת!"? לוחצים "סגרתי עסקה" בדף של הסוכן','קיבלתם משוב? מעלים לקיר את "המשפט שעבד הכי טוב"'], g:{
         why:'ההוראות לסבב, על המסך לחצי דקה. אחר כך עוברים למונה, ושם רץ הטיימר.',
         time:'חצי דקה',
         say:[
@@ -3579,6 +3605,10 @@ function renderStep(st, thumb){
     const audio = (!thumb && src) ? `<audio data-media src="${esc(src)}" preload="auto"></audio>` : '';
     return `<div class="slide${hcls}">${hart}${head(st)}<div class="content"><div class="lyrics${st.blocks ? ' has-blocks' : ''}">${lines}</div>${audio}<p class="mediahint">${src ? '<span class="kb">רווח</span>מנגנים / עוצרים' : 'חסר קובץ השיר'}</p></div>${footer(st)}</div>`;
   }
+  if (t === 'gemmap'){
+    const cols = st.cols.map((c, n) => `<div class="gmcard" style="--n:${n}"><h3><span class="gmn">${n+1}</span>${esc(c.h)}</h3><ol>${c.items.map((x, k) => `<li><b>${k+1}</b><span>${esc(x)}</span></li>`).join('')}</ol></div>`).join('');
+    return `<div class="slide">${head(st)}<div class="content"><div class="gmap">${cols}</div>${st.foot ? `<p class="pfoot">${esc(st.foot)}</p>` : ''}</div>${footer(st)}</div>`;
+  }
   if (t === 'room'){
     return `<div class="slide roomslide">${head(st)}${st.sub ? `<p class="sub">${esc(st.sub)}</p>` : ''}<div class="content">${agRoomHtml(thumb)}</div>${footer(st)}</div>`;
   }
@@ -3618,26 +3648,29 @@ function embedHtml(st, thumb){
 const POLL = { show:false, counts:null, total:0, err:false, timer:0, poll:null };
 // היעד המשותף: המספר שמכוונים (+ ו-−) נשמר בדפדפן. ההמנון מתנגן לבד רק כשעוברים את היעד, לא כשנכנסים לשקף אחרי שכבר עברו אותו
 const GOAL = { target:0, prev:null, fired:false };
+// המונים, הסקרים והשמירה עובדים רק כשהמלווה פתוח מהאתר עצמו (לא מקובץ במחשב ולא מתצוגה מקדימה)
+const ONSITE = /^https?:$/.test(location.protocol) && /(^|\.)nexadapt\.co\.il$|^localhost$/.test(location.hostname);
 function bindPoll(st){
-  clearInterval(POLL.timer); POLL.show = false; POLL.counts = null; POLL.total = 0; POLL.err = false;
+  clearInterval(POLL.timer); POLL.show = false; POLL.counts = null; POLL.total = 0; POLL.err = false; POLL.fails = 0;
   POLL.poll = (st.type === 'poll' || st.type === 'goal') && st.live ? st.live : null;
   if (st.type === 'goal'){ GOAL.target = goalDefault(); GOAL.prev = null; GOAL.fired = false; }
   if (!POLL.poll) return;
   const tickPoll = async () => {
-    try { const r = await fetch('/api/live?op=votes&poll=' + encodeURIComponent(POLL.poll), { cache:'no-store' }); if (!r.ok) throw 0; const d = await r.json(); POLL.counts = d.counts; POLL.total = d.total; POLL.err = false; }
-    catch(e){ POLL.err = true; }
+    try { const r = await fetch('/api/live?op=votes&poll=' + encodeURIComponent(POLL.poll), { cache:'no-store' }); if (!r.ok) throw r.status; const d = await r.json(); POLL.counts = d.counts; POLL.total = d.total; POLL.err = false; POLL.fails = 0; }
+    // תקלה רגעית ברשת לא מוחקת את המספר האחרון. רק שלוש תקלות ברצף נחשבות "אין חיבור"
+    catch(e){ POLL.why = typeof e === 'number' ? 'קוד ' + e : 'אין רשת'; POLL.fails = (POLL.fails || 0) + 1; if (POLL.fails >= 3) POLL.err = true; }
     paintPoll(); push();
   };
   tickPoll(); POLL.timer = setInterval(tickPoll, 3000);
 }
 function paintGoal(){
   const g = stage && stage.querySelector('#slide .goal'); if (!g) return;
-  const n = POLL.total || 0, t = GOAL.target || 1, ok = !!POLL.counts && !POLL.err, win = ok && n >= t;
+  const n = POLL.total || 0, t = GOAL.target || 1, ok = !!POLL.counts, win = ok && n >= t;
   g.querySelector('[data-goaln]').textContent = ok ? n : '–';
   g.querySelector('[data-goalt]').textContent = t;
   g.querySelector('[data-goalbar]').style.width = ok ? Math.min(100, n / t * 100) + '%' : '0';
   g.classList.toggle('win', win);
-  g.querySelector('[data-goallabel]').textContent = POLL.err ? 'המונה עובד רק כשהמלווה פתוח מהאתר' : win ? 'יש יעד! וזה ההמנון שלכם' : ok ? `עוד ${t - n} ליעד` : '';
+  g.querySelector('[data-goallabel]').textContent = POLL.err && !ok ? (ONSITE ? `אין חיבור לאתר (${POLL.why || ''}). מנסה שוב…` : 'המונה עובד רק כשהמלווה פתוח מהאתר: nexadapt.co.il/live/danshar') : win ? 'יש יעד! וזה ההמנון שלכם' : ok ? `עוד ${t - n} ליעד` : '';
   if (ok){
     if (GOAL.prev !== null && n > GOAL.prev){
       const b = g.querySelector('[data-goaln]'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump');
@@ -3750,7 +3783,7 @@ function paintPoll(){
   paintGoal();
   const box = stage && stage.querySelector('#slide .poll'); if (!box) return;
   box.classList.toggle('res', POLL.show && !!POLL.counts);
-  const v = box.querySelector('[data-votes]'); if (v) v.textContent = POLL.err ? '' : `הצביעו: ${POLL.total}`;
+  const v = box.querySelector('[data-votes]'); if (v) v.textContent = POLL.counts ? `הצביעו: ${POLL.total}` : '';
   const tot = Math.max(1, POLL.total);
   box.querySelectorAll('.opt[data-i]').forEach(o => {
     const c = POLL.counts ? (POLL.counts[+o.dataset.i] || 0) : 0, pct = Math.round(c / tot * 100);
@@ -3853,8 +3886,8 @@ function liveLine(){
   const st = STEPS[S.i];
   if (GOAL.flash && Date.now() < GOAL.flash && !(st && st.type === 'goal')) return `יעד העסקאות: ${GOAL.target}`;
   if (PARTY.on) return 'החגיגה על המסך · Esc סוגר · נגן / עצור להמנון';
-  if (POLL.poll && st && st.type === 'goal') return POLL.err ? 'המונה עובד רק כשהמלווה פתוח מהאתר' : `עסקאות: ${POLL.total} מתוך ${GOAL.target} · + ו-− משנים את היעד`;
-  if (POLL.poll) return POLL.err ? 'הספירה עובדת רק כשהמלווה פתוח מהאתר' : `הצביעו: ${POLL.total}${POLL.show ? ' · התוצאות על המסך' : ' · V מציג את התוצאות'}`;
+  if (POLL.poll && st && st.type === 'goal') return (POLL.err ? (ONSITE ? `אין חיבור לאתר (${POLL.why || ''}) · ` : 'המלווה לא פתוח מהאתר, אז אין מונה · ') : '') + `עסקאות: ${POLL.total} מתוך ${GOAL.target} · + ו-− משנים את היעד`;
+  if (POLL.poll) return POLL.err && !POLL.counts ? 'הספירה עובדת רק כשהמלווה פתוח מהאתר' : `הצביעו: ${POLL.total}${POLL.show ? ' · התוצאות על המסך' : ' · V מציג את התוצאות'}`;
   if (st && st.type === 'video' && st.src === '@film') return filmStatus();
   return '';
 }
@@ -4144,7 +4177,7 @@ function notesHtml(st){
     ${list(say, 'say', 'מה אומרים')}${list(act, 'do', 'מה עושים')}${list(g.watch, 'watch', 'למה לשים לב')}${st.backup && link(st.backup) ? `<p class="gd-backup"><b>גיבוי מוכן מבדיקת התוצרים:</b> <a href="${esc(link(st.backup))}" target="_blank" rel="noopener">פותחים</a></p>` : ''}</div>`;
 }
 function stepLabel(st){
-  const kind = { room:'משפטים מהחדר', cover:'פתיחה', principle:'עיקרון', points:'נקודות', task:'משימה', qr:'ברקוד', poll:'סקר', examples:'דוגמאות', song:'שיר', external:'חלון אחר', draw:'הגרלה', wall:'קיר', embed:'מוטמע', video:'סרטון' }[st.type] || st.type;
+  const kind = { gemmap:'שלוש שאלות', room:'משפטים מהחדר', cover:'פתיחה', principle:'עיקרון', points:'נקודות', task:'משימה', qr:'ברקוד', poll:'סקר', examples:'דוגמאות', song:'שיר', external:'חלון אחר', draw:'הגרלה', wall:'קיר', embed:'מוטמע', video:'סרטון' }[st.type] || st.type;
   return kind + ': ' + (st.type === 'cover' ? L.title : (st.title || st.tool || ''));
 }
 function toggle(name){ S.ov = S.ov === name ? null : name; drawOv(); push(); }

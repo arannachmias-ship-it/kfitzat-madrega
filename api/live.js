@@ -65,6 +65,17 @@ async function listAll(prefix) {
   return out;
 }
 
+// מטמון קצר בזיכרון: בסדנה עשרים טלפונים מאותו Wi-Fi שואלים כל כמה שניות על אותה ספירה.
+// בלי זה כל שאלה היא עוד קריאה לאחסון. אחרי כתיבה מוחקים את הערך, כדי שהשינוי ייראה מיד.
+const CACHE = new Map();
+async function cached(key, ms, fn) {
+  const c = CACHE.get(key);
+  if (c && Date.now() - c.t < ms) return c.v;
+  const v = await fn();
+  CACHE.set(key, { t: Date.now(), v });
+  return v;
+}
+
 /** קישור לסוכן: רק https, ורק של Gemini */
 function isAgentUrl(u) {
   try {
@@ -100,36 +111,44 @@ export default async function handler(req, res) {
     if (op === 'votes' && req.method === 'GET') {
       const poll = url.searchParams.get('poll');
       if (!POLLS[poll]) return res.status(404).json({ error: 'no_poll' });
-      if (rateLimited(`votes:${ip}`, 120, 60_000)) return res.status(429).json({ error: 'rate_limited' });
-      const counts = Array(POLLS[poll]).fill(0);
-      for (const b of await listAll(`${ROOT}/votes/${poll}/`)) {
-        const c = Number(b.pathname.split('/')[4]);
-        if (Number.isInteger(c) && c >= 0 && c < counts.length) counts[c] += 1;
-      }
-      return res.status(200).json({ poll, counts, total: counts.reduce((a, b) => a + b, 0) });
+      // תקרה גבוהה: כל החדר שואל מאותה כתובת של ה-Wi-Fi באולם
+      if (rateLimited(`votes:${ip}`, 1200, 60_000)) return res.status(429).json({ error: 'rate_limited' });
+      const out = await cached(`votes:${poll}`, 1500, async () => {
+        const counts = Array(POLLS[poll]).fill(0);
+        for (const b of await listAll(`${ROOT}/votes/${poll}/`)) {
+          const c = Number(b.pathname.split('/')[4]);
+          if (Number.isInteger(c) && c >= 0 && c < counts.length) counts[c] += 1;
+        }
+        return { poll, counts, total: counts.reduce((a, b) => a + b, 0) };
+      });
+      return res.status(200).json(out);
     }
     if (op === 'vote' && req.method === 'POST') {
       if (!isSameSite(req)) return res.status(403).json({ error: 'forbidden' });
       // תקרה גבוהה: כל החדר עשוי לצאת מאותה כתובת של ה-Wi-Fi באולם
-      if (rateLimited(`vote:${ip}`, 300, 10 * 60_000)) return res.status(429).json({ error: 'rate_limited' });
+      if (rateLimited(`vote:${ip}`, 2000, 10 * 60_000)) return res.status(429).json({ error: 'rate_limited' });
       const body = await readJson(req, 1024);
       const poll = clean(body.poll, 20);
       const choice = Number(body.choice);
       if (!POLLS[poll] || !Number.isInteger(choice) || choice < 0 || choice >= POLLS[poll]) return res.status(400).json({ error: 'bad_vote' });
       await store().put(`${ROOT}/votes/${poll}/${choice}/${crypto.randomUUID()}`, '1', { ...PUB, contentType: 'text/plain' });
+      CACHE.delete(`votes:${poll}`);
       return res.status(200).json({ ok: true });
     }
 
     // ---------- הקישור לסוכן ----------
     if (op === 'agent' && req.method === 'GET') {
-      if (rateLimited(`agent:${ip}`, 300, 60_000)) return res.status(429).json({ error: 'rate_limited' });
-      const all = await listAll(`${ROOT}/agent/`);
-      if (!all.length) return res.status(200).json({ url: null, room: [] });
-      all.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
-      const r = await fetch(all[0].url, { cache: 'no-store' });
-      if (!r.ok) return res.status(502).json({ error: 'store_error' });
-      const m = await r.json();
-      return res.status(200).json({ url: isAgentUrl(String(m.url || '')) ? m.url : null, room: cleanRoom(m.room), updatedAt: all[0].uploadedAt });
+      if (rateLimited(`agent:${ip}`, 1200, 60_000)) return res.status(429).json({ error: 'rate_limited' });
+      const out = await cached('agent', 2000, async () => {
+        const all = await listAll(`${ROOT}/agent/`);
+        if (!all.length) return { url: null, room: [] };
+        all.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+        const r = await fetch(all[0].url, { cache: 'no-store' });
+        if (!r.ok) throw Object.assign(new Error('store_error'), { status: 502 });
+        const m = await r.json();
+        return { url: isAgentUrl(String(m.url || '')) ? m.url : null, room: cleanRoom(m.room), updatedAt: all[0].uploadedAt };
+      });
+      return res.status(200).json(out);
     }
     if (op === 'agent' && req.method === 'POST') {
       if (!isSameSite(req)) return res.status(403).json({ error: 'forbidden' });
@@ -139,6 +158,7 @@ export default async function handler(req, res) {
       const room = cleanRoom(body.room);
       if (u !== '' && !isAgentUrl(u)) return res.status(400).json({ error: 'bad_url' });
       const old = await listAll(`${ROOT}/agent/`);
+      CACHE.delete('agent');
       if (u === '' && !room.length) {
         if (old.length) await store().del(old.map((b) => b.url));
         return res.status(200).json({ ok: true, url: null, room: [] });
@@ -146,6 +166,7 @@ export default async function handler(req, res) {
       const b = await store().put(`${ROOT}/agent/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.json`, JSON.stringify({ url: u || null, room }), { ...PUB, contentType: 'application/json' });
       const stale = old.filter((x) => x.url !== b.url);
       if (stale.length) await store().del(stale.map((x) => x.url));
+      CACHE.delete('agent');
       return res.status(200).json({ ok: true, url: u || null, room });
     }
 
@@ -212,12 +233,14 @@ export default async function handler(req, res) {
         for (let i = 0; i < all.length; i += 500) { await store().del(all.slice(i, i + 500).map((b) => b.url)); }
         n += all.length;
       }
+      CACHE.clear();
       return res.status(200).json({ ok: true, deleted: n });
     }
     res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ error: 'method_not_allowed' });
   } catch (e) {
     if (e?.status === 413) return res.status(413).json({ error: 'body_too_large' });
+    if (e?.status === 502) return res.status(502).json({ error: 'store_error' });
     logEvent('live', 'error');
     return res.status(500).json({ error: 'server_error' });
   }
