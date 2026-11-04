@@ -275,7 +275,12 @@ button{font-family:inherit}
 .pgrid{display:grid;grid-template-columns:minmax(0,1fr) 540px;gap:100px;align-items:center}
 .withart .h{font-size:104px}
 .pgrid2{display:grid;grid-template-columns:minmax(0,1fr) 460px;gap:96px;align-items:start}
-.qart{width:240px;margin-top:36px}
+.qart{width:170px;margin-top:30px}
+.qlines{margin-top:34px;display:flex;flex-direction:column;gap:10px}
+.qlines p{margin:0;font-size:54px;font-weight:700;line-height:1.3}
+.qlines .qfill{color:var(--citron)}
+.qlines p.qex{font-size:36px;font-weight:500;color:var(--ink2);margin-top:6px}
+.qlines p.next{font-size:40px;font-weight:600;color:var(--ink2);margin-top:34px;padding-top:26px;border-top:2px solid var(--line)}
 .eart{width:260px}
 .cart{width:600px}
 @keyframes rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
@@ -1117,7 +1122,11 @@ const LESSON = {
         watch:[
           'קוראים שם רק באישור: "אפשר להגיד את השם שלך?"',
           'אם שולחן לא מצליח לבחור, "כל השולחן" זו תשובה טובה.'] } },
-      { art:'spark', type:'qr', kicker:'טופס סיום', title:'תוכנית קטנה לשבוע', sub:'"אם [מצב בעבודה השבוע], אז אני [פעולה עם הכלי]". ושוב: כמה אתם גאים בצוות, מ-1 עד 5.', url:'@closing', say:'מי שמילא, מקבל מחר קישור לכל מה שעשינו היום.', g:{
+      { type:'qr', kicker:'טופס סיום · שתי דקות', title:'תוכנית קטנה לשבוע', lines:[
+          { t:'אם [מצב בעבודה השבוע],' },
+          { t:'אז אני [מה אעשה עם הכלי].' },
+          { t:'למשל: אם יש לי מחר ביקור קשה, אז אני מתכונן מול המנהל.', cls:'qex' },
+          { t:'ועוד שאלה: כמה אתם גאים בצוות, מ-1 עד 5?', cls:'next' }], url:'@closing', say:'מי שמילא, מקבל מחר קישור לכל מה שעשינו היום.', g:{
         why:'טופס הסיום: תוכנית קטנה לשבוע, שוב השאלה כמה הם גאים בצוות, ומה הם רוצים בהמשך. זה המידע שדנשר ואנחנו לוקחים הביתה.',
         time:'3 דקות',
         say:[
@@ -3572,7 +3581,11 @@ function renderStep(st, thumb){
   }
   if (t === 'qr'){
     const url = link(st.url);
-    return `<div class="slide"><div class="qrwrap"><div>${head(st)}${st.sub ? `<p class="sub">${esc(st.sub)}</p>` : ''}${url ? `<p class="qrurl">${esc(shortUrl(url))}</p>` : ''}${st.art ? artHtml(st.art, 'qart') : ''}</div>${qrTile(st.url)}</div>${footer(st)}</div>`;
+    // כתובת ארוכה (כמו של טופס גוגל) אף אחד לא מעתיק ביד, אז רק הברקוד
+    const short = url && shortUrl(url).length <= 44 ? shortUrl(url) : '';
+    const fill = x => esc(x).replace(/\[([^\]]+)\]/g, '<span class="qfill">$1</span>');
+    const lines = st.lines ? `<div class="qlines">${st.lines.map(l => `<p class="${l.cls || ''}">${fill(l.t)}</p>`).join('')}</div>` : (st.sub ? `<p class="sub">${esc(st.sub)}</p>` : '');
+    return `<div class="slide"><div class="qrwrap"><div>${head(st)}${lines}${short ? `<p class="qrurl">${esc(short)}</p>` : ''}${st.art ? artHtml(st.art, 'qart') : ''}</div>${qrTile(st.url)}</div>${footer(st)}</div>`;
   }
   if (t === 'poll'){
     const letters = 'אבגדהוזח';
