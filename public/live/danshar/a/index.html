@@ -28,8 +28,6 @@ ol li{margin:4px 0}
 .note{margin:0;font-size:15px;color:var(--muted)}
 .count{display:flex;align-items:baseline;gap:8px;font-weight:900}
 .count b{font-size:40px;color:var(--citron);line-height:1}
-.bar{height:10px;border-radius:99px;background:var(--deep);overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--citron);transition:width .6s}
 .row{display:flex;flex-wrap:wrap;gap:8px}
 .copy{border:0;background:var(--citron);color:var(--citron-ink);font:inherit;font-weight:800;border-radius:10px;padding:9px 18px;cursor:pointer}
 .copy.done{background:var(--ok)}
@@ -62,7 +60,6 @@ ol li{margin:4px 0}
     <h2>המנהל כתב "סגרת!"?</h2>
     <button class="big deal" id="deal" type="button">סגרתי עסקה</button>
     <div class="count" aria-live="polite"><b id="n">–</b><span>עסקאות נסגרו בחדר</span></div>
-    <div class="bar"><i id="pct"></i></div>
     <p class="note" id="dmsg" role="status"></p>
   </div>
 
@@ -74,7 +71,7 @@ ol li{margin:4px 0}
 </main>
 <script>
 (function(){
-  const GOAL = 20, WAIT = 60;
+  const WAIT = 60; // היעד של החדר נקבע במצגת (ארן יכול לשנות אותו), ולכן כאן רק הספירה
   const $ = id => document.getElementById(id);
   const open = $('open'), state = $('state');
 
@@ -96,7 +93,7 @@ ol li{margin:4px 0}
 
   // מונה העסקאות של החדר
   async function count(){
-    try { const r = await fetch('/api/live?op=votes&poll=deal', { cache:'no-store' }); if (!r.ok) return; const d = await r.json(); $('n').textContent = d.total; $('pct').style.width = Math.min(100, d.total / GOAL * 100) + '%'; } catch(e){}
+    try { const r = await fetch('/api/live?op=votes&poll=deal', { cache:'no-store' }); if (!r.ok) return; const d = await r.json(); $('n').textContent = d.total; } catch(e){}
   }
   count(); setInterval(() => { if (!document.hidden) count(); }, 8000);
 
