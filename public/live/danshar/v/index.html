@@ -26,9 +26,9 @@ button.o:disabled{opacity:.5}
 </head>
 <body>
 <main>
-  <p class="kick">סקר אנונימי · בלי שם, בלי טלפון</p>
-  <h1>מה הכי מתאר אתכם מול כל זה?</h1>
-  <p class="sub">בוחרים תשובה אחת. התוצאות יופיעו על המסך.</p>
+  <p class="kick" id="kick">סקר אנונימי · בלי שם, בלי טלפון</p>
+  <h1 id="q">מה הכי מתאר אתכם מול כל זה?</h1>
+  <p class="sub" id="sub">בוחרים תשובה אחת. התוצאות יופיעו על המסך.</p>
   <div id="opts" style="display:flex;flex-direction:column;gap:10px">
     <button class="o" type="button" data-c="0">כולם כבר שם, ורק אני מאחור</button>
     <button class="o" type="button" data-c="1">הרבה כלים, לא יודע מאיפה להתחיל</button>
@@ -39,14 +39,26 @@ button.o:disabled{opacity:.5}
 </main>
 <script>
 (function(){
-  const KEY = 'nx-danshar-voted-survey', opts = document.getElementById('opts'), msg = document.getElementById('msg');
-  const done = () => { opts.innerHTML = '<div class="done">תודה. ההצבעה נקלטה, והתוצאות יופיעו על המסך.</div>'; msg.textContent = ''; };
+  // שני סקרים באותו דף: הסקר (ברירת המחדל) והניבוי (?p=predict)
+  const POLLS = {
+    predict: { kick:'ניבוי · 30 שניות, בלי שם', q:'כמה עסקאות ייסגרו בחדר מול המנהל הכי קשה בישראל, עד סוף הסדנה?', sub:'מנחשים פעם אחת. בסוף הסדנה נראה מי צדק.', opts:['פחות מ-5','5 עד 10','11 עד 20','יותר מ-20'] }
+  };
+  const poll = POLLS[new URLSearchParams(location.search).get('p')] ? new URLSearchParams(location.search).get('p') : 'survey';
+  const KEY = 'nx-danshar-voted-' + poll, opts = document.getElementById('opts'), msg = document.getElementById('msg');
+  if (POLLS[poll]){
+    const c = POLLS[poll];
+    document.getElementById('kick').textContent = c.kick; document.getElementById('q').textContent = c.q; document.getElementById('sub').textContent = c.sub;
+    document.title = 'ניבוי · סדנת AI לכל אחד';
+    opts.innerHTML = '';
+    c.opts.forEach((t, i) => { const b = document.createElement('button'); b.className = 'o'; b.type = 'button'; b.dataset.c = String(i); b.textContent = t; opts.appendChild(b); });
+  }
+  const done = () => { opts.innerHTML = poll === 'predict' ? '<div class="done">הניחוש נקלט. נגלה בסוף הסדנה.</div>' : '<div class="done">תודה. ההצבעה נקלטה, והתוצאות יופיעו על המסך.</div>'; msg.textContent = ''; };
   try { if (localStorage.getItem(KEY)) done(); } catch(e){}
   opts.addEventListener('click', async e => {
     const b = e.target.closest('[data-c]'); if (!b) return;
     opts.querySelectorAll('button').forEach(x => x.disabled = true); msg.textContent = 'שולח…';
     try {
-      const r = await fetch('/api/live?op=vote', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ poll:'survey', choice: Number(b.dataset.c) }) });
+      const r = await fetch('/api/live?op=vote', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ poll, choice: Number(b.dataset.c) }) });
       if (!r.ok) throw new Error(r.status);
       try { localStorage.setItem(KEY, '1'); } catch(e){}
       done();
