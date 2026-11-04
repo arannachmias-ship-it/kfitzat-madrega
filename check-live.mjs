@@ -42,7 +42,7 @@ r = await call({ method: 'POST', url: '/api/live?op=vote', body: { poll: 'survey
 r = await call({ method: 'POST', url: '/api/live?op=vote', body: { poll: 'nope', choice: 1 } }); assert.equal(r.status, 400);
 r = await call({ method: 'POST', url: '/api/live?op=vote', headers: { origin: 'https://evil.example' }, body: { poll: 'survey', choice: 1 } }); assert.equal(r.status, 403);
 _resetRateLimits();
-for (let i = 0; i < 300; i++) await call({ method: 'POST', url: '/api/live?op=vote', headers: { 'x-forwarded-for': '7.7.7.7' }, body: { poll: 'survey', choice: 1 } });
+for (let i = 0; i < 2000; i++) await call({ method: 'POST', url: '/api/live?op=vote', headers: { 'x-forwarded-for': '7.7.7.7' }, body: { poll: 'survey', choice: 1 } });
 r = await call({ method: 'POST', url: '/api/live?op=vote', headers: { 'x-forwarded-for': '7.7.7.7' }, body: { poll: 'survey', choice: 1 } }); assert.equal(r.status, 429);
 
 // הניבוי ומונה העסקאות
