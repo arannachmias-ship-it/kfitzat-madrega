@@ -406,6 +406,13 @@ const SYNC = (() => {
     if (!code) throw new Error('no_code');
     return post('?op=agent', JSON.stringify(body), 'application/json');
   }
+  // קישור עם קוד שהודבק בלשונית שכבר פתוחה: הדפדפן לא טוען מחדש, רק משנה את הסימן #. קוראים אותו גם אז
+  addEventListener('hashchange', () => {
+    const h = decodeURIComponent(location.hash.slice(1)).trim(); if (!h) return;
+    code = h; bad = false;
+    try { localStorage.setItem('nx-film-code', h); history.replaceState(null, '', location.pathname + location.search); } catch(e){}
+    start();
+  });
   return { get code(){ return code; }, kick, manifest, start, paint, clear, agent };
 })();
 
@@ -441,7 +448,11 @@ document.querySelectorAll('[data-clear]').forEach(b => {
       const d = await SYNC.agent({ url: url.value.trim(), room: lines });
       msg.textContent = d.url ? 'נשמר. הברקוד במצגת פותח עכשיו את ה-Gem.' : 'המשפטים נשמרו. כשה-Gem מוכן, מדביקים כאן את הקישור ושומרים שוב.';
     } catch(e){
-      msg.textContent = String(e.message) === 'http_400' ? 'הקישור לא נראה כמו קישור של Gemini. מעתיקים אותו שוב מ"שיתוף".' : 'לא נשמר. צריך את הקישור עם הקוד, ואינטרנט.';
+      const m = String(e.message);
+      msg.textContent = m === 'http_400' ? 'הקישור לא נראה כמו קישור של Gemini. מעתיקים אותו שוב מ"שיתוף".'
+        : m === 'no_code' ? 'הדף נפתח בלי הקוד, ולכן אי אפשר לשמור. פותחים את הכלי מהקישור המלא, זה שנגמר בסימן # וקוד. אחרי פעם אחת הקוד נשמר בדפדפן הזה.'
+        : m === 'bad_code' ? 'הקוד בקישור לא נכון. פותחים שוב את הקישור המלא, בדיוק כמו שנשלח.'
+        : 'השרת לא ענה. בודקים שיש אינטרנט ולוחצים שוב על שמירה.';
     }
   });
 })();
