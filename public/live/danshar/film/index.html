@@ -334,11 +334,13 @@ function upLabel(it){
 const SYNC = (() => {
   const API = '/api/live', PART = 3.4 * 1024 * 1024;
   let code = '', busy = false, mTimer = 0, bad = false, lastOk = 0;
+  // הקוד מגיע בסוף הקישור: #הקוד, או #k=הקוד (כמו בקישור האישי של ארן למלווה). שני הנוסחים עובדים
+  const norm = v => String(v || '').trim().replace(/^k=/, '');
   try {
-    const h = decodeURIComponent(location.hash.slice(1)).trim();
+    const h = norm(decodeURIComponent(location.hash.slice(1)));
     if (h){ localStorage.setItem('nx-film-code', h); history.replaceState(null, '', location.pathname + location.search); }
-    code = localStorage.getItem('nx-film-code') || '';
-  } catch(e){ code = decodeURIComponent(location.hash.slice(1)).trim(); }
+    code = norm(localStorage.getItem('nx-film-code'));
+  } catch(e){ code = norm(decodeURIComponent(location.hash.slice(1))); }
   const el = document.getElementById('sync'), txt = document.getElementById('syncTxt');
   const show = (cls, t) => { el.className = 'sync ' + cls; txt.textContent = t; };
   const online = /^https?:$/.test(location.protocol);
@@ -408,7 +410,7 @@ const SYNC = (() => {
   }
   // קישור עם קוד שהודבק בלשונית שכבר פתוחה: הדפדפן לא טוען מחדש, רק משנה את הסימן #. קוראים אותו גם אז
   addEventListener('hashchange', () => {
-    const h = decodeURIComponent(location.hash.slice(1)).trim(); if (!h) return;
+    const h = norm(decodeURIComponent(location.hash.slice(1))); if (!h) return;
     code = h; bad = false;
     try { localStorage.setItem('nx-film-code', h); history.replaceState(null, '', location.pathname + location.search); } catch(e){}
     start();
@@ -424,12 +426,23 @@ document.querySelectorAll('[data-clear]').forEach(b => {
     if (!armed){ b.classList.add('arm'); b.textContent = 'לחיצה נוספת למחיקה'; armed = setTimeout(() => { armed = 0; b.classList.remove('arm'); b.textContent = label; }, 4000); return; }
     clearTimeout(armed); armed = 0; b.classList.remove('arm'); b.textContent = label;
     const what = b.dataset.clear;
+    let d;
+    msg.textContent = 'מוחק…';
+    try { d = await SYNC.clear(what); }
+    catch(e){
+      const m = String(e.message);
+      msg.textContent = m === 'no_code' ? 'הדף נפתח בלי הקוד. פותחים את הכלי מהקישור המלא, זה שנגמר בסימן # וקוד.'
+        : m === 'bad_code' ? 'הקוד לא נכון. פותחים שוב את הקישור המלא, בדיוק כמו שנשלח.'
+        : m.startsWith('http_') ? `השרת לא הצליח למחוק (קוד ${m.slice(5)}). מנסים שוב בעוד רגע.`
+        : 'אין חיבור לאינטרנט. בודקים ולוחצים שוב.';
+      SYNC.paint(); return;
+    }
+    // המחיקה באתר הצליחה. הניקוי כאן במחשב לא יכול להפוך אותה לכישלון
     try {
-      const d = await SYNC.clear(what);
-      if (what === 'film'){ for (const it of items){ DB.del(it.id); URL.revokeObjectURL(it.url); } items = []; renderList(); }
+      if (what === 'film'){ for (const it of items){ try { DB.del(it.id); URL.revokeObjectURL(it.url); } catch(e){} } items = []; renderList(); }
       if (what === 'agent'){ document.getElementById('room').value = ''; document.getElementById('agentUrl').value = ''; }
-      msg.textContent = what === 'film' ? `נמחק. גם כאן וגם במצגת (${d.deleted} קבצים).` : what === 'agent' ? 'הקישור והמשפטים נמחקו.' : `הסקרים והעסקאות אופסו (${d.deleted} הצבעות נמחקו).`;
-    } catch(e){ msg.textContent = 'לא הצליח. צריך את הקישור עם הקוד, ואינטרנט.'; }
+    } catch(e){}
+    msg.textContent = what === 'film' ? `נמחק. גם כאן וגם במצגת (${d.deleted} קבצים).` : what === 'agent' ? 'הקישור והמשפטים נמחקו.' : `הסקרים והעסקאות אופסו (${d.deleted} הצבעות נמחקו).`;
     SYNC.paint();
   });
 });

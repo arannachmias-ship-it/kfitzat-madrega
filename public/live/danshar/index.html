@@ -3505,7 +3505,7 @@ const KEY = 'nx-live-' + L.id;
 // כך המלווה יכול לשמור את המשפטים מהחדר ואת הקישור ל-Gem, בלי לפתוח קודם את הכלי של מתי
 function takeCode(){
   if (!/^#k=/.test(location.hash)) return false;
-  const k = decodeURIComponent(location.hash.slice(3)).trim();
+  const k = decodeURIComponent(location.hash.slice(3)).trim().replace(/^k=/, '');
   try { if (k) localStorage.setItem('nx-film-code', k); } catch(e){}
   try { history.replaceState(null, '', location.pathname + location.search); } catch(e){ location.hash = ''; }
   return true;
@@ -3802,7 +3802,7 @@ function paintPoll(){
 const AG = { room:[], url:'', base:'', baseP:null };
 const AG_ON_SITE = /^https?:$/.test(location.protocol);
 const AG_TXT = (() => { const u = link('@agent'); if (!u) return ''; try { const x = new URL(u); x.pathname = x.pathname.replace(/\/a\/?$/, '/agent.txt'); return AG_ON_SITE && x.host === location.host ? x.pathname : x.href; } catch(e){ return ''; } })();
-const agCode = () => { try { return localStorage.getItem('nx-film-code') || ''; } catch(e){ return ''; } };
+const agCode = () => { try { return String(localStorage.getItem('nx-film-code') || '').trim().replace(/^k=/, ''); } catch(e){ return ''; } };
 function agBase(){ if (!AG.baseP && AG_TXT) AG.baseP = fetch(AG_TXT, { cache:'no-store' }).then(r => r.ok ? r.text() : '').then(t => { AG.base = t; return t; }).catch(() => { AG.baseP = null; return ''; }); return AG.baseP || Promise.resolve(''); }
 async function agGet(){
   if (!AG_ON_SITE) return null;
