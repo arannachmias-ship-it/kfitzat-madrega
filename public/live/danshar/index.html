@@ -3648,15 +3648,17 @@ function embedHtml(st, thumb){
 const POLL = { show:false, counts:null, total:0, err:false, timer:0, poll:null };
 // היעד המשותף: המספר שמכוונים (+ ו-−) נשמר בדפדפן. ההמנון מתנגן לבד רק כשעוברים את היעד, לא כשנכנסים לשקף אחרי שכבר עברו אותו
 const GOAL = { target:0, prev:null, fired:false };
+// המונים, הסקרים והשמירה עובדים רק כשהמלווה פתוח מהאתר עצמו (לא מקובץ במחשב ולא מתצוגה מקדימה)
+const ONSITE = /^https?:$/.test(location.protocol) && /(^|\.)nexadapt\.co\.il$|^localhost$/.test(location.hostname);
 function bindPoll(st){
   clearInterval(POLL.timer); POLL.show = false; POLL.counts = null; POLL.total = 0; POLL.err = false; POLL.fails = 0;
   POLL.poll = (st.type === 'poll' || st.type === 'goal') && st.live ? st.live : null;
   if (st.type === 'goal'){ GOAL.target = goalDefault(); GOAL.prev = null; GOAL.fired = false; }
   if (!POLL.poll) return;
   const tickPoll = async () => {
-    try { const r = await fetch('/api/live?op=votes&poll=' + encodeURIComponent(POLL.poll), { cache:'no-store' }); if (!r.ok) throw 0; const d = await r.json(); POLL.counts = d.counts; POLL.total = d.total; POLL.err = false; POLL.fails = 0; }
+    try { const r = await fetch('/api/live?op=votes&poll=' + encodeURIComponent(POLL.poll), { cache:'no-store' }); if (!r.ok) throw r.status; const d = await r.json(); POLL.counts = d.counts; POLL.total = d.total; POLL.err = false; POLL.fails = 0; }
     // תקלה רגעית ברשת לא מוחקת את המספר האחרון. רק שלוש תקלות ברצף נחשבות "אין חיבור"
-    catch(e){ POLL.fails = (POLL.fails || 0) + 1; if (POLL.fails >= 3) POLL.err = true; }
+    catch(e){ POLL.why = typeof e === 'number' ? 'קוד ' + e : 'אין רשת'; POLL.fails = (POLL.fails || 0) + 1; if (POLL.fails >= 3) POLL.err = true; }
     paintPoll(); push();
   };
   tickPoll(); POLL.timer = setInterval(tickPoll, 3000);
@@ -3668,7 +3670,7 @@ function paintGoal(){
   g.querySelector('[data-goalt]').textContent = t;
   g.querySelector('[data-goalbar]').style.width = ok ? Math.min(100, n / t * 100) + '%' : '0';
   g.classList.toggle('win', win);
-  g.querySelector('[data-goallabel]').textContent = POLL.err && !ok ? (/^https?:$/.test(location.protocol) ? 'אין חיבור לאתר. מנסה שוב…' : 'המונה עובד רק כשהמלווה פתוח מהאתר') : win ? 'יש יעד! וזה ההמנון שלכם' : ok ? `עוד ${t - n} ליעד` : '';
+  g.querySelector('[data-goallabel]').textContent = POLL.err && !ok ? (ONSITE ? `אין חיבור לאתר (${POLL.why || ''}). מנסה שוב…` : 'המונה עובד רק כשהמלווה פתוח מהאתר: nexadapt.co.il/live/danshar') : win ? 'יש יעד! וזה ההמנון שלכם' : ok ? `עוד ${t - n} ליעד` : '';
   if (ok){
     if (GOAL.prev !== null && n > GOAL.prev){
       const b = g.querySelector('[data-goaln]'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump');
@@ -3884,7 +3886,7 @@ function liveLine(){
   const st = STEPS[S.i];
   if (GOAL.flash && Date.now() < GOAL.flash && !(st && st.type === 'goal')) return `יעד העסקאות: ${GOAL.target}`;
   if (PARTY.on) return 'החגיגה על המסך · Esc סוגר · נגן / עצור להמנון';
-  if (POLL.poll && st && st.type === 'goal') return (POLL.err ? 'אין חיבור לאתר כרגע · ' : '') + `עסקאות: ${POLL.total} מתוך ${GOAL.target} · + ו-− משנים את היעד`;
+  if (POLL.poll && st && st.type === 'goal') return (POLL.err ? (ONSITE ? `אין חיבור לאתר (${POLL.why || ''}) · ` : 'המלווה לא פתוח מהאתר, אז אין מונה · ') : '') + `עסקאות: ${POLL.total} מתוך ${GOAL.target} · + ו-− משנים את היעד`;
   if (POLL.poll) return POLL.err && !POLL.counts ? 'הספירה עובדת רק כשהמלווה פתוח מהאתר' : `הצביעו: ${POLL.total}${POLL.show ? ' · התוצאות על המסך' : ' · V מציג את התוצאות'}`;
   if (st && st.type === 'video' && st.src === '@film') return filmStatus();
   return '';
