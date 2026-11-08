@@ -114,6 +114,23 @@ button{font-family:inherit}
 @keyframes trophy{0%{opacity:0;transform:translateY(240px) scale(.2) rotate(-18deg)}60%{opacity:1;transform:translateY(-20px) scale(1.08) rotate(4deg)}100%{transform:none}}
 @keyframes slam{0%{opacity:0;transform:scale(2.4)}100%{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#party .rays{animation:fadein 1s ease both}#party img{animation:fadein .6s ease both}}
+/* ספירה לאחור לפני ההמנון: "מוכנים?" ואז 3, 2, 1 */
+#cd{position:absolute;inset:0;z-index:45;overflow:hidden;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 50%,rgba(17,54,64,.975),rgba(3,12,16,.995) 70%);animation:fadein .35s ease both}
+#cd .rays{position:absolute;left:50%;top:50%;width:1700px;height:1700px;margin:-850px 0 0 -850px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(198,214,63,.13) 0deg 6deg,rgba(198,214,63,0) 6deg 20deg);-webkit-mask:radial-gradient(circle,#000 14%,transparent 64%);mask:radial-gradient(circle,#000 14%,transparent 64%);animation:spin 18s linear infinite}
+#cd .cdring{position:absolute;left:50%;top:50%;width:640px;height:640px;margin:-320px 0 0 -320px}
+#cd .cdring svg{width:100%;height:100%;transform:rotate(-90deg)}
+#cd .cdring circle{fill:none;stroke-width:14}
+#cd .cdring .bg{stroke:rgba(198,214,63,.16)}
+#cd .cdring .fg{stroke:var(--citron);stroke-linecap:round}
+#cd [data-cdtext]{position:relative;display:flex;align-items:center;justify-content:center}
+#cd .ready{font-size:210px;font-weight:900;color:var(--citron);letter-spacing:-2px;text-shadow:0 0 80px rgba(198,214,63,.5);animation:slam .7s var(--spring) both}
+#cd .num{position:relative;font-size:460px;font-weight:900;line-height:1;color:var(--paper);font-variant-numeric:tabular-nums;text-shadow:0 0 90px rgba(198,214,63,.55),0 10px 0 rgba(0,0,0,.25);animation:cdnum 1s cubic-bezier(.2,.8,.2,1) both}
+#cd .pulse{position:absolute;left:50%;top:50%;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;border:10px solid var(--citron);animation:cdpulse 1s ease-out both}
+#cd .flash{position:absolute;inset:0;background:#fff;animation:cdflash .6s ease-out both;pointer-events:none}
+@keyframes cdnum{0%{opacity:0;transform:scale(2.2)}18%{opacity:1;transform:scale(.94)}30%{transform:scale(1)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.6)}}
+@keyframes cdpulse{0%{opacity:.9;transform:scale(.4)}100%{opacity:0;transform:scale(2.4)}}
+@keyframes cdflash{0%{opacity:.85}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){#cd .rays,#cd .num,#cd .pulse,#cd .ready{animation:none}}
 .filmlive{position:relative;height:100%;display:flex;align-items:center;justify-content:center}
 .filmlive canvas{height:100%;max-width:100%;aspect-ratio:16/9;border-radius:16px;background:#000}
 .filmstat{position:absolute;bottom:0;right:0;margin:0;font-size:26px;color:var(--cap);background:rgba(12,40,49,.85);padding:6px 14px;border-radius:10px}
@@ -645,14 +662,14 @@ const LESSON = {
           'כאן לא מסבירים כלום על AI. רק לוגיסטיקה, קצר.'] } }
     ]},
     { from:0, to:5, title:'השיר שלכם', checks:['ההמנון מתנגן במקש רווח, והמילים קריאות מקצה החדר', 'סיפור הכישלון של ארן נכנס בדקה אחת'], steps:[
-      { art:'music', type:'song', kicker:'פתיחה', title:'ההמנון', src:'@anthem', lines:['[המילים לא נטענו]'], blocks:[{tag:'בית 1', lines:['עוד בוקר על הכביש, הטלפון ביד','עוד חנות ועוד מדף שמחכים לנו מיד','מהשילוט עד הסטנד, הכול צריך להיות מושלם','מי שנכנס לחנות יודע שהיינו שם']},{tag:'פזמון', chorus:true, lines:['אנחנו דנשר, אנחנו בשטח','בכל חנות, בכל מדף, בכל פינה','אנחנו דנשר, וזה רק מתחיל','סוכני השטח, הצוות שמוביל']},{tag:'בית 2', lines:['עוד דוח החזרות, עוד מוצר פגום','אבל החיוך שלנו נשאר כאן כל יום','כל קטגוריה, כל לקוח, כל הזמנה','אנחנו מסדרים, ועוברים לחנות הבאה']},{tag:'גשר', lines:['טלפון ביד, והראש בעננים','היום לומדים עוד כלי מדהים']}], cues:[[16.63,0,0],[20.55,0,1],[24.19,0,2],[28.09,0,3],[33.57,1,0],[37.27,1,1],[41.21,1,2],[44.69,1,3],[58.93,2,0],[62.49,2,1],[66.07,2,2],[70.01,2,3],[75.31,1,0],[79.19,1,1],[82.85,1,2],[86.27,1,3],[93.13,3,0],[96.51,3,1],[103.47,1,0],[107.09,1,1],[110.97,1,2],[114.43,1,3]], cueEnd:121, say:'אורות חלשים, בלי הקדמה. רווח מפעיל את השיר.', do:'רווח מפעיל את השיר, ורווח נוסף עוצר.', g:{
+      { art:'music', type:'song', kicker:'פתיחה', title:'ההמנון', src:'@anthem', lines:['[המילים לא נטענו]'], blocks:[{tag:'בית 1', lines:['עוד בוקר על הכביש, הטלפון ביד','עוד חנות ועוד מדף שמחכים לנו מיד','מהשילוט עד הסטנד, הכול צריך להיות מושלם','מי שנכנס לחנות יודע שהיינו שם']},{tag:'פזמון', chorus:true, lines:['אנחנו דנשר, אנחנו בשטח','בכל חנות, בכל מדף, בכל פינה','אנחנו דנשר, וזה רק מתחיל','סוכני השטח, הצוות שמוביל']},{tag:'בית 2', lines:['עוד דוח החזרות, עוד מוצר פגום','אבל החיוך שלנו נשאר כאן כל יום','כל קטגוריה, כל לקוח, כל הזמנה','אנחנו מסדרים, ועוברים לחנות הבאה']},{tag:'גשר', lines:['טלפון ביד, והראש בעננים','היום לומדים עוד כלי מדהים']}], cues:[[16.63,0,0],[20.55,0,1],[24.19,0,2],[28.09,0,3],[33.57,1,0],[37.27,1,1],[41.21,1,2],[44.69,1,3],[58.93,2,0],[62.49,2,1],[66.07,2,2],[70.01,2,3],[75.31,1,0],[79.19,1,1],[82.85,1,2],[86.27,1,3],[93.13,3,0],[96.51,3,1],[103.47,1,0],[107.09,1,1],[110.97,1,2],[114.43,1,3]], cueEnd:121, say:'אורות חלשים, בלי הקדמה. רווח: "מוכנים?", ספירה 3, 2, 1, והשיר מתחיל.', do:'רווח: "מוכנים?" וספירה לאחור, ואז השיר. רווח נוסף עוצר.', g:{
         why:'פתיחה בלי שובר קרח: שיר על הצוות שלהם, שנכתב מהתשובות שלהם בשאלון. כל שורה בו מוכרת למישהו בחדר.',
         time:'2–3 דקות',
         say:[
-          'לפני השיר לא אומרים כלום. אורות חלשים, ולוחצים רווח.',
+          'לפני השיר לא אומרים כלום. אורות חלשים, ולוחצים רווח. על המסך מופיע "מוכנים?", ואחריו ספירה 3, 2, 1. אפשר לספור בקול עם החדר.',
           'אחרי השיר, שנייה של שקט, ואז: "מכירים את השורות האלה? אתם כתבתם אותן."'],
         do:[
-          'רווח מפעיל את השיר, ורווח נוסף עוצר.',
+          'רווח מפעיל את הספירה לאחור (כ-4 שניות), ובסופה השיר מתחיל לבד. רווח באמצע הספירה מתחיל את השיר מיד, ו-Esc מבטל. רווח נוסף בזמן השיר עוצר.',
           'המילים מופיעות על המסך. אפשר לתת לשיר להתנגן עד הסוף, או לעצור אחרי הפזמון השני, לפי האנרגיה בחדר.',
           'השיר והמילים כבר בתוך המלווה (2.11). על המסך מופיעים בית 1, הפזמון, בית 2 והגשר. הפזמון חוזר שלוש פעמים, אז הוא מופיע פעם אחת ומסומן.'],
         watch:[
@@ -3890,6 +3907,7 @@ if (AG_ON_SITE && STEPS.some(x => x.type === 'room' || x.copy === 'agent')){ agB
 function liveLine(){
   const st = STEPS[S.i];
   if (GOAL.flash && Date.now() < GOAL.flash && !(st && st.type === 'goal')) return `יעד העסקאות: ${GOAL.target}`;
+  if (CD.on) return 'ספירה לאחור · רווח מתחיל את השיר מיד · Esc מבטל';
   if (PARTY.on) return 'החגיגה על המסך · Esc סוגר · נגן / עצור להמנון';
   if (POLL.poll && st && st.type === 'goal') return (POLL.err ? (ONSITE ? `אין חיבור לאתר (${POLL.why || ''}) · ` : 'המלווה לא פתוח מהאתר, אז אין מונה · ') : '') + `עסקאות: ${POLL.total} מתוך ${GOAL.target} · + ו-− משנים את היעד`;
   if (POLL.poll) return POLL.err && !POLL.counts ? 'הספירה עובדת רק כשהמלווה פתוח מהאתר' : `הצביעו: ${POLL.total}${POLL.show ? ' · התוצאות על המסך' : ' · V מציג את התוצאות'}`;
@@ -4056,7 +4074,7 @@ function enter(){
   const st = STEPS[S.i];
   stage.querySelector('#slide').innerHTML = renderStep(st, false);
   bindKaraoke(st);
-  partyStop(); bindPoll(st); filmStop(); filmIdle();
+  cdStop(); partyStop(); bindPoll(st); filmStop(); filmIdle();
   if (st.type === 'room' || st.copy === 'agent') agRefresh();
   if (st.type === 'video' && st.src === '@film' && /^https?:$/.test(location.protocol)) pollFilm();
   // טיימר חדש לכל שלב
@@ -4198,7 +4216,47 @@ function openExternal(){
   EXT[name] = window.open(u, name);
 }
 const EXT = {};
-function media(){ if (stage.querySelector('[data-filmcanvas]')){ filmToggle(); return true; } const m = stage.querySelector('[data-media]'); if (!m) return false; if (m.paused) m.play().catch(() => {}); else m.pause(); return true; }
+function media(){
+  if (stage.querySelector('[data-filmcanvas]')){ filmToggle(); return true; }
+  const m = stage.querySelector('[data-media]'); if (!m) return false;
+  // ההמנון: "מוכנים?" וספירה לאחור, רק כשהשיר מתחיל מההתחלה. רווח באמצע הספירה מתחיל מיד
+  if (CD.on){ cdGo(); return true; }
+  if (STEPS[S.i].type === 'song' && m.paused && m.currentTime < 0.5){ cdStart(m); return true; }
+  if (m.paused) m.play().catch(() => {}); else m.pause(); return true;
+}
+/* ---------- ספירה לאחור לפני ההמנון: "מוכנים?" ואז 3, 2, 1, והשיר מתחיל ---------- */
+const CD = { on:false, timers:[], audio:null };
+function cdStop(){
+  CD.timers.forEach(clearTimeout); CD.timers = []; CD.on = false;
+  if (CD.audio){ CD.audio.muted = false; CD.audio = null; }
+  const el = document.getElementById('cd'); if (el){ el.hidden = true; el.innerHTML = ''; }
+}
+function cdStart(m){
+  const el = document.getElementById('cd'); if (!el){ m.play().catch(() => {}); return; }
+  cdStop(); CD.on = true; CD.audio = m;
+  // הדפדפן מרשה לנגן רק בתוך לחיצה: מתחילים בשקט ועוצרים מיד, כדי שאחרי הספירה השיר יתנגן
+  try { m.muted = true; const p = m.play(); if (p) p.then(() => { if (CD.audio === m){ m.pause(); try { m.currentTime = 0; } catch(e){} } }).catch(() => {}); } catch(e){}
+  const C = 2 * Math.PI * 300;
+  el.innerHTML = `<div class="rays"></div><div class="cdring"><svg viewBox="0 0 640 640" aria-hidden="true"><circle class="bg" cx="320" cy="320" r="300"></circle><circle class="fg" cx="320" cy="320" r="300" stroke-dasharray="${C}" stroke-dashoffset="${C}" data-cdfg></circle></svg></div><div data-cdtext><div class="ready">מוכנים?</div></div>`;
+  el.hidden = false;
+  const text = el.querySelector('[data-cdtext]'), fg = el.querySelector('[data-cdfg]');
+  const at = (ms, f) => CD.timers.push(setTimeout(f, ms));
+  const READY = 1500, STEP = 1000;
+  [3, 2, 1].forEach((n, k) => at(READY + k * STEP, () => {
+    text.innerHTML = `<div class="pulse"></div><div class="num">${n}</div>`;
+    fg.style.transition = 'none'; fg.style.strokeDashoffset = C; void fg.getBoundingClientRect();
+    fg.style.transition = `stroke-dashoffset ${STEP - 80}ms linear`; fg.style.strokeDashoffset = 0;
+  }));
+  at(READY + 3 * STEP, cdGo);
+  push();
+}
+function cdGo(){
+  const m = CD.audio, el = document.getElementById('cd');
+  CD.timers.forEach(clearTimeout); CD.timers = []; CD.on = false; CD.audio = null;
+  if (m){ m.muted = false; try { m.currentTime = 0; } catch(e){} m.play().catch(() => {}); }
+  if (el){ el.innerHTML = '<div class="flash"></div>'; CD.timers.push(setTimeout(() => { el.hidden = true; el.innerHTML = ''; }, 600)); }
+  push();
+}
 function fullscreen(){ if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen().catch(() => {}); }
 function openWin(hash, name){
   const w = window.open(location.href.split('#')[0] + hash, name, 'width=1280,height=860');
@@ -4226,7 +4284,7 @@ function cmd(c, arg){
     case 'goalDown': setGoal(-1); break;
     case 'party': if (PARTY.on) partyStop(); else party(); push(); break;
     case 'agent': toggle('agent'); if (S.ov === 'agent'){ const f = ovLayer.querySelector('[data-agline]'); if (f) setTimeout(() => f.focus(), 50); } break;
-    case 'close': if (PARTY.on){ partyStop(); } else if (S.ov){ S.ov = null; drawOv(); } else if (S.wallOv){ S.wallOv = false; updateWall(); } else if (S.black) setBlack(false); push(); break;
+    case 'close': if (CD.on){ cdStop(); } else if (PARTY.on){ partyStop(); } else if (S.ov){ S.ov = null; drawOv(); } else if (S.wallOv){ S.wallOv = false; updateWall(); } else if (S.black) setBlack(false); push(); break;
   }
 }
 function onKey(e){
@@ -4264,7 +4322,7 @@ function push(){ const m = stateMsg(); subs.forEach(w => { if (w.closed){ subs.d
 function bootMain(){
   document.getElementById('vp').hidden = false;
   stage = document.getElementById('stage');
-  stage.innerHTML = '<div id="slide" class="anim"></div><div id="wallLayer" hidden></div><div id="ov" class="ov" hidden></div><div id="party" hidden></div><div id="black" hidden></div>';
+  stage.innerHTML = '<div id="slide" class="anim"></div><div id="wallLayer" hidden></div><div id="ov" class="ov" hidden></div><div id="cd" hidden></div><div id="party" hidden></div><div id="black" hidden></div>';
   wallLayer = document.getElementById('wallLayer'); ovLayer = document.getElementById('ov'); blackLayer = document.getElementById('black');
   fit(); addEventListener('resize', fit);
   addEventListener('keydown', onKey);
