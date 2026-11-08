@@ -54,17 +54,31 @@ button.o:disabled{opacity:.5}
   }
   const done = () => { opts.innerHTML = poll === 'predict' ? '<div class="done">הניחוש נקלט. נגלה בסוף הסדנה.</div>' : '<div class="done">תודה. ההצבעה נקלטה, והתוצאות יופיעו על המסך.</div>'; msg.textContent = ''; };
   try { if (localStorage.getItem(KEY)) done(); } catch(e){}
+  // שולחים עד שלוש פעמים: רשת של אולם יכולה להיתקע לרגע. בשגיאה אומרים מה קרה, כדי שנדע מה לתקן
+  async function send(body){
+    let why = '';
+    for (let i = 0; i < 3; i++){
+      if (i) await new Promise(r => setTimeout(r, i * 900));
+      try {
+        const r = await fetch('/api/live?op=vote', { method:'POST', headers:{ 'Content-Type':'application/json' }, body, cache:'no-store' });
+        if (r.ok) return '';
+        why = 'קוד ' + r.status;
+        if (r.status >= 400 && r.status < 500 && r.status !== 429) break;
+      } catch(e){ why = 'אין חיבור'; }
+    }
+    return why;
+  }
+  const fail = why => why === 'אין חיבור' ? 'לא נשלח, אין חיבור. בודקים שיש אינטרנט ולוחצים שוב.' : `לא נשלח (${why}). לוחצים שוב.`;
   opts.addEventListener('click', async e => {
     const b = e.target.closest('[data-c]'); if (!b) return;
     opts.querySelectorAll('button').forEach(x => x.disabled = true); msg.textContent = 'שולח…';
-    try {
-      const r = await fetch('/api/live?op=vote', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ poll, choice: Number(b.dataset.c) }) });
-      if (!r.ok) throw new Error(r.status);
+    const why = await send(JSON.stringify({ poll, choice: Number(b.dataset.c) }));
+    if (!why){
       try { localStorage.setItem(KEY, '1'); } catch(e){}
       done();
-    } catch(err){
+    } else {
       opts.querySelectorAll('button').forEach(x => x.disabled = false);
-      msg.innerHTML = '<span class="err">לא נשלח. בודקים שיש אינטרנט ולוחצים שוב.</span>';
+      msg.innerHTML = '<span class="err">' + fail(why) + '</span>';
     }
   });
 })();
