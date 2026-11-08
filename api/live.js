@@ -202,6 +202,19 @@ export default async function handler(req, res) {
       // הכלי יכול להיות פתוח בשני מחשבים. רשימה ממחשב אחד לא מוחקת את מה שהועלה ממחשב אחר:
       // תוצר יוצא מהמצגת רק כשהמחשב ששולח מחק אותו בעצמו (removed), או בניקוי
       const removed = new Set((Array.isArray(body.removed) ? body.removed : []).slice(0, 200).map((x) => clean(x, 48)));
+      // בפתיחת הכלי בודקים שהקבצים של תוצרים ישנים עוד קיימים. מה שנמחק בניקוי ממחשב אחר יוצא מהרשימה,
+      // והכלי מוחק אותו גם אצלו (dead). רק "לא נמצא" נחשב מחוק. שגיאה אחרת לא מוחקת כלום
+      const verify = new Set((Array.isArray(body.verify) ? body.verify : []).slice(0, 200).map((x) => clean(x, 48)));
+      const dead = [];
+      for (const it of items) {
+        if (!verify.has(it.id)) continue;
+        for (const u of it.parts) {
+          try { await store().head(u); } catch (e) {
+            if (e?.name === 'BlobNotFoundError' || /not.?found/i.test(String(e?.message || ''))) { dead.push(it.id); break; }
+          }
+        }
+      }
+      if (dead.length) for (let i = items.length - 1; i >= 0; i--) if (dead.includes(items[i].id)) items.splice(i, 1);
       const mine = new Set(items.map((it) => it.id));
       const prev = await latestManifest();
       // כותרות: רק ממחשב ששינה אותן. אחרת נשארות הקודמות (או ברירת המחדל של המלווה)
@@ -214,7 +227,7 @@ export default async function handler(req, res) {
       // שומרים רק את שלוש הרשימות האחרונות
       const old = (await listAll(`${ROOT}/film/manifest/`)).sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)).slice(3);
       if (old.length) await store().del(old.map((b) => b.url));
-      return res.status(200).json({ ok: true, count: merged.length, others: kept.length });
+      return res.status(200).json({ ok: true, count: merged.length, others: kept.length, dead });
     }
     if (op === 'part' && req.method === 'POST') {
       if (!isSameSite(req)) return res.status(403).json({ error: 'forbidden' });
