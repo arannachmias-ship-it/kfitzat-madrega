@@ -54,6 +54,17 @@ async function readRaw(req, max) {
   return Buffer.concat(chunks);
 }
 
+// הרשימה האחרונה של סרט הסיום, או null
+async function latestManifest() {
+  const all = await listAll(`${ROOT}/film/manifest/`);
+  if (!all.length) return null;
+  all.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+  const r = await fetch(all[0].url, { cache: 'no-store' });
+  if (!r.ok) throw Object.assign(new Error('store_error'), { status: 502 });
+  const m = await r.json();
+  return { ...m, updatedAt: all[0].uploadedAt };
+}
+
 async function listAll(prefix) {
   const out = [];
   let cursor;
@@ -173,13 +184,8 @@ export default async function handler(req, res) {
     // ---------- סרט הסיום ----------
     if (op === 'manifest' && req.method === 'GET') {
       if (rateLimited(`manifest:${ip}`, 60, 60_000)) return res.status(429).json({ error: 'rate_limited' });
-      const all = await listAll(`${ROOT}/film/manifest/`);
-      if (!all.length) return res.status(200).json({ items: [], settings: null, updatedAt: null });
-      all.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
-      const r = await fetch(all[0].url, { cache: 'no-store' });
-      if (!r.ok) return res.status(502).json({ error: 'store_error' });
-      const m = await r.json();
-      return res.status(200).json({ ...m, updatedAt: all[0].uploadedAt });
+      const m = await latestManifest();
+      return res.status(200).json(m || { items: [], settings: null, updatedAt: null });
     }
     if (op === 'manifest' && req.method === 'POST') {
       if (!isSameSite(req)) return res.status(403).json({ error: 'forbidden' });
@@ -192,13 +198,23 @@ export default async function handler(req, res) {
         name: clean(it.name, 120),
         parts: (Array.isArray(it.parts) ? it.parts : []).slice(0, 100).map((p) => String(p)).filter(isOurPart),
       })).filter((it) => ID_RE.test(it.id) && it.parts.length);
-      const s = body.settings || {};
-      const settings = { t1: clean(s.t1, 80), t2: clean(s.t2, 80), len: Number(s.len) === 0 ? 0 : 90, logo: s.logo !== false };
-      await store().put(`${ROOT}/film/manifest/${Date.now()}.json`, JSON.stringify({ items, settings }), { ...PUB, contentType: 'application/json' });
+      const s = body.settings;
+      // הכלי יכול להיות פתוח בשני מחשבים. רשימה ממחשב אחד לא מוחקת את מה שהועלה ממחשב אחר:
+      // תוצר יוצא מהמצגת רק כשהמחשב ששולח מחק אותו בעצמו (removed), או בניקוי
+      const removed = new Set((Array.isArray(body.removed) ? body.removed : []).slice(0, 200).map((x) => clean(x, 48)));
+      const mine = new Set(items.map((it) => it.id));
+      const prev = await latestManifest();
+      // כותרות: רק ממחשב ששינה אותן. אחרת נשארות הקודמות (או ברירת המחדל של המלווה)
+      const settings = s && typeof s === 'object'
+        ? { t1: clean(s.t1, 80), t2: clean(s.t2, 80), len: Number(s.len) === 0 ? 0 : 90, logo: s.logo !== false }
+        : (prev?.settings || null);
+      const kept = (prev?.items || []).filter((it) => !mine.has(it.id) && !removed.has(it.id));
+      const merged = [...items, ...kept].slice(0, 200);
+      await store().put(`${ROOT}/film/manifest/${Date.now()}.json`, JSON.stringify({ items: merged, settings }), { ...PUB, contentType: 'application/json' });
       // שומרים רק את שלוש הרשימות האחרונות
       const old = (await listAll(`${ROOT}/film/manifest/`)).sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)).slice(3);
       if (old.length) await store().del(old.map((b) => b.url));
-      return res.status(200).json({ ok: true, count: items.length });
+      return res.status(200).json({ ok: true, count: merged.length, others: kept.length });
     }
     if (op === 'part' && req.method === 'POST') {
       if (!isSameSite(req)) return res.status(403).json({ error: 'forbidden' });

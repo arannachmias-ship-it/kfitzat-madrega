@@ -88,6 +88,21 @@ for (let i = 0; i < 4; i++) await call({ method: 'POST', url: '/api/live?op=mani
 await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [{ id: 'item-abc123', kind: 'image', mime: 'image/jpeg', name: 'a.jpg', parts: [partUrl] }], settings: { t1: 'סוף', len: 0 } }, headers: CODE });
 r = await call({ url: '/api/live?op=manifest' }); assert.equal(r.status, 200); assert.equal(r.body.items.length, 1); assert.deepEqual(r.body.items[0].parts, [partUrl]); assert.equal(r.body.settings.t1, 'סוף'); assert.equal(r.body.settings.len, 0);
 assert.ok([...blobs.keys()].filter((k) => k.includes('/manifest/')).length <= 3, 'נשארות רק שלוש רשימות');
+
+// שני מחשבים: רשימה ממחשב אחד לא מוחקת את מה שהועלה ממחשב אחר
+const it = (id) => ({ id, kind: 'image', mime: 'image/jpeg', name: id + '.jpg', parts: [partUrl] });
+const ids = async () => (await call({ url: '/api/live?op=manifest' })).body.items.map((x) => x.id);
+await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [it('mati-a1'), it('mati-a2')], settings: { t1: 'מתי' } }, headers: CODE });
+r = await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [] }, headers: CODE });
+assert.equal(r.body.others, 3, 'מחשב ריק רואה את מה שיש במצגת');
+assert.ok((await ids()).includes('mati-a1') && (await ids()).includes('mati-a2'), 'רשימה ריקה ממחשב אחר לא מוחקת');
+await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [it('aran-b1')] }, headers: CODE });
+assert.equal((await call({ url: '/api/live?op=manifest' })).body.settings.t1, 'מתי', 'מחשב שלא שינה כותרות לא דורס אותן');
+assert.deepEqual((await ids()).slice(0, 1), ['aran-b1'], 'מה שנשלח עכשיו בא ראשון');
+assert.ok((await ids()).includes('mati-a1'), 'ושל מתי נשאר');
+await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [it('mati-a2')], removed: ['mati-a1'] }, headers: CODE });
+assert.ok(!(await ids()).includes('mati-a1'), 'מה שנמחק במחשב שלו יוצא מהמצגת');
+assert.ok((await ids()).includes('aran-b1') && (await ids()).includes('mati-a2'), 'והשאר נשאר');
 r = await call({ url: '/api/live?op=part&u=' + encodeURIComponent(partUrl) }); assert.equal(r.status, 200); assert.equal(Buffer.from(r.raw).toString(), 'hello');
 r = await call({ url: '/api/live?op=part&u=' + encodeURIComponent('https://evil.example/live/danshar/film/items/x') }); assert.equal(r.status, 400);
 r = await call({ method: 'POST', url: '/api/live?op=clear', headers: CODE }); assert.equal(r.status, 200); assert.equal([...blobs.keys()].length, 0);
