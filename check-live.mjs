@@ -15,6 +15,7 @@ globalThis.__liveStore = {
   async put(pathname, body) { const url = 'https://abc.public.blob.vercel-storage.com/' + pathname; blobs.set(pathname, { url, pathname, body: Buffer.from(body), uploadedAt: new Date(1e12 + (t++) * 1000).toISOString() }); return { url, pathname }; },
   async list({ prefix }) { return { blobs: [...blobs.values()].filter((b) => b.pathname.startsWith(prefix)), hasMore: false }; },
   async del(urls) { for (const u of [].concat(urls)) for (const [k, b] of blobs) if (b.url === u) blobs.delete(k); },
+  async head(url) { const b = [...blobs.values()].find((x) => x.url === String(url)); if (!b) throw Object.assign(new Error('Vercel Blob: The requested blob does not exist'), { name: 'BlobNotFoundError' }); return { url: b.url, pathname: b.pathname }; },
 };
 globalThis.fetch = async (u) => { const b = [...blobs.values()].find((x) => x.url === String(u)); return b ? { ok: true, json: async () => JSON.parse(b.body.toString()), arrayBuffer: async () => b.body } : { ok: false, status: 404 }; };
 const { default: live } = await import('./api/live.js');
@@ -103,6 +104,13 @@ assert.ok((await ids()).includes('mati-a1'), 'ושל מתי נשאר');
 await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [it('mati-a2')], removed: ['mati-a1'] }, headers: CODE });
 assert.ok(!(await ids()).includes('mati-a1'), 'מה שנמחק במחשב שלו יוצא מהמצגת');
 assert.ok((await ids()).includes('aran-b1') && (await ids()).includes('mati-a2'), 'והשאר נשאר');
+// תוצר שהקבצים שלו נמחקו (ניקוי ממחשב אחר): בבדיקה בפתיחה הוא יוצא מהרשימה, והכלי מקבל אותו ב-dead
+const deadPart = 'https://abc.public.blob.vercel-storage.com/live/danshar/film/items/gone12/000';
+r = await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [it('mati-a2'), { ...it('gone12'), parts: [deadPart] }], verify: ['mati-a2', 'gone12'] }, headers: CODE });
+assert.deepEqual(r.body.dead, ['gone12'], 'תוצר בלי קבצים מסומן dead');
+assert.ok(!(await ids()).includes('gone12') && (await ids()).includes('mati-a2'), 'ולא נכנס לרשימה, והשאר כן');
+r = await call({ method: 'POST', url: '/api/live?op=manifest', body: { items: [{ ...it('gone34'), parts: [deadPart] }] }, headers: CODE });
+assert.deepEqual(r.body.dead, [], 'בלי verify לא בודקים (תוצר שעלה עכשיו)');
 r = await call({ url: '/api/live?op=part&u=' + encodeURIComponent(partUrl) }); assert.equal(r.status, 200); assert.equal(Buffer.from(r.raw).toString(), 'hello');
 r = await call({ url: '/api/live?op=part&u=' + encodeURIComponent('https://evil.example/live/danshar/film/items/x') }); assert.equal(r.status, 400);
 r = await call({ method: 'POST', url: '/api/live?op=clear', headers: CODE }); assert.equal(r.status, 200); assert.equal([...blobs.keys()].length, 0);

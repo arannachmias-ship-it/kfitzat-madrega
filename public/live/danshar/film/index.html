@@ -335,7 +335,7 @@ function upLabel(it){
 }
 const SYNC = (() => {
   const API = '/api/live', PART = 3.4 * 1024 * 1024;
-  let code = '', busy = false, mTimer = 0, bad = false, lastOk = 0, others = 0;
+  let code = '', busy = false, mTimer = 0, bad = false, lastOk = 0, others = 0, gone = 0;
   // הכלי יכול להיות פתוח בשני מחשבים. השרת מאחד את הרשימות, ומוחק מהמצגת רק מה שמחקו כאן (removed)
   const upIdOf = x => x.upId || String(x.id).toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 48).padEnd(6, '0');
   let removed = []; try { removed = JSON.parse(localStorage.getItem('nx-film-removed') || '[]'); } catch(e){}
@@ -357,8 +357,13 @@ const SYNC = (() => {
     const arr = sorted(), left = arr.filter(x => !x.parts).length;
     if (left) return show('go', `מעלה למצגת… נשארו ${left}`);
     const more = others ? ` · ועוד ${others} ממחשב אחר` : '';
-    if (!arr.length) return show('ok', others ? `מחובר למצגת. כאן עוד לא הוספתם כלום, ובמצגת כבר יש ${others} תוצרים ממחשב אחר.` : 'מחובר למצגת. כל מה שתוסיפו יעלה לבד.');
-    return show('ok', `הכל במצגת (${arr.length === 1 ? 'תוצר אחד' : arr.length + ' תוצרים'}${more})${lastOk ? ' · עודכן ' + new Date(lastOk).toLocaleTimeString('he-IL', { hour:'2-digit', minute:'2-digit' }) : ''}`);
+    // תוצרים ישנים שנמחקו מהמצגת ממחשב אחר, והוסרו גם כאן
+    const oldTxt = !gone ? '' : gone === 1 ? 'תוצר ישן אחד, שנמחק מהמצגת, הוסר גם כאן' : `${gone} תוצרים ישנים, שנמחקו מהמצגת, הוסרו גם כאן`;
+    if (!arr.length){
+      const base = others ? `מחובר למצגת. כאן עוד לא הוספתם כלום, ובמצגת כבר יש ${others} תוצרים ממחשב אחר.` : 'מחובר למצגת. כל מה שתוסיפו יעלה לבד.';
+      return show('ok', oldTxt ? `${base} ${oldTxt}.` : base);
+    }
+    return show('ok', `הכל במצגת (${arr.length === 1 ? 'תוצר אחד' : arr.length + ' תוצרים'}${more})${oldTxt ? ' · ' + oldTxt : ''}${lastOk ? ' · עודכן ' + new Date(lastOk).toLocaleTimeString('he-IL', { hour:'2-digit', minute:'2-digit' }) : ''}`);
   }
   async function post(url, body, type){
     const r = await fetch(API + url, { method:'POST', headers:{ 'content-type': type, 'x-live-code': code }, body });
@@ -398,14 +403,20 @@ const SYNC = (() => {
     } finally { busy = false; paint(); }
     if (sorted().some(x => !x.parts && x.err) && !bad) setTimeout(kick, 8000);
   }
-  async function sendManifest(){
+  async function sendManifest(verify){
     if (!code || !online || bad) return;
     const list = sorted().filter(x => x.parts).map(x => ({ id: upIdOf(x), kind: x.kind, mime: x.mime, name: x.name, parts: x.parts }));
-    const gone = removed.slice();
+    const rmNow = removed.slice();
     try {
-      const d = await post('?op=manifest', JSON.stringify({ items: list, removed: gone, settings: settingsMine ? settings : undefined }), 'application/json');
+      const d = await post('?op=manifest', JSON.stringify({ items: list, removed: rmNow, settings: settingsMine ? settings : undefined, verify: Array.isArray(verify) ? verify : undefined }), 'application/json');
       lastOk = Date.now(); others = Number(d.others) || 0;
-      removed = removed.filter(x => !gone.includes(x)); keepRemoved();
+      removed = removed.filter(x => !rmNow.includes(x)); keepRemoved();
+      // תוצרים שהקבצים שלהם נמחקו מהמצגת (ניקוי ממחשב אחר): מוחקים גם כאן
+      const dead = Array.isArray(d.dead) ? d.dead : [];
+      if (dead.length){
+        for (const it of items.filter(x => x.parts && dead.includes(upIdOf(x)))){ try { DB.del(it.id); URL.revokeObjectURL(it.url); } catch(e){} items = items.filter(x => x !== it); gone++; }
+        renderList();
+      }
     }
     catch(e){ clearTimeout(mTimer); if (!bad) mTimer = setTimeout(sendManifest, 8000); }
     paint();
@@ -420,7 +431,11 @@ const SYNC = (() => {
     } catch(e){}
   }
   // בפתיחה שולחים רשימה רק כשיש כאן מה לשלוח. מחשב ריק לא שולח כלום, וגם לא דורס את הכותרות
-  function start(){ paint(); if (code && online) kick().then(() => (sorted().some(x => x.parts) || removed.length) ? sendManifest() : peek()); }
+  function start(){
+    paint(); if (!code || !online) return;
+    const atLoad = sorted().filter(x => x.parts).map(upIdOf); // תוצרים מפעם קודמת: בודקים שהם עוד במצגת
+    kick().then(() => (sorted().some(x => x.parts) || removed.length) ? sendManifest(atLoad) : peek());
+  }
   function markRemoved(it){ const id = upIdOf(it); if (!removed.includes(id)){ removed.push(id); keepRemoved(); } }
   async function clear(what){
     if (!code) throw new Error('no_code');
@@ -437,7 +452,7 @@ const SYNC = (() => {
     try { localStorage.setItem('nx-film-code', h); history.replaceState(null, '', location.pathname + location.search); } catch(e){}
     start();
   });
-  return { get code(){ return code; }, kick, manifest, start, paint, clear, agent, removed: markRemoved, reset(){ removed = []; keepRemoved(); others = 0; } };
+  return { get code(){ return code; }, kick, manifest, start, paint, clear, agent, removed: markRemoved, reset(){ removed = []; keepRemoved(); others = 0; gone = 0; } };
 })();
 
 /* ---------- ניקוי לפני הסדנה (שתי לחיצות) ---------- */
