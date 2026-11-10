@@ -22,7 +22,7 @@
  */
 import crypto from 'node:crypto';
 import { apiHeaders, isSameSite, clientIp, rateLimited, readJson, clean, logEvent } from '../lib/api-guard.js';
-import { store } from '../lib/live-store.js';
+import { store, isNotFound } from '../lib/live-store.js';
 
 const ROOT = 'live/danshar';
 const POLLS = { survey: 4, predict: 4, deal: 1 };
@@ -210,7 +210,7 @@ export default async function handler(req, res) {
         if (!verify.has(it.id)) continue;
         for (const u of it.parts) {
           try { await store().head(u); } catch (e) {
-            if (e?.name === 'BlobNotFoundError' || /not.?found/i.test(String(e?.message || ''))) { dead.push(it.id); break; }
+            if (isNotFound(e)) { dead.push(it.id); break; }
           }
         }
       }

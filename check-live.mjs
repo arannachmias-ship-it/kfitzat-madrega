@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { Readable } from 'node:stream';
 import { _resetRateLimits } from './lib/api-guard.js';
 import crypto from 'node:crypto';
+import { BlobNotFoundError } from '@vercel/blob';
 
 process.env.LIVE_CODE_SHA = crypto.createHash('sha256').update('test-code-123').digest('hex');
 
@@ -15,7 +16,8 @@ globalThis.__liveStore = {
   async put(pathname, body) { const url = 'https://abc.public.blob.vercel-storage.com/' + pathname; blobs.set(pathname, { url, pathname, body: Buffer.from(body), uploadedAt: new Date(1e12 + (t++) * 1000).toISOString() }); return { url, pathname }; },
   async list({ prefix }) { return { blobs: [...blobs.values()].filter((b) => b.pathname.startsWith(prefix)), hasMore: false }; },
   async del(urls) { for (const u of [].concat(urls)) for (const [k, b] of blobs) if (b.url === u) blobs.delete(k); },
-  async head(url) { const b = [...blobs.values()].find((x) => x.url === String(url)); if (!b) throw Object.assign(new Error('Vercel Blob: The requested blob does not exist'), { name: 'BlobNotFoundError' }); return { url: b.url, pathname: b.pathname }; },
+  // השגיאה האמיתית של הספרייה. שגיאה מומצאת עם name אחר הסתירה כאן באג שהיה בייצור
+  async head(url) { const b = [...blobs.values()].find((x) => x.url === String(url)); if (!b) throw new BlobNotFoundError(); return { url: b.url, pathname: b.pathname }; },
 };
 globalThis.fetch = async (u) => { const b = [...blobs.values()].find((x) => x.url === String(u)); return b ? { ok: true, json: async () => JSON.parse(b.body.toString()), arrayBuffer: async () => b.body } : { ok: false, status: 404 }; };
 const { default: live } = await import('./api/live.js');
