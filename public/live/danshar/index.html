@@ -4144,7 +4144,8 @@ function tick(){
   T.last = now; paintClock();
 }
 function elapsed(){ return S.clockStart ? Math.floor((Date.now() - S.clockStart)/1000) : 0; }
-function hms(sec){ const h = Math.floor(sec/3600), m = Math.floor(sec%3600/60), s = sec%60; return (h ? h + ':' : '') + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0'); }
+// השעון סופר דקות בלי לעבור לשעות (62:15 ולא 1:02:15), כמו הדקות שבצד השני של הפוטר
+function hms(sec){ const m = Math.floor(sec/60), s = sec%60; return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0'); }
 function paintClock(){ const el = stage.querySelector('[data-clock]'); if (el) el.textContent = S.clockStart ? hms(elapsed()) : 'S · מתחילים שעון'; }
 
 /* הגרלת שולחנות */
