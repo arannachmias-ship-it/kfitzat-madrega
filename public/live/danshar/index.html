@@ -3950,14 +3950,28 @@ function paintFilmStat(){ const el = stage && stage.querySelector('[data-filmsta
 
 const FP = { playing:false, raf:0, src:null, actx:null, buf:null, t0:0, cur:null, logo:null };
 const F_INTRO = 4, F_OUTRO = 5, F_FADE = .35;
+/* כמה זמן כל תוצר על המסך. סרטון מתנגן באורך המלא שלו, עד 12 שניות (Gemini נותן 8, Kling עד 10).
+   התמונות ממלאות את מה שנשאר, כל אחת בין 2.5 ל-8 שניות. יותר מדי תוצרים? קודם מקצרים סרטונים, עד 4 שניות כל אחד */
+function filmTimes(vids, imgs, avail){
+  const VMAX = 12, VMIN = 4, IMIN = 2.5, IMAX = 8;
+  const full = v => Math.min(VMAX, Math.max(2, v.dur || 5));
+  const sumV = cap => vids.reduce((a, v) => a + Math.min(cap, full(v)), 0);
+  let cap = VMAX;
+  if (sumV(VMAX) + imgs.length * IMIN > avail && vids.length){
+    let lo = VMIN, hi = VMAX;
+    for (let i = 0; i < 24; i++){ const mid = (lo + hi) / 2; if (sumV(mid) + imgs.length * IMIN > avail) hi = mid; else lo = mid; }
+    cap = lo;
+  }
+  const vt = sumV(cap);
+  let img = imgs.length ? (avail - vt) / imgs.length : 0;
+  if (imgs.length) img = Math.min(IMAX, Math.max(IMIN, img));
+  return { vid: v => Math.min(cap, full(v)), img, tight: vt + imgs.length * img > avail + 0.5 };
+}
 function filmPlan(){
   const arr = filmReady(), set = Object.assign({ t1:'סוכני השטח של דנשר', t2:'סדנת AI לכל אחד · 11.11', len:90 }, FL.settings || {});
   const musicLen = FP.buf ? FP.buf.duration : 136, target = set.len ? Math.min(set.len, musicLen) : musicLen;
-  const vidDur = v => Math.min(6, Math.max(2, v.dur || 5));
   const vids = arr.filter(x => x.kind === 'video'), imgs = arr.filter(x => x.kind === 'image');
-  const vt = vids.reduce((a, v) => a + vidDur(v), 0);
-  let imgDur = imgs.length ? (target - F_INTRO - F_OUTRO - vt) / imgs.length : 0;
-  if (imgs.length){ imgDur = Math.min(6, Math.max(2.5, imgDur)); }
+  const { vid: vidDur, img: imgDur } = filmTimes(vids, imgs, target - F_INTRO - F_OUTRO);
   const segs = [{ type:'title', text:set.t1 || 'סוכני השטח של דנשר', d:F_INTRO }];
   arr.forEach((it, i) => segs.push({ type:it.kind, it, d: it.kind === 'image' ? imgDur : vidDur(it), dir: i % 2 ? -1 : 1 }));
   segs.push({ type:'end', text:set.t2 || 'סדנת AI לכל אחד', d:F_OUTRO });
@@ -4779,7 +4793,7 @@ function bootGuide(){
   root.querySelector('[data-print]').onclick = () => window.print();
 }
 
-if (/[?&]e2e\b/.test(location.search)) window.__nx = { STEPS, go, FP, FL, pollFilm, filmStatus, S, AG };
+if (/[?&]e2e\b/.test(location.search)) window.__nx = { STEPS, go, FP, FL, pollFilm, filmStatus, filmPlan, S, AG };
 if (IS_PRESENTER) bootPresenter(); else if (location.hash === '#rehearsal') bootRehearsal(); else if (location.hash === '#tooltest') bootToolTest(); else if (location.hash === '#guide') bootGuide(); else bootMain();
 })();
 </script>
