@@ -57,6 +57,16 @@ label.chk input{width:18px;height:18px;accent-color:var(--citron)}
 .warn{color:var(--warn)}
 .it .up{font-size:12.5px;font-weight:800;white-space:nowrap}
 .it .up.ok{color:var(--ok)} .it .up.go{color:var(--citron)} .it .up.err{color:var(--warn)}
+/* פס ההתקדמות של העלאה: ליד כל תוצר, ובשורת הסטטוס */
+.bar{display:block;height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px;min-width:120px}
+.bar i{display:block;height:100%;width:0;background:var(--citron);border-radius:3px;transition:width .25s linear}
+.sync{flex-wrap:wrap}
+.sync #syncTxt{flex:1 1 0;min-width:0}
+/* השורה הקטנה מתחת לשם: בזמן העלאה מותר לה לרדת שורה, כדי שהאחוזים והמגה ייראו */
+.it .nm small{white-space:normal}
+.it .up{white-space:normal}
+.sync .bar{flex:1 1 100%;height:10px;border-radius:5px;margin:2px 0 0 20px}
+.sync .bar i{border-radius:5px}
 .sync{display:flex;gap:10px;align-items:center;background:var(--deep);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14.5px}
 .sync i{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}
 .sync.ok i{background:var(--ok)} .sync.go i{background:var(--citron)} .sync.err i{background:var(--warn)}
@@ -165,7 +175,7 @@ function prep(it){
 const sorted = () => items.filter(x => x.el).sort((a,b) => a.order - b.order);
 function renderList(){
   const L = document.getElementById('list'), arr = sorted();
-  L.innerHTML = arr.map((it, i) => `<div class="it" data-id="${it.id}"><span class="n">${i+1}</span>${it.kind === 'image' ? `<img src="${it.url}" alt="">` : `<video src="${it.url}" muted></video>`}<span class="nm">${it.name.replace(/[<>&]/g,'')}<small>${it.kind === 'image' ? 'תמונה' : 'סרטון'} · ${upLabel(it)}</small></span><span class="act"><button type="button" data-mv="-1" title="למעלה">▲</button><button type="button" data-mv="1" title="למטה">▼</button><button type="button" data-rm title="להסיר">✕</button></span></div>`).join('');
+  L.innerHTML = arr.map((it, i) => `<div class="it" data-id="${it.id}"><span class="n">${i+1}</span>${it.kind === 'image' ? `<img src="${it.url}" alt="">` : `<video src="${it.url}" muted></video>`}<span class="nm">${it.name.replace(/[<>&]/g,'')}<small>${it.kind === 'image' ? 'תמונה' : `סרטון · ${MB(it.blob.size)}${it.blob.size > 60 * 1048576 && !it.parts && !it.tooBig ? ' · קובץ גדול, ייקח זמן. בסרט רואים ממנו רק עד 6 שניות' : ''}`} · ${upLabel(it)}</small></span><span class="act"><button type="button" data-mv="-1" title="למעלה">▲</button><button type="button" data-mv="1" title="למטה">▼</button><button type="button" data-rm title="להסיר">✕</button></span></div>`).join('');
   const plan = buildPlan();
   document.getElementById('count').innerHTML = arr.length ? `${arr.length} תוצרים · הסרט ייצא באורך <b>${fmt(plan.total)}</b>` + (plan.tight ? ' <span class="warn">· הרבה תוצרים, כל תמונה תוצג קצר</span>' : '') : 'עוד אין תוצרים. אפשר להפעיל, ותראו רק את הפתיחה והסיום.';
   if (!playing) drawAt(1);
@@ -326,15 +336,28 @@ document.getElementById('save').addEventListener('click', async () => {
 
 /* ---------- העלאה למצגת: כל תוצר עולה לבד, והמלווה של ארן מושך אותו ---------- */
 function save(it){ DB.put({ id:it.id, kind:it.kind, name:it.name, blob:it.blob, order:it.order, parts:it.parts || null, mime:it.mime || '' }); }
+const MB = b => b >= 1048576 ? Math.round(b / 1048576) + 'MB' : Math.max(1, Math.round(b / 1024)) + 'KB';
+const pctOf = it => it.total ? Math.min(100, Math.floor((it.sent || 0) / it.total * 100)) : 0;
+/* ההתקדמות של תוצר: אחוזים, כמה מגה מתוך כמה, ופס */
+function upProg(it){ return `עולה… ${pctOf(it)}% (${MB(it.sent || 0)} מתוך ${MB(it.total)})`; }
 function upLabel(it){
   if (!SYNC.code) return 'רק כאן';
   if (it.parts) return '<span class="up ok">במצגת ✓</span>';
-  if (it.err) return '<span class="up err">לא עלה, מנסה שוב</span>';
-  if (it.going) return '<span class="up go">עולה…</span>';
+  if (it.tooBig) return `<span class="up err">גדול מדי (${MB(it.blob.size)}). מקצרים ומוסיפים שוב</span>`;
+  if (it.going && it.total) return `<span class="up go" data-up="${it.id}">${upProg(it)}</span><span class="bar" data-bar="${it.id}"><i style="width:${pctOf(it)}%"></i></span>`;
+  if (it.err) return `<span class="up err">לא עלה, מנסה שוב${it.total && it.sent ? ` (ממשיך מ-${pctOf(it)}%)` : ''}</span>`;
+  if (it.going) return '<span class="up go">מכין…</span>';
   return '<span class="up go">ממתין</span>';
 }
+/* עדכון ההתקדמות בלי לבנות מחדש את כל הרשימה */
+function upTick(it){
+  const t = document.querySelector(`[data-up="${it.id}"]`), b = document.querySelector(`[data-bar="${it.id}"] i`);
+  if (t) t.textContent = upProg(it); else renderList();
+  if (b) b.style.width = pctOf(it) + '%';
+  SYNC.paint();
+}
 const SYNC = (() => {
-  const API = '/api/live', PART = 3.4 * 1024 * 1024;
+  const API = '/api/live', PART = 3.4 * 1024 * 1024, MAX_PARTS = 100;
   let code = '', busy = false, mTimer = 0, bad = false, lastOk = 0, others = 0, gone = 0;
   // הכלי יכול להיות פתוח בשני מחשבים. השרת מאחד את הרשימות, ומוחק מהמצגת רק מה שמחקו כאן (removed)
   const upIdOf = x => x.upId || String(x.id).toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 48).padEnd(6, '0');
@@ -348,14 +371,23 @@ const SYNC = (() => {
     code = norm(localStorage.getItem('nx-film-code'));
   } catch(e){ code = norm(decodeURIComponent(location.hash.slice(1))); }
   const el = document.getElementById('sync'), txt = document.getElementById('syncTxt');
-  const show = (cls, t) => { el.className = 'sync ' + cls; txt.textContent = t; };
+  const show = (cls, t) => { el.className = 'sync ' + cls; txt.textContent = t; el.querySelectorAll('.bar').forEach(b => b.remove()); };
   const online = /^https?:$/.test(location.protocol);
   function paint(){
     if (!online) return show('err', 'הדף פתוח מהמחשב ולא מהאתר, אז שום דבר לא עולה למצגת.');
     if (!code) return show('err', 'לא מחובר למצגת. פותחים את הקישור המלא שארן שלח (עם הקוד).');
     if (bad) return show('err', 'הקוד בקישור לא נכון. מבקשים מארן את הקישור שוב.');
-    const arr = sorted(), left = arr.filter(x => !x.parts).length;
-    if (left) return show('go', `מעלה למצגת… נשארו ${left}`);
+    const arr = sorted(), waiting = arr.filter(x => !x.parts && !x.tooBig), left = waiting.length, big = arr.filter(x => x.tooBig).length;
+    const bigTxt = big ? ` · ${big === 1 ? 'סרטון אחד גדול מדי ולא יעלה' : big + ' סרטונים גדולים מדי ולא יעלו'}` : '';
+    if (left){
+      // כמה עלה מכל מה שנשאר. תמונה עוד לא התחילה? סופרים אותה לפי הגודל שלה
+      const tot = waiting.reduce((s, x) => s + (x.total || x.blob.size || 0), 0), sent = waiting.reduce((s, x) => s + (x.sent || 0), 0);
+      const pct = tot ? Math.min(99, Math.floor(sent / tot * 100)) : 0, cur = waiting.find(x => x.going);
+      show('go', `מעלה למצגת… נשארו ${left} · ${pct}%${cur && cur.total ? ` · עכשיו: ${cur.name.slice(0, 30)} ${pctOf(cur)}%` : ''}${bigTxt}`);
+      txt.insertAdjacentHTML('afterend', `<span class="bar"><i style="width:${pct}%"></i></span>`);
+      return;
+    }
+    if (big) return show('err', `${bigTxt.slice(3)}. מקצרים אותו (בסרט רואים רק עד 6 שניות) ומוסיפים שוב.`);
     const more = others ? ` · ועוד ${others} ממחשב אחר` : '';
     // תוצרים ישנים שנמחקו מהמצגת ממחשב אחר, והוסרו גם כאן
     const oldTxt = !gone ? '' : gone === 1 ? 'תוצר ישן אחד, שנמחק מהמצגת, הוסר גם כאן' : `${gone} תוצרים ישנים, שנמחקו מהמצגת, הוסרו גם כאן`;
@@ -379,29 +411,54 @@ const SYNC = (() => {
     const b = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.86));
     return { blob: b || it.blob, mime: b ? 'image/jpeg' : (it.blob.type || 'image/jpeg') };
   }
+  // חלק אחד של קובץ, עם דיווח על כמה עלה. fetch לא יודע לדווח על העלאה, ולכן XMLHttpRequest
+  function postPart(url, body, onProg){
+    return new Promise((res, rej) => {
+      const x = new XMLHttpRequest();
+      x.open('POST', API + url); x.setRequestHeader('content-type', 'application/octet-stream'); x.setRequestHeader('x-live-code', code);
+      x.timeout = 180000;
+      x.upload.onprogress = e => onProg(e.loaded);
+      x.onload = () => {
+        if (x.status === 401){ bad = true; paint(); return rej(new Error('bad_code')); }
+        if (x.status < 200 || x.status >= 300) return rej(new Error('http_' + x.status));
+        try { res(JSON.parse(x.responseText)); } catch(e){ rej(e); }
+      };
+      x.onerror = () => rej(new Error('network')); x.ontimeout = () => rej(new Error('timeout'));
+      x.send(body);
+    });
+  }
   async function upload(it){
     const { blob, mime } = it.kind === 'image' ? await imageBytes(it) : { blob: it.blob, mime: it.blob.type || 'video/mp4' };
     const id = String(it.id).toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 48).padEnd(6, '0');
-    const parts = [];
-    for (let n = 0, off = 0; off < blob.size; n++, off += PART){
-      const d = await post(`?op=part&id=${id}&n=${n}`, blob.slice(off, off + PART), 'application/octet-stream');
-      parts.push(d.url);
+    const count = Math.ceil(blob.size / PART);
+    if (count > MAX_PARTS){ it.tooBig = true; throw new Error('too_big'); } // השרת מקבל עד 100 חלקים
+    // ממשיכים מהחלק האחרון שעלה. נפל באמצע? לא מתחילים מאפס
+    if (!it.done || it.doneSize !== blob.size){ it.done = []; it.doneSize = blob.size; }
+    it.total = blob.size; it.sent = it.done.length * PART; upTick(it);
+    let last = 0;
+    for (let n = it.done.length; n < count; n++){
+      const off = n * PART, chunk = blob.slice(off, off + PART);
+      const d = await postPart(`?op=part&id=${id}&n=${n}`, chunk, loaded => {
+        it.sent = off + Math.min(loaded, chunk.size);
+        const now = Date.now(); if (now - last > 200){ last = now; upTick(it); }
+      });
+      it.done.push(d.url); it.sent = off + chunk.size; upTick(it);
     }
-    it.parts = parts; it.mime = mime; it.upId = id; save(it);
+    it.parts = it.done.slice(); it.mime = mime; it.upId = id; it.done = null; save(it);
   }
   async function kick(){
     paint();
     if (busy || !code || !online || bad) return; busy = true;
     try {
       for (const it of sorted()){
-        if (it.parts) continue;
+        if (it.parts || it.tooBig) continue;
         it.going = true; renderList();
         try { await upload(it); it.err = false; } catch(e){ it.err = true; if (bad) break; }
         it.going = false; renderList();
         if (it.parts) await sendManifest();
       }
     } finally { busy = false; paint(); }
-    if (sorted().some(x => !x.parts && x.err) && !bad) setTimeout(kick, 8000);
+    if (sorted().some(x => !x.parts && x.err && !x.tooBig) && !bad) setTimeout(kick, 8000);
   }
   async function sendManifest(verify){
     if (!code || !online || bad) return;
