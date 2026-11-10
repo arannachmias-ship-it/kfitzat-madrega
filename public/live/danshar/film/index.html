@@ -175,7 +175,7 @@ function prep(it){
 const sorted = () => items.filter(x => x.el).sort((a,b) => a.order - b.order);
 function renderList(){
   const L = document.getElementById('list'), arr = sorted();
-  L.innerHTML = arr.map((it, i) => `<div class="it" data-id="${it.id}"><span class="n">${i+1}</span>${it.kind === 'image' ? `<img src="${it.url}" alt="">` : `<video src="${it.url}" muted></video>`}<span class="nm">${it.name.replace(/[<>&]/g,'')}<small>${it.kind === 'image' ? 'תמונה' : `סרטון · ${MB(it.blob.size)}${it.blob.size > 60 * 1048576 && !it.parts && !it.tooBig ? ' · קובץ גדול, ייקח זמן. בסרט רואים ממנו רק עד 6 שניות' : ''}`} · ${upLabel(it)}</small></span><span class="act"><button type="button" data-mv="-1" title="למעלה">▲</button><button type="button" data-mv="1" title="למטה">▼</button><button type="button" data-rm title="להסיר">✕</button></span></div>`).join('');
+  L.innerHTML = arr.map((it, i) => `<div class="it" data-id="${it.id}"><span class="n">${i+1}</span>${it.kind === 'image' ? `<img src="${it.url}" alt="">` : `<video src="${it.url}" muted></video>`}<span class="nm">${it.name.replace(/[<>&]/g,'')}<small>${it.kind === 'image' ? 'תמונה' : `סרטון · ${MB(it.blob.size)}${it.blob.size > 60 * 1048576 && !it.parts && !it.tooBig ? ' · קובץ גדול, ייקח זמן. בסרט רואים ממנו עד 12 שניות' : ''}`} · ${upLabel(it)}</small></span><span class="act"><button type="button" data-mv="-1" title="למעלה">▲</button><button type="button" data-mv="1" title="למטה">▼</button><button type="button" data-rm title="להסיר">✕</button></span></div>`).join('');
   const plan = buildPlan();
   document.getElementById('count').innerHTML = arr.length ? `${arr.length} תוצרים · הסרט ייצא באורך <b>${fmt(plan.total)}</b>` + (plan.tight ? ' <span class="warn">· הרבה תוצרים, כל תמונה תוצג קצר</span>' : '') : 'עוד אין תוצרים. אפשר להפעיל, ותראו רק את הפתיחה והסיום.';
   if (!playing) drawAt(1);
@@ -212,16 +212,29 @@ async function loadMusic(buf){
 
 /* ---------- תכנון הסרט ---------- */
 const INTRO = 4, OUTRO = 5, FADE = .35;
+/* כמה זמן כל תוצר על המסך. סרטון מתנגן באורך המלא שלו, עד 12 שניות (Gemini נותן 8, Kling עד 10).
+   התמונות ממלאות את מה שנשאר, כל אחת בין 2.5 ל-8 שניות. יותר מדי תוצרים? קודם מקצרים סרטונים, עד 4 שניות כל אחד */
+function filmTimes(vids, imgs, avail){
+  const VMAX = 12, VMIN = 4, IMIN = 2.5, IMAX = 8;
+  const full = v => Math.min(VMAX, Math.max(2, v.dur || 5));
+  const sumV = cap => vids.reduce((a, v) => a + Math.min(cap, full(v)), 0);
+  let cap = VMAX;
+  if (sumV(VMAX) + imgs.length * IMIN > avail && vids.length){
+    let lo = VMIN, hi = VMAX;
+    for (let i = 0; i < 24; i++){ const mid = (lo + hi) / 2; if (sumV(mid) + imgs.length * IMIN > avail) hi = mid; else lo = mid; }
+    cap = lo;
+  }
+  const vt = sumV(cap);
+  let img = imgs.length ? (avail - vt) / imgs.length : 0;
+  if (imgs.length) img = Math.min(IMAX, Math.max(IMIN, img));
+  return { vid: v => Math.min(cap, full(v)), img, tight: vt + imgs.length * img > avail + 0.5 };
+}
 function buildPlan(){
   const arr = sorted();
   const musicLen = music ? music.duration : 136;
   const target = settings.len ? Math.min(settings.len, musicLen) : musicLen;
   const vids = arr.filter(x => x.kind === 'video'), imgs = arr.filter(x => x.kind === 'image');
-  const vidDur = v => Math.min(6, Math.max(2, v.dur || 5));
-  const vt = vids.reduce((s,v) => s + vidDur(v), 0);
-  let imgDur = imgs.length ? (target - INTRO - OUTRO - vt) / imgs.length : 0;
-  let tight = false;
-  if (imgs.length){ if (imgDur < 2.5){ imgDur = 2.5; tight = true; } if (imgDur > 6) imgDur = 6; }
+  const { vid: vidDur, img: imgDur, tight } = filmTimes(vids, imgs, target - INTRO - OUTRO);
   const segs = [{ type:'title', text:settings.t1, d:INTRO }];
   arr.forEach((it, i) => segs.push({ type:it.kind, it, d: it.kind === 'image' ? imgDur : vidDur(it), dir: i % 2 ? -1 : 1 }));
   segs.push({ type:'end', text:settings.t2, d:OUTRO });
@@ -387,7 +400,7 @@ const SYNC = (() => {
       txt.insertAdjacentHTML('afterend', `<span class="bar"><i style="width:${pct}%"></i></span>`);
       return;
     }
-    if (big) return show('err', `${bigTxt.slice(3)}. מקצרים אותו (בסרט רואים רק עד 6 שניות) ומוסיפים שוב.`);
+    if (big) return show('err', `${bigTxt.slice(3)}. מקצרים אותו (בסרט רואים ממנו עד 12 שניות) ומוסיפים שוב.`);
     const more = others ? ` · ועוד ${others} ממחשב אחר` : '';
     // תוצרים ישנים שנמחקו מהמצגת ממחשב אחר, והוסרו גם כאן
     const oldTxt = !gone ? '' : gone === 1 ? 'תוצר ישן אחד, שנמחק מהמצגת, הוסר גם כאן' : `${gone} תוצרים ישנים, שנמחקו מהמצגת, הוסרו גם כאן`;
