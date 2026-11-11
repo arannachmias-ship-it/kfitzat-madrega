@@ -216,7 +216,7 @@ const SPLASH = { d:10.5, v:null, ok:false, ab:null, buf:null, src:null };
 (() => {
   const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto';
   v.oncanplaythrough = () => { if (SPLASH.ok) return; SPLASH.ok = true; try { renderList(); } catch(e){} };
-  v.src = 'nexadapt-splash.webm'; v.load(); SPLASH.v = v;
+  v.src = 'nexadapt-splash-2.webm'; v.load(); SPLASH.v = v;
   fetch('nexadapt-splash.mp3').then(r => r.ok ? r.arrayBuffer() : null).then(b => { SPLASH.ab = b; }).catch(() => {});
 })();
 

@@ -3960,7 +3960,7 @@ const SPL = { d:10.5, v:null, ok:false, ab:null, buf:null, src:null };
 if (/^https?:$/.test(location.protocol) && STEPS.some(x => x.src === '@film')){
   const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto';
   v.oncanplaythrough = () => { SPL.ok = true; };
-  v.src = 'film/nexadapt-splash.webm'; v.load(); SPL.v = v;
+  v.src = 'film/nexadapt-splash-2.webm'; v.load(); SPL.v = v;
   fetch('film/nexadapt-splash.mp3').then(r => r.ok ? r.arrayBuffer() : null).then(b => { SPL.ab = b; }).catch(() => {});
 }
 /* כמה זמן כל תוצר על המסך. סרטון מתנגן באורך המלא שלו, עד 12 שניות (Gemini נותן 8, Kling עד 10).
