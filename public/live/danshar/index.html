@@ -3954,6 +3954,15 @@ function paintFilmStat(){ const el = stage && stage.querySelector('[data-filmsta
 
 const FP = { playing:false, raf:0, src:null, actx:null, buf:null, t0:0, cur:null, logo:null };
 const F_INTRO = 4, F_OUTRO = 5, F_FADE = .35;
+/* הספלאש של Nexadapt: נכנס בסוף הסרט, אחרי שההמנון דועך, עם צליל משלו. נטען רק מהאתר.
+   לא נטען? הסרט מתנגן בלעדיו, בדיוק כמו קודם */
+const SPL = { d:10.5, v:null, ok:false, ab:null, buf:null, src:null };
+if (/^https?:$/.test(location.protocol) && STEPS.some(x => x.src === '@film')){
+  const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto';
+  v.oncanplaythrough = () => { SPL.ok = true; };
+  v.src = 'film/nexadapt-splash.webm'; v.load(); SPL.v = v;
+  fetch('film/nexadapt-splash.mp3').then(r => r.ok ? r.arrayBuffer() : null).then(b => { SPL.ab = b; }).catch(() => {});
+}
 /* כמה זמן כל תוצר על המסך. סרטון מתנגן באורך המלא שלו, עד 12 שניות (Gemini נותן 8, Kling עד 10).
    התמונות ממלאות את מה שנשאר, כל אחת בין 2.5 ל-8 שניות. יותר מדי תוצרים? קודם מקצרים סרטונים, עד 4 שניות כל אחד */
 function filmTimes(vids, imgs, avail){
@@ -3980,7 +3989,9 @@ function filmPlan(){
   arr.forEach((it, i) => segs.push({ type:it.kind, it, d: it.kind === 'image' ? imgDur : vidDur(it), dir: i % 2 ? -1 : 1 }));
   segs.push({ type:'end', text:set.t2 || 'סדנת AI לכל אחד', d:F_OUTRO });
   let t = 0; segs.forEach(sg => { sg.t0 = t; t += sg.d; });
-  return { segs, total:t };
+  const musicEnd = t; let splashAt = null;
+  if (SPL.ok){ splashAt = t; segs.push({ type:'splash', d:SPL.d, t0:t }); t += SPL.d; }
+  return { segs, total:t, musicEnd, splashAt };
 }
 function filmDraw(cv, t, plan){
   const cx = cv.getContext('2d'), W = cv.width, H = cv.height;
@@ -4000,6 +4011,7 @@ function filmDraw(cv, t, plan){
     cx.fillStyle = '#F1F4F4'; cx.font = '500 36px Heebo, Arial, sans-serif'; cx.fillText(seg.type === 'title' ? 'סדנת AI לכל אחד' : 'Nexadapt', 0, 80 + dy); cx.restore();
   } else if (seg.type === 'image'){ const im = seg.it.el; fit(im, im.naturalWidth, im.naturalHeight, 0.96 + k * 0.04); bug(); }
   else if (seg.type === 'video'){ const v = seg.it.el; if (v.readyState >= 2) fit(v, v.videoWidth, v.videoHeight, 1); bug(); }
+  else if (seg.type === 'splash'){ if (SPL.v.readyState >= 2) cx.drawImage(SPL.v, 0, 0, W, H); return seg; }
   const a = Math.min(1, (t - seg.t0) / F_FADE, (seg.t0 + seg.d - t) / F_FADE);
   if (a < 1){ cx.fillStyle = `rgba(0,0,0,${1 - Math.max(0, a)})`; cx.fillRect(0, 0, W, H); }
   return seg;
@@ -4014,11 +4026,13 @@ async function filmToggle(){
     try { const bin = atob(b64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); FP.buf = await FP.actx.decodeAudioData(u8.buffer); } catch(e){ FP.buf = null; }
   }
   await FP.actx.resume();
+  if (SPL.ok && SPL.ab && !SPL.buf){ try { SPL.buf = await FP.actx.decodeAudioData(SPL.ab.slice(0)); } catch(e){} }
   const plan = filmPlan(), now = FP.actx.currentTime;
+  if (plan.splashAt != null && SPL.buf){ SPL.src = FP.actx.createBufferSource(); SPL.src.buffer = SPL.buf; SPL.src.connect(FP.actx.destination); SPL.src.start(now + 0.05 + plan.splashAt); }
   if (FP.buf){
     FP.src = FP.actx.createBufferSource(); FP.src.buffer = FP.buf; const g = FP.actx.createGain();
-    g.gain.setValueAtTime(1, now); if (plan.total < FP.buf.duration){ g.gain.setValueAtTime(1, now + Math.max(0, plan.total - 2.5)); g.gain.linearRampToValueAtTime(0.0001, now + plan.total); }
-    FP.src.connect(g); g.connect(FP.actx.destination); FP.src.start(now + 0.05, 0, Math.min(plan.total, FP.buf.duration));
+    g.gain.setValueAtTime(1, now); if (plan.musicEnd < FP.buf.duration){ g.gain.setValueAtTime(1, now + Math.max(0, plan.musicEnd - 2.5)); g.gain.linearRampToValueAtTime(0.0001, now + plan.musicEnd); }
+    FP.src.connect(g); g.connect(FP.actx.destination); FP.src.start(now + 0.05, 0, Math.min(plan.musicEnd, FP.buf.duration));
   }
   FP.t0 = now + 0.05; FP.playing = true; FP.cur = null; paintFilmStat();
   const loop = () => {
@@ -4027,6 +4041,7 @@ async function filmToggle(){
     if (t >= plan.total){ filmDraw(c, plan.total - 0.01, plan); return filmStop(); }
     const seg = filmDraw(c, Math.max(0, t), plan);
     if (seg.type === 'video'){ const v = seg.it.el; if (FP.cur !== v){ if (FP.cur) FP.cur.pause(); FP.cur = v; v.currentTime = Math.max(0, ((v.duration || 0) - seg.d) / 2); v.play().catch(() => {}); } }
+    else if (seg.type === 'splash'){ const v = SPL.v; if (FP.cur !== v){ if (FP.cur) FP.cur.pause(); FP.cur = v; v.currentTime = Math.max(0, t - seg.t0); v.play().catch(() => {}); } }
     else if (FP.cur){ FP.cur.pause(); FP.cur = null; }
     FP.raf = requestAnimationFrame(loop);
   };
@@ -4035,6 +4050,7 @@ async function filmToggle(){
 function filmStop(){
   if (!FP.playing) return; FP.playing = false; cancelAnimationFrame(FP.raf);
   try { FP.src && FP.src.stop(); } catch(e){} FP.src = null;
+  try { SPL.src && SPL.src.stop(); } catch(e){} SPL.src = null;
   if (FP.cur){ FP.cur.pause(); FP.cur = null; }
   paintFilmStat();
 }
@@ -4798,7 +4814,7 @@ function bootGuide(){
   root.querySelector('[data-print]').onclick = () => window.print();
 }
 
-if (/[?&]e2e\b/.test(location.search)) window.__nx = { STEPS, go, FP, FL, pollFilm, filmStatus, filmPlan, S, AG };
+if (/[?&]e2e\b/.test(location.search)) window.__nx = { STEPS, go, FP, FL, pollFilm, filmStatus, filmPlan, S, AG, SPL, filmToggle };
 if (IS_PRESENTER) bootPresenter(); else if (location.hash === '#rehearsal') bootRehearsal(); else if (location.hash === '#tooltest') bootToolTest(); else if (location.hash === '#guide') bootGuide(); else bootMain();
 })();
 </script>
