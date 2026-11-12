@@ -5,6 +5,7 @@ import SignupBand from '../../components/SignupBand.astro';
 import ToolMatch from '../../components/ToolMatch.astro';
 import { getCollection } from 'astro:content';
 import { MADRICHIM } from '../../data/madrichim';
+import Il from '../../components/Il.astro';
 
 const all = (await getCollection('kelim', (e) => e.data.published))
   .sort((a, b) => a.data.order - b.data.order);
@@ -46,8 +47,8 @@ const updated = newest.toLocaleDateString('he-IL', { day: 'numeric', month: 'lon
       איפה שלא הצלחנו לאמת משהו מול המקור הרשמי — כתוב שלא אימתנו, ולא ניחשנו במקום.
     </p>
     </div>
-    <div class="head__media rise">
-      <img src="/photos/kelim.webp" width="1200" height="800" alt="שני עמיתים משרטטים תרשים של תיבות וחיצים על לוח מחיק" fetchpriority="high" decoding="async" />
+    <div class="head__media head__media--il">
+      <div class="il-panel"><Il name="group" size={330} eager alt="איור: חמישה טלפונים פרושים כמו מניפה, וכוכבים מנצנצים ביניהם" /></div>
     </div>
   </section>
 

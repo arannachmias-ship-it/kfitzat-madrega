@@ -4,6 +4,7 @@ import SignupBand from '../../components/SignupBand.astro';
 import { getCollection } from 'astro:content';
 import TrackNav from '../../components/TrackNav.astro';
 import { STAGES, TOTAL_LESSONS } from '../../data/track';
+import Il from '../../components/Il.astro';
 
 // שכבה שנייה ושלישית של המסלול: הכלים וההדגמות שמשויכים לכל שלב
 const tools = (await getCollection('kelim', (e) => e.data.published && e.data.stages.length > 0))
@@ -35,8 +36,8 @@ const lastLiveIndex = (items: { slug: string }[]) => items.reduce((m, it, i) => 
     </p>
     <p class="head__layers">שלוש שכבות של אותה למידה: <strong>{TOTAL_LESSONS} שיעורים</strong>, <strong>{toolCount} כלים</strong> שנכנסים בדיוק בשלב שצריך אותם, ו<strong>הדגמות חיות</strong> של מה שנהיה אפשרי.</p>
     </div>
-    <div class="head__media rise">
-      <img src="/photos/maslul.webp" width="1200" height="800" alt="עובדת לומדת לבד מול מחשב נייד במשרד שקט, עם מחברת וכוס קפה" fetchpriority="high" decoding="async" />
+    <div class="head__media head__media--il">
+      <div class="il-panel"><Il name="proud" size={330} eager alt="איור: עובדת עולה במדרגות עם טלפון ביד וחיוך גאה, ועמיתה מעודדת אותה מלמטה" /></div>
     </div>
   </section>
 

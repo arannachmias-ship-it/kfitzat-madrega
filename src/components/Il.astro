@@ -1,0 +1,24 @@
+---
+/**
+ * איור מספריית האיורים של Nexadapt (public/il).
+ * כל האיורים מצוירים על רקע #113640 (‎--hero), ולכן הם עומדים רק על משטח בצבע הזה:
+ * פס .band-hero, או הלוח .il-panel. אף פעם לא על נייר בהיר.
+ * האיור נכנס בקפיצה אחת, ואז מרחף בעדינות. שלושה ניצוצות מנצנצים לידו.
+ */
+interface Props {
+  name: string;
+  alt?: string;
+  size?: number;
+  eager?: boolean;
+  still?: boolean;
+  class?: string;
+}
+const { name, alt = '', size = 420, eager = false, still = false, class: cls } = Astro.props;
+---
+<span class:list={['il', { 'il--still': still }, cls]} style={`--il:${size}px`}>
+  <img
+    src={`/il/${name}.webp`} width="640" height="640" alt={alt}
+    loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} decoding="async"
+  />
+  {!still && <><i class="il__s il__s--1" aria-hidden="true"></i><i class="il__s il__s--2" aria-hidden="true"></i><i class="il__s il__s--3" aria-hidden="true"></i></>}
+</span>

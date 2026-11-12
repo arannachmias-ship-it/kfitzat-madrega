@@ -1,67 +1,94 @@
 ---
 import Base from '../layouts/Base.astro';
 import SignupBand from '../components/SignupBand.astro';
+import Il from '../components/Il.astro';
 import { getCollection } from 'astro:content';
 import { STAGES, TOTAL_LESSONS } from '../data/track';
 
 const live = (await getCollection('maslul', (e) => e.data.published))
   .sort((a, b) => a.data.stage - b.data.stage || a.data.order - b.data.order);
 const featured = live.slice(0, 4);
-const newest = live.length ? live[live.length - 1] : null;
 const liveCount = live.length;
 
 // מה כבר אפשר: ההדגמות החיות עולות לדף הבית, כדי שהמבקר יראה מה AI עושה ולא רק יקרא עליו
 const demos = (await getCollection('efshar', (e) => e.data.published))
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
+
+// 90 הדקות של הרצאת ההתנעה: ארבעה סבבי יצירה, כמו במערך ההרצאה
+const rounds = [
+  { il: 'spark', n: 'סבב 1', h: 'פוסטר לצוות', d: 'משפט אחד בטלפון, ולכל שולחן יש פוסטר משלו על קיר התהילה.' },
+  { il: 'music', n: 'סבב 2', h: 'שיר שלם', d: 'מילים על העבודה שלכם, לחן, ושיר שאפשר לשלוח הביתה.' },
+  { il: 'video', n: 'סבב 3', h: 'טריילר', d: 'הפוסטר מתחיל לזוז. סרטון קצר של הצוות, מהטלפון.' },
+  { il: 'talk', n: 'סבב 4', h: 'מדברים איתה', d: 'פותחים מצלמה, שואלים בקול, והיא עונה על מה שהיא רואה.' },
+];
 ---
 <Base
   title="הכשרות והטמעת AI בארגונים · Nexadapt"
   description="הרצאות, סדנאות וליווי הטמעת AI בארגונים, על העבודה האמיתית של הצוות. ומסלול לימוד AI פתוח וחינמי. ארן נחמיאס ומתי מצוינים."
 >
-  <!-- hero -->
-  <section class="wrap hero">
-    <div class="hero__glow" aria-hidden="true"></div>
-    <div class="hero__copy">
-      <h1 class="hero__title rise">תראו מה <span class="hero__ai">AI</span> עושה עם העבודה שלכם.</h1>
-      <p class="hero__sub rise">הרצאה שמדליקה את כל הצוות, וסדנאות שהופכות את החשק להרגל. הכול על המסמכים האמיתיים שלכם.</p>
-      <div class="hero__actions rise">
-        <a class="btn btn--primary" href={live[0] ? `/maslul/${live[0].id}` : '/maslul'}>ללמוד לבד, בחינם <span class="btn__arrow" aria-hidden="true">←</span></a>
-        <a class="btn btn--ghost" href="/irgunim">להביא אותנו לארגון</a>
+  <!-- hero: the lecture's look. deep band, one illustration, one promise -->
+  <section class="heroBand band-hero">
+    <div class="wrap hero">
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="hero__copy">
+        <p class="hero__kicker rise"><span class="hero__dot" aria-hidden="true"></span>הרצאות וסדנאות AI לארגונים</p>
+        <h1 class="hero__title rise">תראו מה <span class="hero__ai">AI</span> עושה עם העבודה שלכם.</h1>
+        <p class="hero__sub rise">90 דקות שבהן כל הצוות יוצר בעצמו, מהטלפון: פוסטר, שיר, סרטון. ואחר כך סדנאות שהופכות את החשק להרגל.</p>
+        <div class="hero__actions rise">
+          <a class="btn btn--primary" href="/irgunim">להביא אותנו לארגון <span class="btn__arrow" aria-hidden="true">←</span></a>
+          <a class="btn btn--ghostOnDeep" href={live[0] ? `/maslul/${live[0].id}` : '/maslul'}>ללמוד לבד, בחינם</a>
+        </div>
       </div>
-    </div>
-    <div class="hero__media rise">
-      <div class="hero__frame">
-      <img
-        class="hero__img"
-        src="/hero.webp" width="760" height="568" fetchpriority="high" decoding="async"
-        alt="סדנה בפעולה: משתתפים יושבים סביב שולחן עם מחשבים ניידים, וארן עומד מולם ומדבר, על המסך מאחוריו השקף: תראו מה AI עושה עם העבודה שלכם"
-    />
+      <div class="hero__media">
+        <Il name="hero" size={470} eager alt="איור: טלפון שמתוכו פורצים תווים, קלאפר של סרט, מצלמה, תמונה ובועת שיחה" />
       </div>
-      {newest && (
-        <a class="hero__card" href={`/maslul/${newest.id}`}>
-          <span class="hero__cardLabel"><span class="hero__dot" aria-hidden="true"></span>השיעור החדש</span>
-          <span class="hero__cardTitle">{newest.data.stage}.{newest.data.order} {newest.data.title}</span>
-          <span class="hero__cardArrow" aria-hidden="true">←</span>
-        </a>
-      )}
     </div>
   </section>
 
-  <!-- two paths: what is free, and what we sell. this is the sentence the page has to land. -->
+  <!-- two paths: what we sell, and what is free -->
   <section class="wrap paths" aria-label="שתי דרכים">
-    <a class="path path--free reveal" href="/maslul">
-      <span class="path__tag">חינם</span>
+    <a class="path path--lead reveal" href="/irgunim">
+      <span class="path__tag">לארגונים</span>
+      <span class="path__h">להביא אותנו אליכם</span>
+      <span class="path__d">מתחילים בהרצאת התנעה שמדליקה את כל הצוות. ממשיכים בסדנה מעשית, בתוכנית הכשרה או בליווי הטמעה.</span>
+      <span class="path__cta">לתוכניות <span aria-hidden="true">←</span></span>
+    </a>
+    <a class="path reveal" href="/maslul">
+      <span class="path__tag path__tag--quiet">חינם</span>
       <span class="path__h">ללמוד לבד</span>
       <span class="path__d">{TOTAL_LESSONS} שיעורים, מהאפס עד הטמעה. פתוחים לכולם, בלי הרשמה ובלי תשלום. שיעור חדש בכל שבוע.</span>
       <span class="path__cta">למסלול <span aria-hidden="true">←</span></span>
     </a>
-    <a class="path path--paid reveal" href="/irgunim">
-      <span class="path__tag path__tag--paid">לארגונים</span>
-      <span class="path__h">להביא אותנו אליכם</span>
-      <span class="path__d">הרצאת התנעה, סדנה מעשית, תוכנית הכשרה או ליווי הטמעה. שני מנחים, על החומרים שלכם.</span>
-      <span class="path__cta">לתוכניות ולמחירים <span aria-hidden="true">←</span></span>
-    </a>
+  </section>
+
+  <!-- the kickoff lecture: what actually happens in the room -->
+  <section class="ninety band-hero" aria-labelledby="ninety-title">
+    <div class="wrap">
+      <div class="ninety__head">
+        <p class="ninety__kicker">הרצאת ההתנעה</p>
+        <h2 id="ninety-title" class="ninety__title">90 דקות. אף אחד לא רק מקשיב.</h2>
+        <p class="ninety__sub">ארבעה סבבים, וכל אחד יוצר בעצמו, מהטלפון שלו ובכלים חינמיים. גם מי שבטוח שזה לא בשבילו.</p>
+      </div>
+      <ol class="ninety__grid" data-stagger="110">
+        {rounds.map((r) => (
+          <li class="round reveal">
+            <Il name={r.il} size={190} still />
+            <span class="round__n">{r.n}</span>
+            <h3 class="round__h">{r.h}</h3>
+            <p class="round__d">{r.d}</p>
+          </li>
+        ))}
+      </ol>
+      <div class="ninety__end reveal">
+        <Il name="team" size={230} />
+        <div>
+          <h3 class="ninety__endH">ובסוף, סרט אחד מכל מה שהצוות יצר.</h3>
+          <p class="ninety__endD">הפוסטרים, השירים והטריילרים מתחברים לסרט של דקה וחצי, על שיר שנכתב מראש מהתשובות של העובדים שלכם. יוצאים עם משהו לשלוח הביתה, ועם חשק לנסות שוב מחר.</p>
+          <a class="btn btn--onDeep" href="/irgunim#hartsaa">מה עוד יש בהרצאה <span class="btn__arrow" aria-hidden="true">←</span></a>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- what AI already does: the live demos, shown up front -->
@@ -142,8 +169,8 @@ const demos = (await getCollection('efshar', (e) => e.data.published))
         <p class="proof__t">מ־3,000 מתנדבים שכל העבודה שלהם הייתה פנים אל פנים עברו לזום תוך 30 יום, ושביעות רצון המשפחות עלתה מ־90% ל־94%</p>
       </div>
       <div class="proof__cell">
-        <p class="proof__n" data-count="20" data-suffix=" שנה">20 שנה</p>
-        <p class="proof__t">הוראה לכל אחד משנינו. פסיכומטרי, קצינים, תיכון, מכללה.</p>
+        <p class="proof__n" data-count="20" data-suffix="+ שנה">20+ שנה</p>
+        <p class="proof__t">ותק של כל אחד משנינו בניהול, תפעול והטמעת טכנולוגיה בארגונים.</p>
       </div>
       <div class="proof__cell">
         <p class="proof__n" data-count="70" data-suffix="%">70%</p>
@@ -202,64 +229,71 @@ const demos = (await getCollection('efshar', (e) => e.data.published))
 
 <style>
   /* hero */
-  .hero { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 2.75rem; align-items: center; padding-block: 3rem 2.5rem; position: relative; isolation: isolate; }
+  .heroBand { position: relative; overflow: hidden; }
+  .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2.5rem; align-items: center; padding-block: 3.5rem 3.75rem; position: relative; isolation: isolate; }
   .hero__glow {
     position: absolute; z-index: -1; pointer-events: none;
-    inset-block-start: -30%; inset-inline-end: -10%; inline-size: 52%; aspect-ratio: 1; border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(198, 214, 63, 0.26), transparent 70%);
+    inset-block-start: -35%; inset-inline-start: -12%; inline-size: 55%; aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(198, 214, 63, 0.2), transparent 70%);
     filter: blur(48px);
     animation: heroDrift 16s ease-in-out infinite alternate;
   }
   @keyframes heroDrift { to { transform: translate(14%, 18%) scale(1.15); } }
-  .hero__ai { position: relative; display: inline-block; white-space: nowrap; }
+  .hero__kicker { display: inline-flex; align-items: center; gap: 0.5rem; font-size: var(--t-sm); font-weight: 500; color: var(--accent); margin-block-end: 0.9rem; }
+  .hero__dot { inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50%; background: var(--accent); animation: heroPulse 2.2s ease-in-out infinite; }
+  @keyframes heroPulse { 50% { box-shadow: 0 0 0 6px rgba(198, 214, 63, 0.28); } }
+  .hero__ai { position: relative; display: inline-block; white-space: nowrap; color: var(--accent); }
   .hero__ai::after {
-    content: ""; position: absolute; inset-inline: 0; bottom: 0.06em; height: 0.16em; border-radius: 2px;
+    content: ""; position: absolute; inset-inline: 0; bottom: 0.06em; height: 0.12em; border-radius: 2px;
     background: var(--accent); transform: scaleX(0); transform-origin: right;
     animation: heroUnderline 0.7s var(--ease-out) 1.1s forwards;
   }
   @keyframes heroUnderline { to { transform: scaleX(1); } }
-  .hero__media { position: relative; margin-block-end: 5rem; }
-  .hero__frame { border-radius: var(--r-card); overflow: hidden; box-shadow: var(--shadow-3); }
-  .hero__card {
-    position: absolute; inset-block-end: -4.6rem; inset-inline-start: 1.2rem; inset-inline-end: 1.2rem;
-    display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 0.9rem; row-gap: 0.2rem; align-items: center;
-    padding: 0.8rem 1.1rem; border-radius: var(--r-card); text-decoration: none; color: var(--ink-strong);
-    background: var(--glass);
-    -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
-    border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-edge), var(--shadow-2);
-    opacity: 0; transform: translateY(12px); animation: rise var(--dur-slow) var(--ease-out) 0.9s forwards;
-    transition: background var(--dur-fast) ease;
-  }
-  .hero__card:hover { background: var(--glass-strong); color: var(--ink-strong); }
-  @media (prefers-reduced-transparency: reduce) { .hero__card { background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; } }
-  .hero__cardLabel { grid-column: 1; grid-row: 1; font-size: var(--t-xs); color: var(--ink-muted); display: flex; align-items: center; gap: 0.4rem; }
-  .hero__dot { inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50%; background: var(--accent); animation: heroPulse 2.2s ease-in-out infinite; }
-  @keyframes heroPulse { 50% { box-shadow: 0 0 0 6px rgba(198, 214, 63, 0.28); } }
-  .hero__cardTitle { grid-column: 1; grid-row: 2; font-family: var(--font-display); font-size: var(--t-lg); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .hero__cardArrow { grid-column: 2; grid-row: 1 / -1; color: var(--accent-deep); font-size: var(--t-xl); transition: transform var(--dur-base) var(--ease-out); }
-  .hero__card:hover .hero__cardArrow { transform: translateX(-4px); }
-  .hero__title { font-size: clamp(2.5rem, 5.4vw, 3.75rem); margin-block-end: 1.1rem; }
-  .hero__sub { font-size: var(--t-xl); line-height: 1.6; color: var(--ink-muted); font-weight: 300; max-inline-size: 40ch; margin-block-end: 1.9rem; }
+  .hero__title { font-size: clamp(2.5rem, 5.4vw, 3.9rem); margin-block-end: 1.1rem; }
+  .hero__sub { font-size: var(--t-xl); line-height: 1.6; color: #C2D0D4; font-weight: 300; max-inline-size: 38ch; margin-block-end: 1.9rem; }
   .hero__actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-  .hero__img { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 4 / 3; object-fit: cover; animation: kenBurns 20s ease-in-out infinite alternate; }
-  @keyframes kenBurns { to { transform: scale(1.07) translate(-1.5%, 1%); } }
   @media (max-width: 880px) {
-    .hero { grid-template-columns: 1fr; gap: 2rem; padding-block: 3.5rem 2.5rem; }
-    .hero__glow { inline-size: 80%; inset-inline-end: -30%; }
+    .hero { grid-template-columns: 1fr; gap: 1rem; padding-block: 2.5rem 2rem; }
+    .hero__media { --il: 300px; }
+    .hero__media :global(.il) { inline-size: min(300px, 80%); }
+    .hero__glow { inline-size: 80%; inset-inline-start: -30%; inset-block-start: -45%; }
   }
 
   /* two paths */
-  .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding-block: 0 3.5rem; }
+  .paths { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1rem; padding-block: 2.5rem 3.5rem; }
   .path { display: flex; flex-direction: column; gap: 0.5rem; padding: 1.5rem 1.6rem; border-radius: var(--r-card); text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); box-shadow: var(--shadow-1); transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-fast) ease; }
   .path:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); color: var(--ink); }
-  .path--free { border-color: var(--accent); }
+  .path--lead { border-color: var(--accent); box-shadow: var(--shadow-2); }
   .path__tag { align-self: flex-start; font-size: var(--t-xs); font-weight: 700; padding: 0.2rem 0.7rem; border-radius: 999px; background: var(--accent); color: var(--accent-ink); }
-  .path__tag--paid { background: var(--surface-sunk); color: var(--ink-muted); }
+  .path__tag--quiet { background: var(--surface-sunk); color: var(--ink-muted); }
   .path__h { font-family: var(--font-display); font-size: var(--t-xl); color: var(--ink-strong); }
   .path__d { color: var(--ink-muted); font-size: var(--t-sm); line-height: 1.6; }
   .path__cta { margin-block-start: 0.4rem; font-weight: 500; color: var(--ink-strong); }
   .path:hover .path__cta { color: var(--accent-deep); }
   @media (max-width: 720px) { .paths { grid-template-columns: 1fr; } }
+
+  /* the 90 minutes */
+  .ninety { padding-block: 3.75rem 4rem; margin-block-end: 3.5rem; }
+  .ninety__head { margin-block-end: 2rem; }
+  .ninety__kicker { color: var(--accent); font-weight: 500; font-size: var(--t-sm); margin-block-end: 0.4rem; }
+  .ninety__title { font-size: clamp(2rem, 4.2vw, 2.9rem); margin-block-end: 0.7rem; }
+  .ninety__sub { color: #C2D0D4; font-weight: 300; font-size: var(--t-lg); max-inline-size: 56ch; margin: 0; }
+  .ninety__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+  .round { display: flex; flex-direction: column; gap: 0.3rem; padding: 0.5rem 1.2rem 1.4rem; border: 1px solid var(--hero-edge); border-radius: var(--r-card); transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-fast) ease, opacity var(--dur-slow) var(--ease-out); }
+  .round:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .round:hover :global(.il img) { transform: scale(1.06) rotate(-2deg); }
+  .round :global(.il img) { transition: transform var(--dur-base) var(--ease-spring); }
+  .round__n { color: var(--accent); font-size: var(--t-xs); font-weight: 500; }
+  .round__h { font-size: var(--t-xl); }
+  .round__d { color: #C2D0D4; font-size: var(--t-sm); font-weight: 300; line-height: 1.6; margin: 0; }
+  .ninety__end { display: grid; grid-template-columns: auto 1fr; gap: 2rem; align-items: center; margin-block-start: 2.25rem; padding-block-start: 2rem; border-block-start: 1px solid var(--hero-edge); }
+  .ninety__endH { font-size: var(--t-2xl); margin-block-end: 0.5rem; }
+  .ninety__endD { color: #C2D0D4; font-weight: 300; max-inline-size: 58ch; margin-block-end: 1.3rem; }
+  @media (max-width: 900px) {
+    .ninety__grid { grid-template-columns: 1fr 1fr; }
+    .ninety__end { grid-template-columns: 1fr; gap: 0.5rem; }
+  }
+  @media (max-width: 460px) { .ninety__grid { gap: 0.6rem; } .round { padding-inline: 0.8rem; } }
   .track__free { display: inline-block; vertical-align: middle; font-family: var(--font-body); font-size: var(--t-sm); font-weight: 700; background: var(--accent); color: var(--accent-ink); padding: 0.15rem 0.7rem; border-radius: 999px; margin-inline-start: 0.6rem; }
 
   /* track */
