@@ -15,7 +15,7 @@ const demos = (await getCollection('efshar', (e) => e.data.published))
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
 
-// 90 הדקות של הרצאת ההתנעה: ארבעה סבבי יצירה, כמו במערך ההרצאה
+// 90 הדקות של סדנת ההתנעה: ארבעה סבבי יצירה, כמו במערך
 const rounds = [
   { il: 'spark', n: 'סבב 1', h: 'פוסטר לצוות', d: 'משפט אחד בטלפון, ולכל שולחן יש פוסטר משלו על קיר התהילה.' },
   { il: 'music', n: 'סבב 2', h: 'שיר שלם', d: 'מילים על העבודה שלכם, לחן, ושיר שאפשר לשלוח הביתה.' },
@@ -25,18 +25,18 @@ const rounds = [
 ---
 <Base
   title="הכשרות והטמעת AI בארגונים · Nexadapt"
-  description="הרצאות, סדנאות וליווי הטמעת AI בארגונים, על העבודה האמיתית של הצוות. ומסלול לימוד AI פתוח וחינמי. ארן נחמיאס ומתי מצוינים."
+  description="סדנאות AI לארגונים וליווי הטמעה, נבנות סביב הצוות שלכם. ומסלול לימוד AI פתוח וחינמי. ארן נחמיאס ומתי מצוינים."
 >
   <!-- hero: the lecture's look. deep band, one illustration, one promise -->
   <section class="heroBand band-hero">
     <div class="wrap hero">
       <div class="hero__glow" aria-hidden="true"></div>
       <div class="hero__copy">
-        <p class="hero__kicker rise"><span class="hero__dot" aria-hidden="true"></span>הרצאות וסדנאות AI לארגונים</p>
+        <p class="hero__kicker rise"><span class="hero__dot" aria-hidden="true"></span>סדנאות AI לארגונים</p>
         <h1 class="hero__title rise">תראו מה <span class="hero__ai">AI</span> עושה עם העבודה שלכם.</h1>
         <p class="hero__sub rise">90 דקות שבהן כל הצוות יוצר בעצמו, מהטלפון: פוסטר, שיר, סרטון. ואחר כך סדנאות שהופכות את החשק להרגל.</p>
         <div class="hero__actions rise">
-          <a class="btn btn--primary" href="/irgunim">להביא אותנו לארגון <span class="btn__arrow" aria-hidden="true">←</span></a>
+          <a class="btn btn--primary" href="/hatnaa">להביא אותנו לארגון <span class="btn__arrow" aria-hidden="true">←</span></a>
           <a class="btn btn--ghostOnDeep" href={live[0] ? `/maslul/${live[0].id}` : '/maslul'}>ללמוד לבד, בחינם</a>
         </div>
         <a class="hero__who rise" href="/anachnu">
@@ -58,7 +58,7 @@ const rounds = [
     <a class="path path--lead reveal" href="/irgunim">
       <span class="path__tag">לארגונים</span>
       <span class="path__h">להביא אותנו אליכם</span>
-      <span class="path__d">מתחילים בהרצאת התנעה שמדליקה את כל הצוות. ממשיכים בסדנה מעשית, בתוכנית הכשרה או בליווי הטמעה.</span>
+      <span class="path__d">מתחילים בסדנת התנעה שמדליקה את כל הצוות. ממשיכים בסדנה מעשית, בתוכנית הכשרה או בליווי הטמעה. הכול נבנה סביב הצוות שלכם.</span>
       <span class="path__cta">לתוכניות <span aria-hidden="true">←</span></span>
     </a>
     <a class="path reveal" href="/maslul">
@@ -73,7 +73,7 @@ const rounds = [
   <section class="ninety band-hero" aria-labelledby="ninety-title">
     <div class="wrap">
       <div class="ninety__head">
-        <p class="ninety__kicker">הרצאת ההתנעה</p>
+        <p class="ninety__kicker">סדנת ההתנעה</p>
         <h2 id="ninety-title" class="ninety__title">90 דקות. אף אחד לא רק מקשיב.</h2>
         <p class="ninety__sub">ארבעה סבבים, וכל אחד יוצר בעצמו, מהטלפון שלו ובכלים חינמיים. גם מי שבטוח שזה לא בשבילו.</p>
         <p class="ninety__first"><span class="hero__dot" aria-hidden="true"></span>עד 25 משתתפים, שני מנחים בחדר. כמו שעשינו עם סוכני השטח של דנשר.</p>
@@ -93,7 +93,7 @@ const rounds = [
         <div>
           <h3 class="ninety__endH">ובסוף, סרט אחד מכל מה שהצוות יצר.</h3>
           <p class="ninety__endD">הפוסטרים, השירים והטריילרים מתחברים לסרט של דקה וחצי, על שיר שנכתב מראש מהתשובות של העובדים שלכם. יוצאים עם משהו לשלוח הביתה, ועם חשק לנסות שוב מחר.</p>
-          <a class="btn btn--onDeep" href="/irgunim#hartsaa">מה עוד יש בהרצאה <span class="btn__arrow" aria-hidden="true">←</span></a>
+          <a class="btn btn--onDeep" href="/hatnaa">כל הפרטים על הסדנה <span class="btn__arrow" aria-hidden="true">←</span></a>
         </div>
       </div>
     </div>
@@ -195,7 +195,7 @@ const rounds = [
       <article class="step reveal">
         <h3 class="step__q">"צריכים לעשות משהו בנושא AI"</h3>
         <p class="step__d">יש רצון, עוד אין כיוון. כאן כולם רואים בפעם הראשונה מה זה יכול לעשות.</p>
-        <p class="step__tag">הרצאת התנעה</p>
+        <p class="step__tag">סדנת התנעה</p>
       </article>
       <article class="step step--mid reveal">
         <h3 class="step__q">"כולם התלהבו. עכשיו רוצים לעשות"</h3>
@@ -212,8 +212,8 @@ const rounds = [
 
   <!-- programs: one sentence and a link. the full table lives on /irgunim -->
   <section class="wrap programs" aria-labelledby="programs-title">
-    <h2 id="programs-title" class="programs__title">כשאתם רוצים אותנו בחדר</h2>
-    <p class="programs__p">הרצאת התנעה, סדנה מעשית, סדנת יום מלא, תוכנית הכשרה או ליווי הטמעה. שני מנחים, לא מרצה אחד, והכול נבנה סביב העבודה האמיתית שלכם.</p>
+    <h2 id="programs-title" class="programs__title">מתחילים בסדנה אחת. ממשיכים כמה שתרצו.</h2>
+    <p class="programs__p">סדנת התנעה, סדנה מעשית, סדנת יום מלא, תוכנית הכשרה או ליווי הטמעה. שני מנחים בחדר. קודם מקשיבים לכם, ואז בונים את התוכנית סביב הצוות והעבודה האמיתית שלכם.</p>
     <p><a href="/irgunim" class="programs__link link-draw">לכל התוכניות ←</a></p>
   </section>
 
