@@ -10,26 +10,29 @@
     <source src="/video/hero-480.mp4" type="video/mp4" media="(max-width: 720px)" />
     <source src="/video/hero-720.mp4" type="video/mp4" />
   </video>
-  <button class="hv__snd" type="button" data-hv-snd aria-pressed="false">
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path class="hv__w" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    <span data-hv-lbl>להפעיל קול</span>
+  <button class="hv__snd" type="button" data-hv-snd aria-pressed="false" aria-label="להפעיל קול" title="להפעיל קול">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>
+      <path class="hv__on" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path class="hv__off" d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
   </button>
 </div>
 
 <style>
   .hv { position: relative; border-radius: var(--r-card); overflow: hidden; background: var(--deep); box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--hero-edge); aspect-ratio: 16 / 9; }
   .hv__v { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
+  /* כפתור קטן בפינה העליונה: הכותרות של הסרטון יושבות למטה ובאמצע */
   .hv__snd {
-    position: absolute; inset-block-end: 0.75rem; inset-inline-start: 0.75rem;
-    display: inline-flex; align-items: center; gap: 0.45rem; min-block-size: 44px; padding: 0.5rem 0.95rem;
-    border: 0; border-radius: 999px; background: var(--accent); color: var(--deep);
-    font: inherit; font-size: var(--t-sm); font-weight: 600; cursor: pointer;
-    box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.6); transition: transform var(--dur-fast) ease;
+    position: absolute; inset-block-start: 0.6rem; inset-inline-end: 0.6rem;
+    display: grid; place-items: center; inline-size: 44px; block-size: 44px; padding: 0;
+    border: 2px solid rgba(12, 40, 49, 0.85); border-radius: 50%; background: var(--accent); color: var(--deep);
+    cursor: pointer; box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.7); transition: transform var(--dur-fast) ease;
   }
-  .hv__snd:hover { transform: translateY(-1px); }
+  .hv__snd:hover { transform: scale(1.06); }
   .hv__snd:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
-  .hv__snd[aria-pressed="true"] { background: rgba(12, 40, 49, 0.82); color: #fff; }
-  .hv__snd[aria-pressed="false"] .hv__w { opacity: 0.35; }
+  .hv__snd[aria-pressed="true"] .hv__off, .hv__snd[aria-pressed="false"] .hv__on { display: none; }
+  .hv__snd[aria-pressed="true"] { background: rgba(12, 40, 49, 0.85); color: #fff; border-color: rgba(255, 255, 255, 0.75); }
 </style>
 
 <script>
@@ -39,7 +42,6 @@
       box.dataset.ready = '1';
       const v = box.querySelector('video')!;
       const btn = box.querySelector<HTMLButtonElement>('[data-hv-snd]')!;
-      const lbl = box.querySelector('[data-hv-lbl]')!;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         v.removeAttribute('autoplay'); v.pause(); v.controls = true; v.loop = false; btn.hidden = true;
         return;
@@ -49,7 +51,8 @@
         v.muted = !on;
         if (on) { v.currentTime = 0; v.play().catch(() => {}); }
         btn.setAttribute('aria-pressed', String(on));
-        lbl.textContent = on ? 'להשתיק' : 'להפעיל קול';
+        const t = on ? 'להשתיק' : 'להפעיל קול';
+        btn.setAttribute('aria-label', t); btn.title = t;
       });
       // לא מנגנים כשהסרטון מחוץ למסך
       if ('IntersectionObserver' in window) {
