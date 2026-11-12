@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import SignupBand from '../components/SignupBand.astro';
+import Shot from '../components/Shot.astro';
 
 // שאלות שחוזרות מארגונים לפני שמזמינים. התשובות כאן חופפות למה שכתוב בשאר האתר — לא מבטיחות יותר.
 const faq = [
@@ -57,6 +58,10 @@ const faqLd = JSON.stringify({
       שנינו בעלי ותק של למעלה מ־20 שנה בניהול, תפעול והטמעת טכנולוגיה בארגונים, וכבר עשינו את המעבר
       הזה פעם אחת עם טכנולוגיות אחרות. עכשיו אנחנו עושים אותו עם AI.
     </p>
+  </section>
+
+  <section class="wrap duo">
+    <Shot name="duo" ratio="21 / 9" pos="center 22%" eager alt="ארן נחמיאס ומתי מצוינים צוחקים, באמצע סדנה" />
   </section>
 
   <section class="wrap story band-story" aria-labelledby="story-t">
@@ -164,6 +169,7 @@ const faqLd = JSON.stringify({
 
 <style>
   .head { padding-block: 3rem 1.5rem; }
+  .duo { padding-block: 0.5rem 2.5rem; }
   .head__title { font-size: clamp(2.1rem, 4.6vw, 3rem); max-inline-size: 20ch; margin-block-end: 1rem; }
   .head__sub { font-size: var(--t-xl); color: var(--ink-muted); font-weight: 300; max-inline-size: 58ch; }
 

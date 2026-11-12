@@ -1,0 +1,25 @@
+---
+/**
+ * צילום אמיתי מסדנה (public/sadna). כל תמונה בשני רוחבים: 800 ו-1600.
+ * הכללים: רק מה שמותר לפרסם. המנחים, ידיים וטלפונים, מסכים, ומשתתפים מהגב או מרחוק.
+ * תקריב של משתתף נכנס רק אחרי שהוא אישר. מה שבתיקיית "מוגבל" של הצלם לא נכנס בכלל.
+ */
+interface Props {
+  name: string;
+  alt: string;
+  ratio?: string;
+  pos?: string;
+  eager?: boolean;
+  class?: string;
+}
+const { name, alt, ratio = '3 / 2', pos = 'center', eager = false, class: cls } = Astro.props;
+---
+<img
+  class:list={['shot', cls]}
+  src={`/sadna/${name}-800.webp`}
+  srcset={`/sadna/${name}-800.webp 800w, /sadna/${name}-1600.webp 1600w`}
+  sizes="(max-width: 720px) 100vw, 640px"
+  width="1600" height="1067" alt={alt}
+  style={`aspect-ratio:${ratio};object-position:${pos}`}
+  loading={eager ? 'eager' : 'lazy'} decoding="async"
+/>

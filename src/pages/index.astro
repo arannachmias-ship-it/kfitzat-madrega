@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import SignupBand from '../components/SignupBand.astro';
 import Il from '../components/Il.astro';
+import Shot from '../components/Shot.astro';
 import { getCollection } from 'astro:content';
 import { STAGES, TOTAL_LESSONS } from '../data/track';
 
@@ -76,7 +77,6 @@ const rounds = [
         <p class="ninety__kicker">סדנת ההתנעה</p>
         <h2 id="ninety-title" class="ninety__title">100 דקות. כולם יוצרים.</h2>
         <p class="ninety__sub">שתי מטרות: שהצוות ייהנה, ושיגלה מה AI יודע לעשות. ארבעה חלקים והפסקה באמצע, הכול מהטלפון. מתאים לכולם, גם למי שזו הפעם הראשונה שלו.</p>
-        <p class="ninety__first"><span class="hero__dot" aria-hidden="true"></span>כמו שעשינו עם סוכני השטח של דנשר.</p>
       </div>
       <ol class="ninety__grid" data-stagger="110">
         {rounds.map((r) => (
@@ -88,6 +88,14 @@ const rounds = [
           </li>
         ))}
       </ol>
+      <div class="ninety__shots reveal">
+        <div class="shots">
+          <Shot name="room" alt="חדר הסדנה: המשתתפים סביב שולחנות עם טלפונים, ארן ומתי ליד המסך הגדול" />
+          <Shot name="wall" alt="הפוסטרים שהמשתתפים יצרו מוצגים על המסך הגדול" />
+          <Shot name="help" alt="מתי רוכן ליד משתתף ועוזר לו בטלפון" pos="center 30%" />
+        </div>
+        <p class="shots__cap">מהסדנה עם סוכני השטח של דנשר.</p>
+      </div>
       <div class="ninety__end reveal">
         <Il name="team" size={230} />
         <div>
@@ -293,7 +301,6 @@ const rounds = [
   .ninety__kicker { color: var(--accent); font-weight: 500; font-size: var(--t-sm); margin-block-end: 0.4rem; }
   .ninety__title { font-size: clamp(2rem, 4.2vw, 2.9rem); margin-block-end: 0.7rem; }
   .ninety__sub { color: #C2D0D4; font-weight: 300; font-size: var(--t-lg); max-inline-size: 56ch; margin: 0; }
-  .ninety__first { display: flex; align-items: center; gap: 0.55rem; margin: 1rem 0 0; font-size: var(--t-sm); color: var(--ink-on-deep); }
   .ninety__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
   .round { display: flex; flex-direction: column; gap: 0.3rem; padding: 0.5rem 1.2rem 1.4rem; border: 1px solid var(--hero-edge); border-radius: var(--r-card); transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-fast) ease, opacity var(--dur-slow) var(--ease-out); }
   .round:hover { transform: translateY(-4px); border-color: var(--accent); }
@@ -302,6 +309,7 @@ const rounds = [
   .round__n { color: var(--accent); font-size: var(--t-xs); font-weight: 500; }
   .round__h { font-size: var(--t-xl); }
   .round__d { color: #C2D0D4; font-size: var(--t-sm); font-weight: 300; line-height: 1.6; margin: 0; }
+  .ninety__shots { margin-block-start: 1.5rem; }
   .ninety__end { display: grid; grid-template-columns: auto 1fr; gap: 2rem; align-items: center; margin-block-start: 2.25rem; padding-block-start: 2rem; border-block-start: 1px solid var(--hero-edge); }
   .ninety__endH { font-size: var(--t-2xl); margin-block-end: 0.5rem; }
   .ninety__endD { color: #C2D0D4; font-weight: 300; max-inline-size: 58ch; margin-block-end: 1.3rem; }

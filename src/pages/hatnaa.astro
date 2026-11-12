@@ -5,6 +5,7 @@ import Base from '../layouts/Base.astro';
 import ContactWays from '../components/ContactWays.astro';
 import Testimonials from '../components/Testimonials.astro';
 import Il from '../components/Il.astro';
+import Shot from '../components/Shot.astro';
 
 const facts = [
   { n: '100', t: 'דקות, עם הפסקה' },
@@ -88,6 +89,19 @@ const takeaways = [
     </div>
   </section>
 
+  <section class="wrap sec" aria-labelledby="room-t">
+    <h2 id="room-t" class="sec__t">ככה זה נראה</h2>
+    <p class="sec__sub">צילומים אמיתיים מסדנה שהעברנו לסוכני השטח של דנשר.</p>
+    <div class="shots">
+      <Shot class="shot--wide" name="room" alt="חדר הסדנה: המשתתפים יושבים סביב שולחנות עם טלפונים, ארן ומתי ליד המסך הגדול" />
+      <Shot name="wall" alt="הפוסטרים שהמשתתפים יצרו מוצגים על המסך הגדול, וארן מסתכל עליהם" />
+      <Shot name="tablet" alt="שני משתתפים, מצולמים מהגב, עובדים יחד על מסך" />
+      <Shot name="help" alt="מתי רוכן ליד משתתף ועוזר לו בטלפון" pos="center 30%" />
+      <Shot name="scan" alt="יד מחזיקה טלפון שסורק ברקוד מדף של הסדנה" />
+      <Shot name="poster" alt="פוסטר שיצר אחד השולחנות, על המסך: דנשר לנצח" pos="center 30%" />
+    </div>
+  </section>
+
   <section class="wrap sec" aria-labelledby="shelachem-t">
     <h2 id="shelachem-t" class="sec__t">קודם מקשיבים. אחר כך בונים.</h2>
     <p class="sec__sub">כל סדנה נבנית סביב הצוות שיושב בחדר. ואם משהו לא מתאים לארגון שלכם, פשוט משנים אותו.</p>
@@ -130,7 +144,7 @@ const takeaways = [
   </section>
 
   <section class="wrap sec amp" aria-labelledby="amp-t">
-    <div class="il-panel amp__media"><Il name="lawyer" size={260} alt="איור: עורך דין מחייך ליד ערימת מסמכים ומחשב נייד" /></div>
+    <Shot class="amp__photo" name="aran" ratio="4 / 3" pos="30% center" alt="ארן מסביר מול המסך, באמצע הסדנה" />
     <div>
       <h2 id="amp-t" class="sec__t">הידע של הצוות שלכם, עם AI, שווה יותר.</h2>
       <p class="amp__p">עורך דין עם AI מספיק בעשר דקות מה שלקח שבוע, כי הוא זה שיודע איזה סעיף חשוב. זה המסר שהצוות שלכם שומע אצלנו: הידע והשיפוט שלכם הם מה שעושה את הכלי שווה.</p>
@@ -141,6 +155,7 @@ const takeaways = [
   <section class="wrap sec who" aria-labelledby="who-t">
     <h2 id="who-t" class="sec__t">מי איתכם בחדר</h2>
     <p class="sec__sub">מנחים בעלי ותק של למעלה מ־20 שנה בניהול, תפעול והטמעת טכנולוגיה בארגונים. אחד מוביל, ותמיד יש מי שעובר בין השולחנות ועוזר לכל אחד להתקדם. את מספר המנחים מתאימים לגודל הקבוצה.</p>
+    <Shot class="who__shot" name="duo" ratio="16 / 9" pos="center 25%" alt="ארן נחמיאס ומתי מצוינים צוחקים, באמצע סדנה" />
     <div class="who__grid">
       <a class="who__p" href="/anachnu">
         <img src="/anachnu/aran.webp" width="160" height="160" alt="ארן נחמיאס" loading="lazy" decoding="async" />
@@ -212,6 +227,8 @@ const takeaways = [
   .amp__p { color: var(--ink-muted); font-weight: 300; font-size: var(--t-lg); max-inline-size: 56ch; }
 
   .who { padding-block-end: 3rem; }
+  .who :global(.who__shot) { max-inline-size: 760px; margin-block-end: 1rem; }
+  .amp__photo { box-shadow: var(--shadow-2); }
   .who__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-inline-size: 760px; }
   .who__p { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); text-decoration: none; color: var(--ink-muted); font-size: var(--t-sm); box-shadow: var(--shadow-1); transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
   .who__p:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); color: var(--ink-muted); }
@@ -226,6 +243,5 @@ const takeaways = [
     .facts, .rounds, .take { grid-template-columns: 1fr 1fr; }
     .before, .built, .amp, .who__grid { grid-template-columns: 1fr; }
     .end { grid-template-columns: 1fr; gap: 0.5rem; padding-inline: 1.25rem; }
-    .amp__media { max-inline-size: 320px; }
   }
 </style>
