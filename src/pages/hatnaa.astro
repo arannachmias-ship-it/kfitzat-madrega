@@ -1,0 +1,231 @@
+---
+// סדנת ההתנעה: העמוד שמוכר את המוצר הראשון. מחליף את האתר החיצוני nexadapt-hatnaa.
+// כלל: בלי תאריכים של סדנאות ובלי "הראשונה". מדברים על מה שקורה בחדר.
+import Base from '../layouts/Base.astro';
+import ContactWays from '../components/ContactWays.astro';
+import Testimonials from '../components/Testimonials.astro';
+import Il from '../components/Il.astro';
+
+const facts = [
+  { n: '90', t: 'דקות' },
+  { n: 'עד 25', t: 'משתתפים' },
+  { n: '2', t: 'מנחים בחדר' },
+  { n: '80%', t: 'מהזמן עבודה בידיים' },
+];
+
+const rounds = [
+  { il: 'spark', n: 'סבב 1', h: 'פוסטר לצוות', d: 'משפט אחד בטלפון, ולכל שולחן יש פוסטר משלו על קיר התהילה.' },
+  { il: 'music', n: 'סבב 2', h: 'שיר שלם', d: 'מילים על העבודה שלכם, לחן, ושיר שאפשר לשלוח הביתה.' },
+  { il: 'video', n: 'סבב 3', h: 'טריילר', d: 'הפוסטר מתחיל לזוז. סרטון קצר של הצוות, מהטלפון.' },
+  { il: 'talk', n: 'סבב 4', h: 'מדברים איתה', d: 'פותחים מצלמה, שואלים בקול, והיא עונה על מה שהיא רואה.' },
+];
+
+// הגמישות היא מה שלקוחות מציינים. לכן היא מוצגת כשלבים שרואים, לא כסיסמה.
+const before = [
+  { h: 'שיחה אחת איתכם', d: 'מי הצוות, מה מעסיק אותו, וממה אתם חוששים. משם בונים, לא ממצגת מוכנה.' },
+  { h: 'שאלון קצר לעובדים', d: 'כמה דקות, בלי שמות. במה הצוות טוב, מה מעיק עליו, ומה הוא רוצה לדעת.' },
+  { h: 'שיר שנכתב מהתשובות', d: 'הסדנה נפתחת בשיר על הצוות שלכם, במילים שלו. זה הרגע שבו כולם מרימים את הראש.' },
+];
+
+const built = [
+  { il: 'app', h: 'אפליקציה מהטופס שכולם שונאים', d: 'הטופס שהעובדים הכי לא אוהבים למלא הופך לאפליקציה שממלאים בקול, בצבעים ובלוגו שלכם.' },
+  { il: 'manager', h: 'שותף לתרגול שיחות קשות', d: 'לצוות מכירות בנינו "מנהל קשוח" שמתרגלים מולו שיחה לפני שנכנסים לפגישה האמיתית, ומקבלים ממנו משוב.' },
+  { il: 'gift', h: 'או משהו אחר לגמרי', d: 'יש לכם רעיון? מחלקת מערכות המידע מעדיפה בלי אפליקציה חדשה? מוצאים יחד את מה שמתאים לכם.' },
+];
+
+const takeaways = [
+  { h: 'פחות פחד', d: 'מי שיצר שיר בעצמו כבר לא אומר "זה לא בשבילי".' },
+  { h: 'צוות שגאה בעצמו', d: 'פוסטר, שיר וסרט על הצוות, במילים שלו. זה נשאר בקבוצת הוואטסאפ הרבה אחרי.' },
+  { h: 'שני כללים שנשארים', d: 'מתי הכלי טועה בביטחון, ומה לא מכניסים לכלים חינמיים.' },
+  { h: 'חבילת סיום אליכם', d: 'למחרת אתם מקבלים את השיר, הפוסטרים והסרט, ומה העובדים ביקשו בהמשך.' },
+];
+---
+<Base
+  title="סדנת ההתנעה: 90 דקות שבהן כל הצוות יוצר עם AI · Nexadapt"
+  description="סדנת AI של 90 דקות לצוותים של עד 25 משתתפים. כל אחד יוצר בעצמו, מהטלפון: פוסטר, שיר וסרטון. נבנית סביב הצוות שלכם, עם שני מנחים בחדר."
+>
+  <section class="band-hero top">
+    <div class="wrap top__in">
+      <div class="top__copy">
+        <p class="top__kicker rise"><span class="dot" aria-hidden="true"></span>סדנת ההתנעה</p>
+        <h1 class="top__title rise">90 דקות. אף אחד לא רק מקשיב.</h1>
+        <p class="top__sub rise">סדנה שבה לא רק שומעים על AI. עושים אותו. כל אחד יוצר בעצמו, מהטלפון שלו ובכלים חינמיים, גם מי שבטוח שזה לא בשבילו.</p>
+        <div class="top__actions rise">
+          <a class="btn btn--primary" href="#dabru">לתאם שיחה <span class="btn__arrow" aria-hidden="true">←</span></a>
+          <a class="btn btn--ghostOnDeep" href="#bechder">מה קורה בחדר</a>
+        </div>
+      </div>
+      <div class="top__media">
+        <Il name="create" size={440} eager alt="איור: שלושה עובדים סביב שולחן, כל אחד מרים טלפון, ומכל טלפון יוצא משהו אחר: שיר, סרטון ותמונה" />
+      </div>
+    </div>
+    <div class="wrap">
+      <ul class="facts">
+        {facts.map((f) => <li><strong>{f.n}</strong><span>{f.t}</span></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="wrap sec" id="bechder" aria-labelledby="bechder-t">
+    <h2 id="bechder-t" class="sec__t">מה קורה בחדר</h2>
+    <p class="sec__sub">ארבעה סבבים. בכל אחד מקבלים משימה, עובדים בשולחנות, ומעלים את מה שיצא לקיר שכולם רואים על המסך.</p>
+    <ol class="rounds band-hero" data-stagger="110">
+      {rounds.map((r) => (
+        <li class="round reveal">
+          <Il name={r.il} size={180} still />
+          <span class="round__n">{r.n}</span>
+          <h3 class="round__h">{r.h}</h3>
+          <p class="round__d">{r.d}</p>
+        </li>
+      ))}
+    </ol>
+    <div class="end band-hero reveal">
+      <Il name="team" size={210} />
+      <div>
+        <h3 class="end__h">ובסוף, סרט אחד מכל מה שהצוות יצר.</h3>
+        <p class="end__d">הפוסטרים, השירים והטריילרים מתחברים לסרט של דקה וחצי. יוצאים עם משהו לשלוח הביתה, ועם חשק לנסות שוב מחר.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap sec" aria-labelledby="shelachem-t">
+    <h2 id="shelachem-t" class="sec__t">קודם מקשיבים. אחר כך בונים.</h2>
+    <p class="sec__sub">אין אצלנו סדנה אחת שמתאימה לכולם. כל סדנה נבנית סביב הצוות שיושב בחדר, ואם משהו לא מתאים לארגון שלכם, משנים אותו.</p>
+    <ol class="before" data-stagger="100">
+      {before.map((b, i) => (
+        <li class="before__i reveal">
+          <span class="before__n" aria-hidden="true">{i + 1}</span>
+          <h3 class="before__h">{b.h}</h3>
+          <p class="before__d">{b.d}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="band-hero builtBand" aria-labelledby="built-t">
+    <div class="wrap">
+      <p class="top__kicker"><span class="dot" aria-hidden="true"></span>הרגע של הסדנה</p>
+      <h2 id="built-t" class="built__t">ודבר אחד נבנה מול כולם, רק בשבילכם.</h2>
+      <p class="built__sub">בזמן שהצוות יוצר, נבנה על המסך כלי אחד לעבודה שלו. לקראת הסוף הוא נחשף, וכולם מנסים אותו יחד. איזה כלי? מחליטים איתכם.</p>
+      <ul class="built" data-stagger="110">
+        {built.map((b) => (
+          <li class="built__i reveal">
+            <Il name={b.il} size={170} still />
+            <h3 class="built__h">{b.h}</h3>
+            <p class="built__d">{b.d}</p>
+          </li>
+        ))}
+      </ul>
+      <p class="built__note">שום דבר לא מתחבר למערכות שלכם בלי אישור, ואף מסמך של העבודה לא נכנס לכלים. אם יש אצלכם מי שצריך לאשר, נשמח לדבר איתו מראש.</p>
+    </div>
+  </section>
+
+  <section class="wrap sec" aria-labelledby="take-t">
+    <h2 id="take-t" class="sec__t">עם מה יוצאים</h2>
+    <ul class="take" data-stagger="80">
+      {takeaways.map((t) => (
+        <li class="take__i reveal"><h3>{t.h}</h3><p>{t.d}</p></li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="wrap sec amp" aria-labelledby="amp-t">
+    <div class="il-panel amp__media"><Il name="lawyer" size={260} alt="איור: עורך דין מחייך ליד ערימת מסמכים ומחשב נייד" /></div>
+    <div>
+      <h2 id="amp-t" class="sec__t">AI לא מחליף את מה שהצוות יודע. הוא מגביר אותו.</h2>
+      <p class="amp__p">מי שאינו עורך דין לא צריך לנסח חוזה עם AI. אבל עורך דין עם AI מספיק הרבה יותר. זה המסר שהצוות שלכם שומע אצלנו: הידע והשיפוט נשארים אצלכם, והכלי חוסך את הזמן.</p>
+      <p class="amp__p">לכן מדברים בסדנה גם על הפחד, על עומס הכלים, ועל מה שנשאר רק שלכם.</p>
+    </div>
+  </section>
+
+  <section class="wrap sec who" aria-labelledby="who-t">
+    <h2 id="who-t" class="sec__t">שני מנחים בחדר</h2>
+    <p class="sec__sub">שני מנחים בעלי ותק של למעלה מ־20 שנה בניהול, תפעול והטמעת טכנולוגיה בארגונים. אחד מוביל, השני עובר בין השולחנות, כך שאף אחד לא נשאר מאחור.</p>
+    <div class="who__grid">
+      <a class="who__p" href="/anachnu">
+        <img src="/anachnu/aran.webp" width="160" height="160" alt="ארן נחמיאס" loading="lazy" decoding="async" />
+        <span><strong>ארן נחמיאס</strong>מנהל מוצר ותפעול · למידה והדרכה בארגונים</span>
+      </a>
+      <a class="who__p" href="/anachnu">
+        <img src="/anachnu/mati.webp" width="160" height="160" alt="מתי מצוינים" loading="lazy" decoding="async" />
+        <span><strong>מתי מצוינים</strong>טכנולוג ראשי בתעשייה לשעבר · M.Sc. ביוטכנולוגיה</span>
+      </a>
+    </div>
+    <p class="who__next">ומה אחרי? מי שרוצה להמשיך, יש <a href="/irgunim">סדנה מעשית, תוכנית הכשרה וליווי הטמעה</a>.</p>
+  </section>
+
+  <Testimonials />
+
+  <ContactWays />
+</Base>
+
+<style>
+  .dot { inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50%; background: var(--accent); }
+  .top { padding-block: 3.25rem 0; overflow: hidden; }
+  .top__in { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2.5rem; align-items: center; }
+  .top__kicker { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent); font-weight: 500; font-size: var(--t-sm); margin-block-end: 0.8rem; }
+  .top__title { font-size: clamp(2.4rem, 5.2vw, 3.7rem); margin-block-end: 1rem; }
+  .top__sub { font-size: var(--t-xl); line-height: 1.6; color: #C2D0D4; font-weight: 300; max-inline-size: 40ch; margin-block-end: 1.8rem; }
+  .top__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .facts { list-style: none; margin: 2.5rem 0 0; padding: 1.4rem 0 1.6rem; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; border-block-start: 1px solid var(--hero-edge); }
+  .facts li { display: flex; flex-direction: column; }
+  .facts strong { font-family: var(--font-display); font-weight: 400; font-size: var(--t-3xl); color: var(--accent); line-height: 1.2; }
+  .facts span { color: #C2D0D4; font-size: var(--t-sm); }
+
+  .sec { padding-block: 3.5rem 0.5rem; }
+  .sec__t { font-size: var(--t-3xl); margin-block-end: 0.6rem; }
+  .sec__sub { color: var(--ink-muted); font-weight: 300; font-size: var(--t-lg); max-inline-size: 62ch; margin-block-end: 1.75rem; }
+
+  .rounds { list-style: none; margin: 0; padding: 1.25rem; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; border-radius: var(--r-card) var(--r-card) 0 0; }
+  .round { display: flex; flex-direction: column; gap: 0.3rem; padding: 0.5rem 1.1rem 1.3rem; border: 1px solid var(--hero-edge); border-radius: var(--r-card); transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-fast) ease, opacity var(--dur-slow) var(--ease-out); }
+  .round:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .round :global(.il img) { transition: transform var(--dur-base) var(--ease-spring); }
+  .round:hover :global(.il img) { transform: scale(1.06) rotate(-2deg); }
+  .round__n { color: var(--accent); font-size: var(--t-xs); font-weight: 500; }
+  .round__h { font-size: var(--t-xl); }
+  .round__d { color: #C2D0D4; font-size: var(--t-sm); font-weight: 300; line-height: 1.6; margin: 0; }
+  .end { display: grid; grid-template-columns: auto 1fr; gap: 2rem; align-items: center; padding: 1rem 2rem 1.75rem; border-radius: 0 0 var(--r-card) var(--r-card); }
+  .end__h { font-size: var(--t-2xl); margin-block-end: 0.5rem; }
+  .end__d { color: #C2D0D4; font-weight: 300; max-inline-size: 56ch; margin: 0; }
+
+  .before { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+  .before__i { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); padding: 1.4rem 1.5rem; box-shadow: var(--shadow-1); }
+  .before__n { display: grid; place-items: center; inline-size: 2.1rem; block-size: 2.1rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-family: var(--font-display); margin-block-end: 0.8rem; }
+  .before__h { font-size: var(--t-xl); margin-block-end: 0.4rem; }
+  .before__d { color: var(--ink-muted); font-size: var(--t-sm); font-weight: 300; margin: 0; }
+
+  .builtBand { margin-block-start: 3.5rem; padding-block: 3.5rem 3.25rem; }
+  .built__t { font-size: clamp(1.9rem, 4vw, 2.7rem); margin-block-end: 0.7rem; }
+  .built__sub { color: #C2D0D4; font-weight: 300; font-size: var(--t-lg); max-inline-size: 60ch; margin-block-end: 1.75rem; }
+  .built { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+  .built__i { border: 1px solid var(--hero-edge); border-radius: var(--r-card); padding: 0.5rem 1.3rem 1.4rem; }
+  .built__h { font-size: var(--t-xl); margin-block-end: 0.4rem; }
+  .built__d { color: #C2D0D4; font-size: var(--t-sm); font-weight: 300; line-height: 1.6; margin: 0; }
+  .built__note { margin: 1.5rem 0 0; color: var(--ink-on-deep); font-size: var(--t-sm); max-inline-size: 70ch; padding-inline-start: 1rem; border-inline-start: 3px solid var(--accent); }
+
+  .take { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+  .take__i { border-block-start: 3px solid var(--accent); padding-block-start: 0.9rem; }
+  .take__i h3 { font-size: var(--t-lg); font-family: var(--font-body); font-weight: 700; margin-block-end: 0.3rem; }
+  .take__i p { color: var(--ink-muted); font-size: var(--t-sm); font-weight: 300; margin: 0; }
+
+  .amp { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 2.5rem; align-items: center; }
+  .amp__p { color: var(--ink-muted); font-weight: 300; font-size: var(--t-lg); max-inline-size: 56ch; }
+
+  .who { padding-block-end: 3rem; }
+  .who__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-inline-size: 760px; }
+  .who__p { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); text-decoration: none; color: var(--ink-muted); font-size: var(--t-sm); box-shadow: var(--shadow-1); transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+  .who__p:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); color: var(--ink-muted); }
+  .who__p img { inline-size: 4.5rem; block-size: 4.5rem; border-radius: 50%; object-fit: cover; object-position: top; box-shadow: 0 0 0 3px var(--accent); }
+  .who__p span { display: flex; flex-direction: column; }
+  .who__p strong { color: var(--ink-strong); font-size: var(--t-lg); }
+  .who__next { margin: 1.5rem 0 0; color: var(--ink-muted); }
+
+  @media (max-width: 900px) {
+    .top__in { grid-template-columns: 1fr; gap: 1rem; }
+    .top__media :global(.il) { inline-size: min(300px, 80%); }
+    .facts, .rounds, .take { grid-template-columns: 1fr 1fr; }
+    .before, .built, .amp, .who__grid { grid-template-columns: 1fr; }
+    .end { grid-template-columns: 1fr; gap: 0.5rem; padding-inline: 1.25rem; }
+    .amp__media { max-inline-size: 320px; }
+  }
+</style>
