@@ -15,12 +15,12 @@ const demos = (await getCollection('efshar', (e) => e.data.published))
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
 
-// 90 הדקות של סדנת ההתנעה: ארבעה סבבי יצירה, כמו במערך
+// 100 הדקות של סדנת ההתנעה: ארבעה סבבים והפסקה באמצע, כמו במערך
 const rounds = [
   { il: 'spark', n: 'סבב 1', h: 'פוסטר לצוות', d: 'משפט אחד בטלפון, ולכל שולחן יש פוסטר משלו על קיר התהילה.' },
-  { il: 'music', n: 'סבב 2', h: 'שיר שלם', d: 'מילים על העבודה שלכם, לחן, ושיר שאפשר לשלוח הביתה.' },
-  { il: 'video', n: 'סבב 3', h: 'טריילר', d: 'הפוסטר מתחיל לזוז. סרטון קצר של הצוות, מהטלפון.' },
-  { il: 'talk', n: 'סבב 4', h: 'מדברים איתה', d: 'פותחים מצלמה, שואלים בקול, והיא עונה על מה שהיא רואה.' },
+  { il: 'music', n: 'סבב 2', h: 'שיר שלם', d: 'Gemini כותב מילים על העבודה שלכם, Suno מלחין, ויש שיר לשלוח הביתה.' },
+  { il: 'talk', n: 'סבב 3', h: 'מדברים איתה', d: 'פותחים מצלמה, שואלים בקול, והיא עונה על מה שהיא רואה.' },
+  { il: 'manager', n: 'סבב 4', h: 'מתאמנים מול הכלי', d: 'כלי שנבנה מההדרכות שלכם, כמו מנהל קשוח לתרגול מכירה. מנהל בכל שולחן.' },
 ];
 ---
 <Base
@@ -34,7 +34,7 @@ const rounds = [
       <div class="hero__copy">
         <p class="hero__kicker rise"><span class="hero__dot" aria-hidden="true"></span>סדנאות AI לארגונים</p>
         <h1 class="hero__title rise">תראו מה <span class="hero__ai">AI</span> עושה עם העבודה שלכם.</h1>
-        <p class="hero__sub rise">90 דקות שבהן כל הצוות יוצר בעצמו, מהטלפון: פוסטר, שיר, סרטון. ואחר כך סדנאות שהופכות את החשק להרגל.</p>
+        <p class="hero__sub rise">100 דקות שבהן כל הצוות יוצר בעצמו, מהטלפון: פוסטר, שיר, ותרגול מול כלי שנבנה לעבודה שלכם. ואחר כך סדנאות שהופכות את החשק להרגל.</p>
         <div class="hero__actions rise">
           <a class="btn btn--primary" href="/hatnaa">להביא אותנו לארגון <span class="btn__arrow" aria-hidden="true">←</span></a>
           <a class="btn btn--ghostOnDeep" href={live[0] ? `/maslul/${live[0].id}` : '/maslul'}>ללמוד לבד, בחינם</a>
@@ -74,8 +74,8 @@ const rounds = [
     <div class="wrap">
       <div class="ninety__head">
         <p class="ninety__kicker">סדנת ההתנעה</p>
-        <h2 id="ninety-title" class="ninety__title">90 דקות. אף אחד לא רק מקשיב.</h2>
-        <p class="ninety__sub">ארבעה סבבים, וכל אחד יוצר בעצמו, מהטלפון שלו ובכלים חינמיים. גם מי שבטוח שזה לא בשבילו.</p>
+        <h2 id="ninety-title" class="ninety__title">100 דקות. אף אחד לא רק מקשיב.</h2>
+        <p class="ninety__sub">ארבעה סבבים והפסקה באמצע. כל אחד יוצר בעצמו, מהטלפון שלו ובכלים חינמיים. גם מי שבטוח שזה לא בשבילו.</p>
         <p class="ninety__first"><span class="hero__dot" aria-hidden="true"></span>עד 25 משתתפים, שני מנחים בחדר. כמו שעשינו עם סוכני השטח של דנשר.</p>
       </div>
       <ol class="ninety__grid" data-stagger="110">
@@ -92,7 +92,7 @@ const rounds = [
         <Il name="team" size={230} />
         <div>
           <h3 class="ninety__endH">ובסוף, סרט אחד מכל מה שהצוות יצר.</h3>
-          <p class="ninety__endD">הפוסטרים, השירים והטריילרים מתחברים לסרט של דקה וחצי, על שיר שנכתב מראש מהתשובות של העובדים שלכם. יוצאים עם משהו לשלוח הביתה, ועם חשק לנסות שוב מחר.</p>
+          <p class="ninety__endD">הפוסטרים, השירים והסרטונים מתחברים לסרט של דקה וחצי, על שיר שנכתב מראש מהתשובות של העובדים שלכם. יוצאים עם משהו לשלוח הביתה, ועם חשק לנסות שוב מחר.</p>
           <a class="btn btn--onDeep" href="/hatnaa">כל הפרטים על הסדנה <span class="btn__arrow" aria-hidden="true">←</span></a>
         </div>
       </div>
