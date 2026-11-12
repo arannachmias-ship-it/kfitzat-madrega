@@ -12,6 +12,8 @@
   --surface-sunk: #EEF2F2;
   --deep:         #0C2831;
   --deep-2:       #12313A;
+  --hero:         #113640;   /* רקע האיורים. זהה בבהיר ובכהה, כי האיורים מצוירים עליו */
+  --hero-edge:    #2B5562;
 
   /* --- ink --- */
   --ink:          #12313A;
@@ -268,6 +270,7 @@ a:hover { color: var(--accent-deep); }
 .rise:nth-child(2) { animation-delay: 0.15s; }
 .rise:nth-child(3) { animation-delay: 0.3s; }
 .rise:nth-child(4) { animation-delay: 0.45s; }
+.rise:nth-child(5) { animation-delay: 0.6s; }
 @keyframes rise { to { opacity: 1; transform: none; } }
 
 /* --- view transitions --- */
@@ -289,6 +292,31 @@ a:hover { color: var(--accent-deep); }
 }
 .band-deep h1, .band-deep h2, .band-deep h3 { color: var(--ink-on-deep); }
 
+/* --- illustrations: the lecture's visual language, on the site ---
+   האיורים מצוירים על --hero, ולכן הם עומדים רק על משטח בצבע הזה. */
+.band-hero { background: var(--hero); color: var(--ink-on-deep); }
+.band-hero h1, .band-hero h2, .band-hero h3 { color: var(--ink-on-deep); }
+.il-panel { background: var(--hero); border-radius: var(--r-card); box-shadow: var(--shadow-3); display: grid; place-items: center; padding: clamp(0.75rem, 2vw, 1.5rem); }
+
+.il { position: relative; display: block; inline-size: min(var(--il, 420px), 100%); aspect-ratio: 1; margin-inline: auto; }
+.il img { display: block; inline-size: 100%; block-size: 100%; animation: ilPop 0.7s var(--ease-spring) both, ilFloat 6s ease-in-out 0.7s infinite; }
+.il--still img { animation: none; }
+@keyframes ilPop { from { opacity: 0; transform: translateY(18px) scale(0.92); } }
+@keyframes ilFloat { 50% { transform: translateY(-14px); } }
+.il__s { position: absolute; inline-size: 0.9rem; block-size: 0.9rem; background: var(--accent); clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: ilTwinkle 2.6s ease-in-out infinite; pointer-events: none; }
+.il__s--1 { inset-block-start: 6%; inset-inline-start: 4%; }
+.il__s--2 { inset-block-start: 18%; inset-inline-end: 2%; inline-size: 0.6rem; block-size: 0.6rem; animation-delay: 0.9s; }
+.il__s--3 { inset-block-end: 8%; inset-inline-start: 12%; inline-size: 0.7rem; block-size: 0.7rem; animation-delay: 1.7s; }
+@keyframes ilTwinkle { 0%, 100% { opacity: 0.15; transform: scale(0.6) rotate(0deg); } 50% { opacity: 1; transform: scale(1.15) rotate(45deg); } }
+
+.btn--ghostOnDeep { border-color: rgba(255, 255, 255, 0.34); color: var(--ink-on-deep); font-weight: 500; background: transparent; }
+.btn--ghostOnDeep::before { background: rgba(255, 255, 255, 0.1); }
+.btn--ghostOnDeep:hover { border-color: rgba(255, 255, 255, 0.6); color: var(--ink-on-deep); }
+
+/* page head with an illustration beside it (replaces the stock photo) */
+.head__media--il { align-self: center; }
+.head__media--il .il-panel { aspect-ratio: 3 / 2; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -298,5 +326,7 @@ a:hover { color: var(--accent-deep); }
     scroll-behavior: auto !important;
   }
   .reveal, .rise { opacity: 1; transform: none; }
+  .il img { animation: none; }
+  .il__s { animation: none; opacity: 0.8; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
