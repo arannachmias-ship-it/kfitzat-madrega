@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import SignupBand from '../components/SignupBand.astro';
 import Il from '../components/Il.astro';
 import Shot from '../components/Shot.astro';
+import HeroVideo from '../components/HeroVideo.astro';
 import { getCollection } from 'astro:content';
 import { STAGES, TOTAL_LESSONS } from '../data/track';
 
@@ -49,7 +50,7 @@ const rounds = [
         </a>
       </div>
       <div class="hero__media">
-        <Il name="hero" size={470} eager alt="איור: טלפון שמתוכו פורצים תווים, קלאפר של סרט, מצלמה, תמונה ובועת שיחה" />
+        <HeroVideo />
       </div>
     </div>
   </section>
@@ -246,7 +247,7 @@ const rounds = [
 <style>
   /* hero */
   .heroBand { position: relative; overflow: hidden; }
-  .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2.5rem; align-items: center; padding-block: 3.5rem 3.75rem; position: relative; isolation: isolate; }
+  .hero { display: grid; grid-template-columns: 1fr 1.05fr; gap: 2.5rem; align-items: center; padding-block: 3.5rem 3.75rem; position: relative; isolation: isolate; }
   .hero__glow {
     position: absolute; z-index: -1; pointer-events: none;
     inset-block-start: -35%; inset-inline-start: -12%; inline-size: 55%; aspect-ratio: 1; border-radius: 50%;
@@ -276,7 +277,7 @@ const rounds = [
   .hero__whoT { display: flex; flex-direction: column; font-size: var(--t-sm); line-height: 1.45; font-weight: 300; }
   .hero__whoT strong { color: var(--ink-on-deep); font-weight: 500; }
   @media (max-width: 880px) {
-    .hero { grid-template-columns: 1fr; gap: 1rem; padding-block: 2.5rem 2rem; }
+    .hero { grid-template-columns: 1fr; gap: 1.5rem; padding-block: 2.5rem 2rem; }
     .hero__media { --il: 300px; }
     .hero__media :global(.il) { inline-size: min(300px, 80%); }
     .hero__glow { inline-size: 80%; inset-inline-start: -30%; inset-block-start: -45%; }

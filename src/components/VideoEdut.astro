@@ -1,0 +1,24 @@
+---
+/**
+ * סרטון העדויות מהסדנה (עם כתוביות צרובות). נטען רק כשלוחצים על נגן.
+ * כל המצולמים אישרו את הפרסום.
+ */
+---
+<section class="wrap vedut" aria-labelledby="vedut-t">
+  <h2 id="vedut-t" class="sec__t">מה אומרים אחרי</h2>
+  <p class="sec__sub">משתתפות ומשתתפים מהסדנה בדנשר, דקה וחצי, במילים שלהם.</p>
+  <div class="vedut__frame">
+    <video controls playsinline preload="none" poster="/video/edut-poster.jpg" width="1280" height="720"
+      aria-label="סרטון עדויות מהסדנה בדנשר, עם כתוביות בעברית">
+      <source src="/video/edut-720.mp4" type="video/mp4" />
+    </video>
+  </div>
+</section>
+
+<style>
+  .vedut { padding-block: 3.5rem 1rem; }
+  .sec__t { font-size: var(--t-3xl); margin-block-end: 0.6rem; }
+  .sec__sub { color: var(--ink-muted); font-weight: 300; font-size: var(--t-lg); max-inline-size: 62ch; margin-block-end: 1.5rem; }
+  .vedut__frame { max-inline-size: 880px; border-radius: var(--r-card); overflow: hidden; background: var(--deep); box-shadow: var(--shadow-3); aspect-ratio: 16 / 9; }
+  .vedut__frame video { display: block; inline-size: 100%; block-size: 100%; }
+</style>
