@@ -317,6 +317,22 @@ a:hover { color: var(--accent-deep); }
 .head__media--il { align-self: center; }
 .head__media--il .il-panel { aspect-ratio: 3 / 2; }
 
+/* --- real photos from our workshops (Shot.astro) --- */
+.shot { display: block; inline-size: 100%; block-size: auto; object-fit: cover; border-radius: var(--r-card); background: var(--surface-sunk); }
+.shots { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.75rem; }
+.shots > .shot, .shots > figure { grid-column: span 2; margin: 0; }
+.shots > .shot--wide { grid-column: span 4; grid-row: span 2; block-size: 100%; }
+.shots .shot { transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+.shots .shot:hover { transform: scale(1.015); box-shadow: var(--shadow-3); }
+.shots__cap { margin: 0.9rem 0 0; font-size: var(--t-sm); color: var(--ink-muted); }
+.band-hero .shots__cap { color: #C2D0D4; }
+@media (max-width: 720px) {
+  .shots { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .shots > .shot, .shots > figure { grid-column: span 1; }
+  .shots > .shot--wide { grid-column: span 2; grid-row: auto; }
+  .shots > .shot--wide ~ .shot:last-child:nth-child(even), .shots > .shot:first-child:nth-last-child(3) { grid-column: span 2; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
