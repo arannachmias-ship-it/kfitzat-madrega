@@ -39,6 +39,13 @@ const rounds = [
           <a class="btn btn--primary" href="/irgunim">להביא אותנו לארגון <span class="btn__arrow" aria-hidden="true">←</span></a>
           <a class="btn btn--ghostOnDeep" href={live[0] ? `/maslul/${live[0].id}` : '/maslul'}>ללמוד לבד, בחינם</a>
         </div>
+        <a class="hero__who rise" href="/anachnu">
+          <span class="hero__faces">
+            <img src="/anachnu/aran.webp" width="96" height="96" alt="" loading="eager" decoding="async" />
+            <img src="/anachnu/mati.webp" width="96" height="96" alt="" loading="eager" decoding="async" />
+          </span>
+          <span class="hero__whoT"><strong>ארן נחמיאס ומתי מצוינים</strong>שני מנחים, יותר מ־20 שנה מול קבוצות בארגונים</span>
+        </a>
       </div>
       <div class="hero__media">
         <Il name="hero" size={470} eager alt="איור: טלפון שמתוכו פורצים תווים, קלאפר של סרט, מצלמה, תמונה ובועת שיחה" />
@@ -252,6 +259,13 @@ const rounds = [
   .hero__title { font-size: clamp(2.5rem, 5.4vw, 3.9rem); margin-block-end: 1.1rem; }
   .hero__sub { font-size: var(--t-xl); line-height: 1.6; color: #C2D0D4; font-weight: 300; max-inline-size: 38ch; margin-block-end: 1.9rem; }
   .hero__actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .hero__who { display: inline-flex; align-items: center; gap: 0.9rem; margin-block-start: 1.6rem; text-decoration: none; color: #C2D0D4; }
+  .hero__who:hover { color: var(--ink-on-deep); }
+  .hero__faces { display: flex; }
+  .hero__faces img { inline-size: 3.25rem; block-size: 3.25rem; border-radius: 50%; object-fit: cover; object-position: top; border: 2px solid var(--hero); box-shadow: 0 0 0 2px var(--accent); }
+  .hero__faces img + img { margin-inline-start: -0.7rem; }
+  .hero__whoT { display: flex; flex-direction: column; font-size: var(--t-sm); line-height: 1.45; font-weight: 300; }
+  .hero__whoT strong { color: var(--ink-on-deep); font-weight: 500; }
   @media (max-width: 880px) {
     .hero { grid-template-columns: 1fr; gap: 1rem; padding-block: 2.5rem 2rem; }
     .hero__media { --il: 300px; }
